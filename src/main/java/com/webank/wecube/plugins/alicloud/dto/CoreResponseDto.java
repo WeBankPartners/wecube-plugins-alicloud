@@ -16,7 +16,7 @@ public class CoreResponseDto<E> {
     @JsonProperty(value = "result_message")
     private String resultMessage;
     @JsonProperty(value = "results")
-    private List<E> results;
+    private Results results;
 
     public static CoreResponseDto okay() {
         CoreResponseDto result = new CoreResponseDto();
@@ -48,13 +48,13 @@ public class CoreResponseDto<E> {
         this.resultMessage = resultMessage;
     }
 
-    public List<E> getResults() {
+    public Results getResults() {
         return results;
     }
 
     public void setResults(List<E> responseResult) {
 
-        this.results = responseResult;
+        this.results = new Results(responseResult);
     }
 
     public CoreResponseDto<E> withData(List<E> data) {
@@ -64,5 +64,24 @@ public class CoreResponseDto<E> {
 
     public CoreResponseDto<E> okayWithData(List<E> data) {
         return okay().withData(data);
+    }
+
+    private class Results {
+        private List<E> outputs;
+
+        public Results(List<E> outputs) {
+            this.outputs = outputs;
+        }
+
+        public Results() {
+        }
+
+        public List<E> getOutputs() {
+            return outputs;
+        }
+
+        public void setOutputs(List<E> outputs) {
+            this.outputs = outputs;
+        }
     }
 }
