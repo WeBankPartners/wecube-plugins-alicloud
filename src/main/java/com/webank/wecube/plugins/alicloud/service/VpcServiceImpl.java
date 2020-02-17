@@ -128,7 +128,6 @@ public class VpcServiceImpl implements VpcService {
                     aliCloudProperties.getAccessSecret()
             );
             final IAcsClient client = new DefaultAcsClient(defaultProfile);
-            DeleteVpcResponse response;
             try {
                 client.getAcsResponse(deleteVpcRequest);
             } catch (ServerException serverEx) {
@@ -137,6 +136,13 @@ public class VpcServiceImpl implements VpcService {
             } catch (ClientException clientEx) {
                 logger.error("Plugin local client error! Code: [{}]. Msg: [{}]", clientEx.getErrCode(), clientEx.getMessage());
                 throw new PluginException("AliCloud local client error: " + clientEx.getMessage());
+            }
+
+            // check if VPC has already been deleted
+            if (0 != this.retrieveVpc(deleteVpcRequest.getRegionId(), deleteVpcRequest.getVpcId()).getTotalCount()) {
+                String msg = String.format("The VPC: [%s] from region: [%s] hasn't been deleted", deleteVpcRequest.getVpcId(), deleteVpcRequest.getRegionId());
+                logger.error(msg);
+                throw new PluginException(msg);
             }
         }
     }
