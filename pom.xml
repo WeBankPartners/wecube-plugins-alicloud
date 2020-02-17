@@ -93,6 +93,12 @@
             <artifactId>aliyun-java-sdk-core</artifactId>
             <version>4.5.0</version>
         </dependency>
+        <!-- vpc -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-vpc</artifactId>
+            <version>3.0.9</version>
+        </dependency>
     </dependencies>
 
     <build>
