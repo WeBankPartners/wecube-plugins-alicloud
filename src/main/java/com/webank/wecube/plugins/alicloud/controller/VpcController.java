@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcResponseDto;
-import com.webank.wecube.plugins.alicloud.service.VpcService;
+import com.webank.wecube.plugins.alicloud.service.vpc.VpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
