@@ -1,5 +1,8 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc;
 
+import com.aliyuncs.vpc.model.v20160428.CreateVpcRequest;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -21,6 +24,11 @@ public class CoreCreateVpcRequestDto {
     private Long ownerId;
     private String ipv6CidrBlock;
     private String cidrBlock;
+
+    public static CreateVpcRequest toSdk(CoreCreateVpcRequestDto coreCreateVpcRequestDto) {
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.convertValue(coreCreateVpcRequestDto, CreateVpcRequest.class);
+    }
 
     @Override
     public String toString() {

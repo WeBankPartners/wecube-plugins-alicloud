@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service;
+package com.webank.wecube.plugins.alicloud.service.vpc;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteVpcRequest;
 import com.aliyuncs.vpc.model.v20160428.DescribeVpcsResponse;
