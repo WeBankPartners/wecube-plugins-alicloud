@@ -19,8 +19,8 @@ public class CoreCreateVSwitchResponseDto extends CreateVSwitchResponse {
     }
 
 
-    public static CoreCreateVSwitchResponseDto fromSdk(CreateVSwitchResponse request) {
+    public static CoreCreateVSwitchResponseDto fromSdk(CreateVSwitchResponse response) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(request, CoreCreateVSwitchResponseDto.class);
+        return mapper.convertValue(response, CoreCreateVSwitchResponseDto.class);
     }
 }
