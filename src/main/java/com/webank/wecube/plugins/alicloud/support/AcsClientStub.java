@@ -8,7 +8,6 @@ import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.webank.wecube.plugins.alicloud.common.AliCloudProperties;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +32,16 @@ public class AcsClientStub {
         return new DefaultAcsClient(defaultProfile);
     }
 
-    public <T extends AcsResponse> T request(IAcsClient client, AcsRequest<T> request) throws PluginException {
+    public <T extends AcsResponse> T request(IAcsClient client, AcsRequest<T> request) throws AliCloudException {
         T response;
         try {
             response = client.getAcsResponse(request);
         } catch (ServerException serverEx) {
             logger.error("AliCloud server error! Code: [{}], Msg: [{}]", serverEx.getErrCode(), serverEx.getMessage());
-            throw new PluginException("AliCloud server error: " + serverEx.getMessage());
+            throw new AliCloudException("AliCloud server error: " + serverEx.getMessage());
         } catch (ClientException clientEx) {
             logger.error("Plugin local client error! Code: [{}]. Msg: [{}]", clientEx.getErrCode(), clientEx.getMessage());
-            throw new PluginException("AliCloud local client error: " + clientEx.getMessage());
+            throw new AliCloudException("AliCloud local client error: " + clientEx.getMessage());
         }
         return response;
     }
