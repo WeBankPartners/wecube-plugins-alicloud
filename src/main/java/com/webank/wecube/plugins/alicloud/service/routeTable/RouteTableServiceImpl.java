@@ -1,10 +1,7 @@
 package com.webank.wecube.plugins.alicloud.service.routeTable;
 
 import com.aliyuncs.IAcsClient;
-import com.aliyuncs.vpc.model.v20160428.CreateRouteTableRequest;
-import com.aliyuncs.vpc.model.v20160428.DeleteRouteTableRequest;
-import com.aliyuncs.vpc.model.v20160428.DescribeRouteTablesRequest;
-import com.aliyuncs.vpc.model.v20160428.DescribeRouteTablesResponse;
+import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
@@ -98,6 +95,22 @@ public class RouteTableServiceImpl extends AbstractAliCloudService<CoreCreateRou
                 throw new PluginException(msg);
             }
         }
+    }
+
+    @Override
+    public AssociateRouteTableResponse associateVSwitch(String regionId, String routeTableId, String vSwitchId) {
+        if (regionId == null) {
+            System.out.println("Test");
+        }
+
+        AssociateRouteTableRequest request = new AssociateRouteTableRequest();
+        request.setRegionId(regionId);
+        request.setRouteTableId(routeTableId);
+        request.setVSwitchId(vSwitchId);
+
+        final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
+
+        return this.acsClientStub.request(client, request);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.webank.wecube.plugins.alicloud.service.routeTable;
 
+import com.aliyuncs.vpc.model.v20160428.AssociateRouteTableResponse;
 import com.aliyuncs.vpc.model.v20160428.DeleteRouteTableRequest;
 import com.aliyuncs.vpc.model.v20160428.DescribeRouteTablesResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
@@ -39,4 +40,15 @@ public interface RouteTableService {
      * @throws PluginException while deleting the route table
      */
     void deleteRouteTable(List<DeleteRouteTableRequest> deleteRouteTableRequestList) throws PluginException;
+
+    /**
+     * Associate VSwtich with route table
+     *
+     * @param regionId     associate region id
+     * @param routeTableId route table id
+     * @param vSwitchId    VSwitch id
+     * @return AssociateRouteTableResponse
+     * @throws PluginException while associate VSwitch with route table
+     */
+    AssociateRouteTableResponse associateVSwitch(String regionId, String routeTableId, String vSwitchId) throws PluginException;
 }
