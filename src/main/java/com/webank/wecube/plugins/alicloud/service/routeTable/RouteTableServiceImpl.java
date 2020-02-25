@@ -5,7 +5,6 @@ import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
-import com.webank.wecube.plugins.alicloud.service.AbstractAliCloudService;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import java.util.List;
  * @author howechen
  */
 @Service
-public class RouteTableServiceImpl extends AbstractAliCloudService<CoreCreateRouteTableRequestDto, DeleteRouteTableRequest> implements RouteTableService {
+public class RouteTableServiceImpl implements RouteTableService {
     private static Logger logger = LoggerFactory.getLogger(RouteTableService.class);
     private AcsClientStub acsClientStub;
 
@@ -44,7 +43,11 @@ public class RouteTableServiceImpl extends AbstractAliCloudService<CoreCreateRou
                 continue;
             }
 
-            fieldCheck(request);
+            if (StringUtils.isAllEmpty(request.getRegionId(), request.getVpcId())) {
+                String msg = "The requested regionId and VPC id field cannot be empty or null.";
+                logger.info(msg);
+                throw new PluginException(msg);
+            }
 
             final IAcsClient client = this.acsClientStub.generateAcsClient(request.getRegionId());
             final CreateRouteTableRequest aliCloudRequest = CoreCreateRouteTableRequestDto.toSdk(request);
@@ -57,7 +60,12 @@ public class RouteTableServiceImpl extends AbstractAliCloudService<CoreCreateRou
 
     @Override
     public DescribeRouteTablesResponse retrieveRouteTable(String regionId, String routeTableId) throws PluginException {
-        regionIdCheck(regionId);
+        logger.info("Retrieving route table info.\nValidating regionId field.");
+        if (StringUtils.isEmpty(regionId)) {
+            String msg = "The regionId cannot be null or empty.";
+            logger.error(msg);
+            throw new PluginException(msg);
+        }
 
         logger.info(String.format("Retrieving route table info, region ID: [%s], route table ID: [%s]", regionId, routeTableId));
 
@@ -72,12 +80,13 @@ public class RouteTableServiceImpl extends AbstractAliCloudService<CoreCreateRou
     @Override
     public void deleteRouteTable(List<DeleteRouteTableRequest> deleteRouteTableRequestList) throws PluginException {
         for (DeleteRouteTableRequest deleteRouteTableRequest : deleteRouteTableRequestList) {
-            logger.info("Deleting VSwitch, VSwitch ID: [{}], VSwitch region:[{}]", deleteRouteTableRequest.getRouteTableId(), deleteRouteTableRequest.getRegionId());
-            if (StringUtils.isEmpty(deleteRouteTableRequest.getRouteTableId())) {
-                throw new PluginException("The VSwitch id cannot be empty or null.");
+            if (StringUtils.isAllEmpty(deleteRouteTableRequest.getRegionId(), deleteRouteTableRequest.getRouteTableId())) {
+                String msg = "The regionId or route table ID cannot be null";
+                logger.error(msg);
+                throw new PluginException(msg);
             }
 
-            fieldCheck(deleteRouteTableRequest);
+            logger.info("Deleting VSwitch, VSwitch ID: [{}], VSwitch region:[{}]", deleteRouteTableRequest.getRouteTableId(), deleteRouteTableRequest.getRegionId());
 
             // check if VSwitch already deleted
             if (0 == this.retrieveRouteTable(deleteRouteTableRequest.getRegionId(), deleteRouteTableRequest.getRouteTableId()).getTotalCount()) {
@@ -111,30 +120,6 @@ public class RouteTableServiceImpl extends AbstractAliCloudService<CoreCreateRou
         final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
 
         return this.acsClientStub.request(client, request);
-    }
-
-    @Override
-    public void fieldCheck(CoreCreateRouteTableRequestDto request) throws PluginException {
-        final boolean isRegionIdEmpty = StringUtils.isEmpty(request.getRegionId());
-        final boolean isVpcIdEmpty = StringUtils.isEmpty(request.getVpcId());
-
-        if (isRegionIdEmpty || isVpcIdEmpty) {
-            String msg = "The requested field cannot be empty or null.";
-            logger.error(msg);
-            throw new PluginException(msg);
-        }
-    }
-
-    @Override
-    public void fieldCheck(DeleteRouteTableRequest request) throws PluginException {
-        final boolean isRegionIdEmpty = StringUtils.isEmpty(request.getRegionId());
-        final boolean isRouteTableIdEmpty = StringUtils.isEmpty(request.getRouteTableId());
-
-        if (isRegionIdEmpty || isRouteTableIdEmpty) {
-            String msg = "The requested field cannot be empty or null.";
-            logger.error(msg);
-            throw new PluginException(msg);
-        }
     }
 
 

@@ -7,7 +7,6 @@ import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableReq
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchResponseDto;
-import com.webank.wecube.plugins.alicloud.service.AbstractAliCloudService;
 import com.webank.wecube.plugins.alicloud.service.routeTable.RouteTableService;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +23,7 @@ import java.util.List;
  * @author howechen
  */
 @Service
-public class VSwitchServiceImpl extends AbstractAliCloudService<CoreCreateVSwitchRequestDto, DeleteVSwitchRequest> implements VSwitchService {
+public class VSwitchServiceImpl implements VSwitchService {
     private static Logger logger = LoggerFactory.getLogger(VSwitchService.class);
 
     private AcsClientStub acsClientStub;
@@ -52,7 +51,11 @@ public class VSwitchServiceImpl extends AbstractAliCloudService<CoreCreateVSwitc
                 continue;
             }
 
-            fieldCheck(request);
+            if (StringUtils.isAllEmpty(request.getCidrBlock(), request.getVpcId(), request.getZoneId(), request.getRegionId())) {
+                String msg = "The requested field: CidrBlock, VpcId, ZoneId, RegionId cannot be null or empty";
+                logger.error(msg);
+                throw new PluginException(msg);
+            }
 
             final IAcsClient client = this.acsClientStub.generateAcsClient(request.getRegionId());
 
@@ -81,7 +84,12 @@ public class VSwitchServiceImpl extends AbstractAliCloudService<CoreCreateVSwitc
 
     @Override
     public DescribeVSwitchesResponse retrieveVSwtich(String regionId, String vSwitchId) throws PluginException {
-        regionIdCheck(regionId);
+        logger.info("Retrieving VSwitch info.\nValidating regionId field.");
+        if (StringUtils.isEmpty(regionId)) {
+            String msg = "The regionId cannot be null or empty.";
+            logger.error(msg);
+            throw new PluginException(msg);
+        }
 
         logger.info(String.format("Retrieving VSwitch info, region ID: [%s], VSwtich ID: [%s]", regionId, vSwitchId));
 
@@ -116,20 +124,6 @@ public class VSwitchServiceImpl extends AbstractAliCloudService<CoreCreateVSwitc
                 logger.error(msg);
                 throw new PluginException(msg);
             }
-        }
-    }
-
-
-    @Override
-    public void fieldCheck(CoreCreateVSwitchRequestDto requestDto) throws PluginException {
-        final boolean isCidrBlockEmpty = StringUtils.isEmpty(requestDto.getCidrBlock());
-        final boolean isVpcIdEmpty = StringUtils.isEmpty(requestDto.getVpcId());
-        final boolean isZoneIdEmpty = StringUtils.isEmpty(requestDto.getZoneId());
-        final boolean isRegionIdEmpty = StringUtils.isEmpty(requestDto.getRegionId());
-        if (isCidrBlockEmpty || isVpcIdEmpty || isZoneIdEmpty || isRegionIdEmpty) {
-            String msg = String.format("Four fields, cidr block: [%s], vpc ID: [%s], zone ID: [%s], region ID: [%s] cannot be empty or null while creating VSwitch", requestDto.getCidrBlock(), requestDto.getVpcId(), requestDto.getZoneId(), requestDto.getRegionId());
-            logger.error(msg);
-            throw new PluginException(msg);
         }
     }
 }

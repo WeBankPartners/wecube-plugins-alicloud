@@ -5,7 +5,6 @@ import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcResponseDto;
-import com.webank.wecube.plugins.alicloud.service.AbstractAliCloudService;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import java.util.List;
  * @author howechen
  */
 @Service
-public class VpcServiceImpl extends AbstractAliCloudService<CoreCreateVpcRequestDto, DeleteVpcRequest> implements VpcService {
+public class VpcServiceImpl implements VpcService {
 
     private static Logger logger = LoggerFactory.getLogger(VpcService.class);
 
@@ -65,7 +64,12 @@ public class VpcServiceImpl extends AbstractAliCloudService<CoreCreateVpcRequest
 
     @Override
     public DescribeVpcsResponse retrieveVpc(String regionId, String vpcId) throws PluginException {
-        regionIdCheck(regionId);
+        logger.info("Retrieving VPC info.\nValidating regionId field.");
+        if (StringUtils.isEmpty(regionId)) {
+            String msg = "The regionId cannot be null or empty.";
+            logger.error(msg);
+            throw new PluginException(msg);
+        }
 
         logger.info("Retrieving VPC info, the region ID: [{}], the vpc ID: [{}].", regionId, vpcId);
 
