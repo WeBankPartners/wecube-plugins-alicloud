@@ -4,6 +4,9 @@ import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * @author howechen
+ */
 public class CoreCreateVSwitchRequestDto extends CreateVSwitchRequest {
     private String vSwitchId;
 

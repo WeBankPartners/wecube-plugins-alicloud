@@ -1,13 +1,14 @@
 package com.webank.wecube.plugins.alicloud.service.vswitch;
 
 import com.aliyuncs.IAcsClient;
-import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
-import com.aliyuncs.vpc.model.v20160428.DeleteVSwitchRequest;
-import com.aliyuncs.vpc.model.v20160428.DescribeVSwitchesRequest;
-import com.aliyuncs.vpc.model.v20160428.DescribeVSwitchesResponse;
+import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchResponseDto;
+import com.webank.wecube.plugins.alicloud.service.AbstractAliCloudService;
+import com.webank.wecube.plugins.alicloud.service.routeTable.RouteTableService;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,17 +17,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * @author howechen
+ */
 @Service
-public class VSwitchServiceImpl implements VSwitchService {
+public class VSwitchServiceImpl extends AbstractAliCloudService<CoreCreateVSwitchRequestDto, DeleteVSwitchRequest> implements VSwitchService {
     private static Logger logger = LoggerFactory.getLogger(VSwitchService.class);
 
     private AcsClientStub acsClientStub;
+    private RouteTableService routeTableService;
 
     @Autowired
-    public VSwitchServiceImpl(AcsClientStub acsClientStub) {
+    public VSwitchServiceImpl(AcsClientStub acsClientStub, RouteTableService routeTableService) {
         this.acsClientStub = acsClientStub;
+        this.routeTableService = routeTableService;
     }
 
 
@@ -45,11 +52,27 @@ public class VSwitchServiceImpl implements VSwitchService {
                 continue;
             }
 
-            createVSwitchFieldCheck(request);
+            fieldCheck(request);
 
             final IAcsClient client = this.acsClientStub.generateAcsClient(request.getRegionId());
+
+            // create VSwitch
             final CreateVSwitchRequest aliCloudRequest = CoreCreateVSwitchRequestDto.toSdk(request);
-            resultList.add(CoreCreateVSwitchResponseDto.fromSdk(this.acsClientStub.request(client, aliCloudRequest)));
+            final CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest);
+
+            // create route table
+            CoreCreateRouteTableRequestDto routeTableRequestDto = new CoreCreateRouteTableRequestDto();
+            routeTableRequestDto.setSysRegionId(request.getRegionId());
+            routeTableRequestDto.setVpcId(request.getVpcId());
+            final List<CoreCreateRouteTableResponseDto> createRouteTableResponseDtoList = this.routeTableService.createRouteTable(Collections.singletonList(routeTableRequestDto));
+
+            // associate route table with VSwitch
+            if (!createRouteTableResponseDtoList.isEmpty()) {
+                final String createdRouteTableId = createRouteTableResponseDtoList.get(0).getRouteTableId();
+                this.routeTableService.associateVSwitch(request.getRegionId(), createdRouteTableId, createVSwitchResponse.getVSwitchId());
+            }
+
+            resultList.add(CoreCreateVSwitchResponseDto.fromSdk(createVSwitchResponse));
 
         }
         return resultList;
@@ -58,12 +81,7 @@ public class VSwitchServiceImpl implements VSwitchService {
 
     @Override
     public DescribeVSwitchesResponse retrieveVSwtich(String regionId, String vSwitchId) throws PluginException {
-
-        if (StringUtils.isEmpty(regionId)) {
-            final String msg = String.format("The region ID cannot be empty, your region id is: [%s]", regionId);
-            logger.error(msg);
-            throw new PluginException(msg);
-        }
+        regionIdCheck(regionId);
 
         logger.info(String.format("Retrieving VSwitch info, region ID: [%s], VSwtich ID: [%s]", regionId, vSwitchId));
 
@@ -101,17 +119,17 @@ public class VSwitchServiceImpl implements VSwitchService {
         }
     }
 
-    private void createVSwitchFieldCheck(CoreCreateVSwitchRequestDto request) throws PluginException {
-        final boolean isCidrBlockEmpty = StringUtils.isEmpty(request.getCidrBlock());
-        final boolean isVpcIdEmpty = StringUtils.isEmpty(request.getVpcId());
-        final boolean isZoneIdEmpty = StringUtils.isEmpty(request.getZoneId());
-        final boolean isRegionIdEmpty = StringUtils.isEmpty(request.getRegionId());
+
+    @Override
+    public void fieldCheck(CoreCreateVSwitchRequestDto requestDto) throws PluginException {
+        final boolean isCidrBlockEmpty = StringUtils.isEmpty(requestDto.getCidrBlock());
+        final boolean isVpcIdEmpty = StringUtils.isEmpty(requestDto.getVpcId());
+        final boolean isZoneIdEmpty = StringUtils.isEmpty(requestDto.getZoneId());
+        final boolean isRegionIdEmpty = StringUtils.isEmpty(requestDto.getRegionId());
         if (isCidrBlockEmpty || isVpcIdEmpty || isZoneIdEmpty || isRegionIdEmpty) {
-            String msg = String.format("Four fields, cidr block: [%s], vpc ID: [%s], zone ID: [%s], region ID: [%s] cannot be empty or null while creating VSwitch", request.getCidrBlock(), request.getVpcId(), request.getZoneId(), request.getRegionId());
+            String msg = String.format("Four fields, cidr block: [%s], vpc ID: [%s], zone ID: [%s], region ID: [%s] cannot be empty or null while creating VSwitch", requestDto.getCidrBlock(), requestDto.getVpcId(), requestDto.getZoneId(), requestDto.getRegionId());
             logger.error(msg);
             throw new PluginException(msg);
         }
     }
-
-
 }
