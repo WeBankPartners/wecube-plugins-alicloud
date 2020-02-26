@@ -13,6 +13,11 @@ public class CoreCreateVMResponseDto extends CreateInstanceResponse {
     public CoreCreateVMResponseDto() {
     }
 
+    public CoreCreateVMResponseDto(String requestId, String instanceId) {
+        this.setRequestId(requestId);
+        this.setInstanceId(instanceId);
+    }
+
     public static CoreCreateVMResponseDto fromSdk(CreateInstanceResponse createInstanceResponse) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.convertValue(createInstanceResponse, CoreCreateVMResponseDto.class);
