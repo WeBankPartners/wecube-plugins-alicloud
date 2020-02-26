@@ -43,8 +43,8 @@ public class RouteTableServiceImpl implements RouteTableService {
                 continue;
             }
 
-            if (StringUtils.isAllEmpty(request.getRegionId(), request.getVpcId())) {
-                String msg = "The requested regionId and VPC id field cannot be empty or null.";
+            if (StringUtils.isAnyEmpty(request.getRegionId(), request.getVpcId())) {
+                String msg = "Either requested regionId or VPC id field cannot be empty or null.";
                 logger.info(msg);
                 throw new PluginException(msg);
             }
@@ -80,7 +80,7 @@ public class RouteTableServiceImpl implements RouteTableService {
     @Override
     public void deleteRouteTable(List<DeleteRouteTableRequest> deleteRouteTableRequestList) throws PluginException {
         for (DeleteRouteTableRequest deleteRouteTableRequest : deleteRouteTableRequestList) {
-            if (StringUtils.isAllEmpty(deleteRouteTableRequest.getRegionId(), deleteRouteTableRequest.getRouteTableId())) {
+            if (StringUtils.isAnyEmpty(deleteRouteTableRequest.getRegionId(), deleteRouteTableRequest.getRouteTableId())) {
                 String msg = "The regionId or route table ID cannot be null";
                 logger.error(msg);
                 throw new PluginException(msg);

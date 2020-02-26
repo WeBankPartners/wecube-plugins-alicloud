@@ -51,7 +51,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 continue;
             }
 
-            if (StringUtils.isAllEmpty(request.getCidrBlock(), request.getVpcId(), request.getZoneId(), request.getRegionId())) {
+            if (StringUtils.isAnyEmpty(request.getCidrBlock(), request.getVpcId(), request.getZoneId(), request.getRegionId())) {
                 String msg = "The requested field: CidrBlock, VpcId, ZoneId, RegionId cannot be null or empty";
                 logger.error(msg);
                 throw new PluginException(msg);
