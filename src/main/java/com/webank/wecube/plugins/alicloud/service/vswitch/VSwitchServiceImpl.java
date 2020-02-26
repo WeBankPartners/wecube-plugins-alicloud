@@ -68,14 +68,17 @@ public class VSwitchServiceImpl implements VSwitchService {
             routeTableRequestDto.setSysRegionId(request.getRegionId());
             routeTableRequestDto.setVpcId(request.getVpcId());
             final List<CoreCreateRouteTableResponseDto> createRouteTableResponseDtoList = this.routeTableService.createRouteTable(Collections.singletonList(routeTableRequestDto));
+            final String createdRouteTableId = createRouteTableResponseDtoList.get(0).getRouteTableId();
 
             // associate route table with VSwitch
             if (!createRouteTableResponseDtoList.isEmpty()) {
-                final String createdRouteTableId = createRouteTableResponseDtoList.get(0).getRouteTableId();
                 this.routeTableService.associateVSwitch(request.getRegionId(), createdRouteTableId, createVSwitchResponse.getVSwitchId());
             }
 
-            resultList.add(CoreCreateVSwitchResponseDto.fromSdk(createVSwitchResponse));
+            CoreCreateVSwitchResponseDto result = CoreCreateVSwitchResponseDto.fromSdk(createVSwitchResponse);
+            result.setRouteTableId(createdRouteTableId);
+
+            resultList.add(result);
 
         }
         return resultList;
