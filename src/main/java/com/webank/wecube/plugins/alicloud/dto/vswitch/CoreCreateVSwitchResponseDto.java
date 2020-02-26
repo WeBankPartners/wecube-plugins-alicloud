@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author howechen
  */
 public class CoreCreateVSwitchResponseDto extends CreateVSwitchResponse {
+    private String routeTableId;
 
     public CoreCreateVSwitchResponseDto() {
     }
@@ -22,5 +23,13 @@ public class CoreCreateVSwitchResponseDto extends CreateVSwitchResponse {
     public static CoreCreateVSwitchResponseDto fromSdk(CreateVSwitchResponse response) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.convertValue(response, CoreCreateVSwitchResponseDto.class);
+    }
+
+    public String getRouteTableId() {
+        return routeTableId;
+    }
+
+    public void setRouteTableId(String routeTableId) {
+        this.routeTableId = routeTableId;
     }
 }
