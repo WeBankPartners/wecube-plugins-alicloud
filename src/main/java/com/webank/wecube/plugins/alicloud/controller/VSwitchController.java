@@ -17,7 +17,7 @@ import java.util.List;
  * @author howechen
  */
 @RestController
-@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX)
+@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/vswitch")
 public class VSwitchController {
 
     private VSwitchService vSwitchService;
@@ -27,7 +27,7 @@ public class VSwitchController {
         this.vSwitchService = vSwitchService;
     }
 
-    @PostMapping(path = "vswitch")
+    @PostMapping(path = "/")
     @ResponseBody
     public CoreResponseDto<?> createVSwitch(@RequestBody CoreRequestDto<CoreCreateVSwitchRequestDto> coreCreateVSwitchDtoCoreResponseDto) {
         List<CoreCreateVSwitchResponseDto> result;
@@ -39,7 +39,7 @@ public class VSwitchController {
         return new CoreResponseDto<CoreCreateVSwitchResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping(path = "vswitch")
+    @DeleteMapping(path = "/")
     @ResponseBody
     public CoreResponseDto<?> deleteVSwitch(@RequestBody CoreRequestDto<DeleteVSwitchRequest> coreDeleteVSwitchRequestDto) {
         try {

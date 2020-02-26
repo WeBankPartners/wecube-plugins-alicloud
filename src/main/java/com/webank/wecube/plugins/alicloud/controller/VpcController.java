@@ -17,13 +17,13 @@ import java.util.List;
  * @author howechen
  */
 @RestController
-@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX)
+@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/vpc")
 public class VpcController {
 
     @Autowired
     private VpcService vpcService;
 
-    @PostMapping(path = "vpc")
+    @PostMapping("/")
     @ResponseBody
     public CoreResponseDto<?> createVpc(@RequestBody CoreRequestDto<CoreCreateVpcRequestDto> coreRequestDto) {
         List<CoreCreateVpcResponseDto> result;
@@ -35,7 +35,7 @@ public class VpcController {
         return new CoreResponseDto<CoreCreateVpcResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping(path = "vpc")
+    @DeleteMapping(path = "/")
     @ResponseBody
     public CoreResponseDto<?> deleteVpc(@RequestBody CoreRequestDto<DeleteVpcRequest> coreRequestDto) {
         try {

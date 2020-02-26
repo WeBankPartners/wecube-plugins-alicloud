@@ -17,7 +17,7 @@ import java.util.List;
  * @author howechen
  */
 @RestController
-@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX)
+@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/route_table")
 public class RouteTableController {
 
     private RouteTableService routeTableService;
@@ -27,7 +27,7 @@ public class RouteTableController {
         this.routeTableService = routeTableService;
     }
 
-    @PostMapping(path = "route_table")
+    @PostMapping(path = "/")
     @ResponseBody
     public CoreResponseDto<?> createRouteTable(@RequestBody CoreRequestDto<CoreCreateRouteTableRequestDto> requestBody) {
         List<CoreCreateRouteTableResponseDto> result;
@@ -39,7 +39,7 @@ public class RouteTableController {
         return new CoreResponseDto<CoreCreateRouteTableResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping(path = "route_table")
+    @DeleteMapping(path = "/")
     @ResponseBody
     public CoreResponseDto<?> deleteRouteTable(@RequestBody CoreRequestDto<DeleteRouteTableRequest> request) {
         try {
