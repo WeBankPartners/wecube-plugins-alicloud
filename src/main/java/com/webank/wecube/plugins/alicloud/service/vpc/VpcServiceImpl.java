@@ -5,7 +5,10 @@ import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcResponseDto;
+import com.webank.wecube.plugins.alicloud.service.routeTable.RouteTableService;
+import com.webank.wecube.plugins.alicloud.service.vswitch.VSwitchService;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
+import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -24,10 +28,14 @@ public class VpcServiceImpl implements VpcService {
     private static Logger logger = LoggerFactory.getLogger(VpcService.class);
 
     private AcsClientStub acsClientStub;
+    private VSwitchService vSwitchService;
+    private RouteTableService routeTableService;
 
     @Autowired
-    public VpcServiceImpl(AcsClientStub acsClientStub) {
+    public VpcServiceImpl(AcsClientStub acsClientStub, VSwitchService vSwitchService, RouteTableService routeTableService) {
         this.acsClientStub = acsClientStub;
+        this.vSwitchService = vSwitchService;
+        this.routeTableService = routeTableService;
     }
 
     @Override
@@ -55,7 +63,13 @@ public class VpcServiceImpl implements VpcService {
             // if vpc id is empty, create vpc
             final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
             final CreateVpcRequest createVpcRequest = CoreCreateVpcRequestDto.toSdk(coreCreateVpcRequestDto);
-            CreateVpcResponse response = this.acsClientStub.request(client, createVpcRequest);
+            CreateVpcResponse response;
+            try {
+                response = this.acsClientStub.request(client, createVpcRequest);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+
 
             resultList.add(CoreCreateVpcResponseDto.fromSdk(response));
         }
@@ -85,15 +99,43 @@ public class VpcServiceImpl implements VpcService {
 
     @Override
     public void deleteVpc(List<DeleteVpcRequest> deleteVpcRequestList) throws PluginException {
+        // TODO: need to release(un-associate) all resources when delete VPC
+
         for (DeleteVpcRequest deleteVpcRequest : deleteVpcRequestList) {
             logger.info("Deleting VPC, VPC ID: [{}], VPC region:[{}]", deleteVpcRequest.getVpcId(), deleteVpcRequest.getRegionId());
             if (StringUtils.isEmpty(deleteVpcRequest.getVpcId())) {
                 throw new PluginException("The VPC id cannot be empty or null.");
             }
 
+            final DescribeVpcsResponse foundedVpcInfo = this.retrieveVpc(deleteVpcRequest.getRegionId(), deleteVpcRequest.getVpcId());
+
             // check if VPC already deleted
-            if (0 == this.retrieveVpc(deleteVpcRequest.getRegionId(), deleteVpcRequest.getVpcId()).getTotalCount()) {
+            if (0 == foundedVpcInfo.getTotalCount()) {
                 continue;
+            }
+
+            // delete existed VSwitches
+            final List<String> vSwitchIdList = foundedVpcInfo.getVpcs().get(0).getVSwitchIds();
+            if (!vSwitchIdList.isEmpty()) {
+                final List<DeleteVSwitchRequest> deleteVSwitchRequestList = vSwitchIdList.stream().map(vSwitchId -> {
+                    DeleteVSwitchRequest deleteVSwitchRequest = new DeleteVSwitchRequest();
+                    deleteVSwitchRequest.setRegionId(deleteVpcRequest.getRegionId());
+                    deleteVSwitchRequest.setVSwitchId(vSwitchId);
+                    return deleteVSwitchRequest;
+                }).collect(Collectors.toList());
+                this.vSwitchService.deleteVSwitch(deleteVSwitchRequestList);
+            }
+
+            // delete existed route tables
+            final List<String> routerTableIdList = foundedVpcInfo.getVpcs().get(0).getRouterTableIds();
+            if (!routerTableIdList.isEmpty()) {
+                final List<DeleteRouteTableRequest> deleteRouteTableRequestList = routerTableIdList.stream().map(routerTableId -> {
+                    DeleteRouteTableRequest deleteRouteTableRequest = new DeleteRouteTableRequest();
+                    deleteRouteTableRequest.setRegionId(deleteVpcRequest.getRegionId());
+                    deleteRouteTableRequest.setRouteTableId(routerTableId);
+                    return deleteRouteTableRequest;
+                }).collect(Collectors.toList());
+                this.routeTableService.deleteRouteTable(deleteRouteTableRequestList);
             }
 
             // delete VPC
