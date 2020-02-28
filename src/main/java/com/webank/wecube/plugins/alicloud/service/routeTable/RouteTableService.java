@@ -1,8 +1,7 @@
 package com.webank.wecube.plugins.alicloud.service.routeTable;
 
-import com.aliyuncs.vpc.model.v20160428.AssociateRouteTableResponse;
-import com.aliyuncs.vpc.model.v20160428.DeleteRouteTableRequest;
-import com.aliyuncs.vpc.model.v20160428.DescribeRouteTablesResponse;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
@@ -44,11 +43,29 @@ public interface RouteTableService {
     /**
      * Associate VSwtich with route table
      *
-     * @param regionId     associate region id
-     * @param routeTableId route table id
-     * @param vSwitchId    VSwitch id
+     * @param associateRouteTableRequest associate route table request
      * @return AssociateRouteTableResponse
      * @throws PluginException while associate VSwitch with route table
      */
-    AssociateRouteTableResponse associateVSwitch(String regionId, String routeTableId, String vSwitchId) throws PluginException;
+    void associateVSwitch(List<AssociateRouteTableRequest> associateRouteTableRequest) throws PluginException;
+
+    /**
+     * Un-associate VSwtich with route table
+     *
+     * @param unassociateRouteTableRequest un-associate route table request
+     * @return UnassociateRouteTableResponse
+     * @throws PluginException while unassociate VSwitch with route table
+     */
+    UnassociateRouteTableResponse unAssociateVSwitch(UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException;
+
+    /**
+     * Check if route table is available for subsequent operation
+     *
+     * @param client       generated alicloud client
+     * @param regionId     regionId
+     * @param routeTableId routeTableId
+     * @return if route table is available
+     * @throws PluginException when checking the route table status
+     */
+    boolean checkIfRouteTableAvailable(IAcsClient client, String regionId, String routeTableId) throws PluginException;
 }

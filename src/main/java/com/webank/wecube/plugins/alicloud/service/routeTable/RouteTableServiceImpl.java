@@ -6,6 +6,8 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
+import com.webank.wecube.plugins.alicloud.support.AliCloudConstant;
+import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +53,16 @@ public class RouteTableServiceImpl implements RouteTableService {
 
             final IAcsClient client = this.acsClientStub.generateAcsClient(request.getRegionId());
             final CreateRouteTableRequest aliCloudRequest = CoreCreateRouteTableRequestDto.toSdk(request);
-            resultList.add(CoreCreateRouteTableResponseDto.fromSdk(this.acsClientStub.request(client, aliCloudRequest)));
+
+            CreateRouteTableResponse response;
+            try {
+                response = this.acsClientStub.request(client, aliCloudRequest);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+
+
+            resultList.add(CoreCreateRouteTableResponseDto.fromSdk(response));
 
         }
         return resultList;
@@ -60,7 +71,6 @@ public class RouteTableServiceImpl implements RouteTableService {
 
     @Override
     public DescribeRouteTablesResponse retrieveRouteTable(String regionId, String routeTableId) throws PluginException {
-        logger.info("Retrieving route table info.\nValidating regionId field.");
         if (StringUtils.isEmpty(regionId)) {
             String msg = "The regionId cannot be null or empty.";
             logger.error(msg);
@@ -74,7 +84,14 @@ public class RouteTableServiceImpl implements RouteTableService {
         request.setRegionId(regionId);
         request.setRouteTableId(routeTableId);
 
-        return this.acsClientStub.request(client, request);
+        DescribeRouteTablesResponse response;
+        try {
+            response = this.acsClientStub.request(client, request);
+        } catch (AliCloudException ex) {
+            throw new PluginException(ex.getMessage());
+        }
+
+        return response;
     }
 
     @Override
@@ -86,18 +103,35 @@ public class RouteTableServiceImpl implements RouteTableService {
                 throw new PluginException(msg);
             }
 
-            logger.info("Deleting VSwitch, VSwitch ID: [{}], VSwitch region:[{}]", deleteRouteTableRequest.getRouteTableId(), deleteRouteTableRequest.getRegionId());
-
-            // check if VSwitch already deleted
-            if (0 == this.retrieveRouteTable(deleteRouteTableRequest.getRegionId(), deleteRouteTableRequest.getRouteTableId()).getTotalCount()) {
+            logger.info("Deleting route table, route table ID: [{}], route table region:[{}]", deleteRouteTableRequest.getRouteTableId(), deleteRouteTableRequest.getRegionId());
+            final DescribeRouteTablesResponse retrieveRouteTableResponse = this.retrieveRouteTable(deleteRouteTableRequest.getRegionId(), deleteRouteTableRequest.getRouteTableId());
+            // check if route table already deleted
+            if (0 == retrieveRouteTableResponse.getTotalCount()) {
                 continue;
             }
 
-            // delete VSwitch
-            final IAcsClient client = this.acsClientStub.generateAcsClient(deleteRouteTableRequest.getRegionId());
-            this.acsClientStub.request(client, deleteRouteTableRequest);
+            // un-associate all related VSwitches
+            final DescribeRouteTablesResponse.RouteTable routeTable = retrieveRouteTableResponse.getRouteTables().get(0);
+            if (!routeTable.getVSwitchIds().isEmpty()) {
+                for (String vSwitchId : routeTable.getVSwitchIds()) {
+                    UnassociateRouteTableRequest unassociateRouteTableRequest = new UnassociateRouteTableRequest();
+                    unassociateRouteTableRequest.setRegionId(deleteRouteTableRequest.getRegionId());
+                    unassociateRouteTableRequest.setRouteTableId(routeTable.getRouteTableId());
+                    unassociateRouteTableRequest.setVSwitchId(vSwitchId);
+                    this.unAssociateVSwitch(unassociateRouteTableRequest);
+                }
+            }
 
-            // re-check if VSwitch has already been deleted
+            // delete route table
+            final IAcsClient client = this.acsClientStub.generateAcsClient(deleteRouteTableRequest.getRegionId());
+            try {
+                this.acsClientStub.request(client, deleteRouteTableRequest);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+
+
+            // re-check if route table has already been deleted
             if (0 != this.retrieveRouteTable(deleteRouteTableRequest.getRegionId(), deleteRouteTableRequest.getRouteTableId()).getTotalCount()) {
                 String msg = String.format("The route table: [%s] from region: [%s] hasn't been deleted", deleteRouteTableRequest.getRouteTableId(), deleteRouteTableRequest.getRegionId());
                 logger.error(msg);
@@ -107,19 +141,72 @@ public class RouteTableServiceImpl implements RouteTableService {
     }
 
     @Override
-    public AssociateRouteTableResponse associateVSwitch(String regionId, String routeTableId, String vSwitchId) {
-        if (regionId == null) {
-            System.out.println("Test");
-        }
+    public void associateVSwitch(List<AssociateRouteTableRequest> associateRouteTableRequestList) throws PluginException {
 
-        AssociateRouteTableRequest request = new AssociateRouteTableRequest();
-        request.setRegionId(regionId);
-        request.setRouteTableId(routeTableId);
-        request.setVSwitchId(vSwitchId);
+
+        for (AssociateRouteTableRequest associateRouteTableRequest : associateRouteTableRequestList) {
+            final String regionId = associateRouteTableRequest.getRegionId();
+            final String routeTableId = associateRouteTableRequest.getRouteTableId();
+            final String vSwitchId = associateRouteTableRequest.getVSwitchId();
+
+            if (StringUtils.isAnyEmpty(regionId, routeTableId, vSwitchId)) {
+                String msg = "Either regionId, routeTableId, vSwitchID cannot be null or empty.";
+                logger.error(msg);
+                throw new PluginException(msg);
+            }
+
+            final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
+            try {
+                this.acsClientStub.request(client, associateRouteTableRequest);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public UnassociateRouteTableResponse unAssociateVSwitch(UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException {
+        final String regionId = unassociateRouteTableRequest.getRegionId();
+        final String routeTableId = unassociateRouteTableRequest.getRouteTableId();
+        final String vSwitchId = unassociateRouteTableRequest.getVSwitchId();
+        if (StringUtils.isAnyEmpty(regionId, routeTableId, vSwitchId)) {
+            String msg = "Either regionId, routeTableId, vSwitchID cannot be null or empty.";
+            logger.error(msg);
+            throw new PluginException(msg);
+        }
+        logger.info("Un-associating route table: [{}] with VSwitch: [{}].", routeTableId, vSwitchId);
 
         final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
+        UnassociateRouteTableResponse response;
+        try {
+            response = this.acsClientStub.request(client, unassociateRouteTableRequest);
+        } catch (AliCloudException ex) {
+            throw new PluginException(ex.getMessage());
+        }
+        return response;
+    }
 
-        return this.acsClientStub.request(client, request);
+    @Override
+    public boolean checkIfRouteTableAvailable(IAcsClient client, String regionId, String routeTableId) throws PluginException {
+        logger.info("Retrieving route table status.");
+        if (StringUtils.isEmpty(regionId)) {
+            String msg = "The regionId cannot be null or empty.";
+            logger.error(msg);
+            throw new PluginException(msg);
+        }
+
+        DescribeRouteTablesRequest request = new DescribeRouteTablesRequest();
+        request.setRegionId(regionId);
+        request.setRouteTableId(routeTableId);
+
+        DescribeRouteTablesResponse response;
+        try {
+            response = this.acsClientStub.request(client, request);
+        } catch (AliCloudException ex) {
+            throw new PluginException(ex.getMessage());
+        }
+
+        return StringUtils.equals(AliCloudConstant.RESOURCE_AVAILABLE_STATUS, response.getRouteTables().get(0).getStatus());
     }
 
 
