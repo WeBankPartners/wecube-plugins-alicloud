@@ -8,6 +8,7 @@ import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcResponseDto;
 import com.webank.wecube.plugins.alicloud.service.vpc.VpcService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class VpcController {
     @Autowired
     private VpcService vpcService;
 
-    @PostMapping("/")
+    @PostMapping(path = StringUtils.EMPTY)
     @ResponseBody
     public CoreResponseDto<?> createVpc(@RequestBody CoreRequestDto<CoreCreateVpcRequestDto> coreRequestDto) {
         List<CoreCreateVpcResponseDto> result;
@@ -35,7 +36,7 @@ public class VpcController {
         return new CoreResponseDto<CoreCreateVpcResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping(path = "/")
+    @DeleteMapping(path = StringUtils.EMPTY)
     @ResponseBody
     public CoreResponseDto<?> deleteVpc(@RequestBody CoreRequestDto<DeleteVpcRequest> coreRequestDto) {
         try {
