@@ -8,6 +8,7 @@ import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vm.CoreCreateVMRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vm.CoreCreateVMResponseDto;
 import com.webank.wecube.plugins.alicloud.service.vm.VMService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class VMController {
         this.vmService = vmService;
     }
 
-    @PostMapping("/")
+    @PostMapping(path = StringUtils.EMPTY)
     @ResponseBody
     public CoreResponseDto<?> createVM(@RequestBody CoreRequestDto<CoreCreateVMRequestDto> request) {
         List<CoreCreateVMResponseDto> result;
@@ -39,7 +40,7 @@ public class VMController {
         return new CoreResponseDto<CoreCreateVMResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping(path = StringUtils.EMPTY)
     @ResponseBody
     public CoreResponseDto<?> deleteVM(@RequestBody CoreRequestDto<DeleteInstanceRequest> request) {
         try {
