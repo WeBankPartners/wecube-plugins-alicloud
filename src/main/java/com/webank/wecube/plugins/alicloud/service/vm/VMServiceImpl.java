@@ -6,6 +6,7 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.vm.CoreCreateVMRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vm.CoreCreateVMResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
+import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public List<CoreCreateVMResponseDto> createVM(List<CoreCreateVMRequestDto> coreCreateVMRequestDtoList) {
+    public List<CoreCreateVMResponseDto> createVM(List<CoreCreateVMRequestDto> coreCreateVMRequestDtoList) throws PluginException {
         List<CoreCreateVMResponseDto> resultList = new ArrayList<>();
         for (CoreCreateVMRequestDto request : coreCreateVMRequestDtoList) {
             final String instanceId = request.getInstanceId();
@@ -63,7 +64,7 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public DescribeInstancesResponse retrieveVM(String regionId, String instanceId) {
+    public DescribeInstancesResponse retrieveVM(String regionId, String instanceId) throws PluginException {
         logger.info("Retrieving created VM instance info.\nValidating regionId field.");
         if (StringUtils.isEmpty(regionId)) {
             String msg = "The regionId cannot be null or empty.";
@@ -82,7 +83,7 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public void deleteVM(List<DeleteInstanceRequest> deleteInstanceRequestList) {
+    public void deleteVM(List<DeleteInstanceRequest> deleteInstanceRequestList) throws PluginException {
         for (DeleteInstanceRequest deleteInstanceRequest : deleteInstanceRequestList) {
             logger.info("Deleting VM instance, VM instance ID: [{}], VM instance region:[{}]", deleteInstanceRequest.getInstanceId(), deleteInstanceRequest.getRegionId());
             if (StringUtils.isEmpty(deleteInstanceRequest.getInstanceId())) {
@@ -108,7 +109,7 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public List<StartInstanceResponse> startVM(List<StartInstanceRequest> startInstanceRequestList) {
+    public List<StartInstanceResponse> startVM(List<StartInstanceRequest> startInstanceRequestList) throws PluginException {
         List<StartInstanceResponse> result = new ArrayList<>();
         for (StartInstanceRequest startInstanceRequest : startInstanceRequestList) {
             final IAcsClient client = this.acsClientStub.generateAcsClient(startInstanceRequest.getRegionId());
@@ -119,7 +120,7 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public List<StopInstanceResponse> stopVM(List<StopInstanceRequest> stopInstanceRequestList) {
+    public List<StopInstanceResponse> stopVM(List<StopInstanceRequest> stopInstanceRequestList) throws PluginException {
         List<StopInstanceResponse> result = new ArrayList<>();
         for (StopInstanceRequest stopInstanceRequest : stopInstanceRequestList) {
             final IAcsClient client = this.acsClientStub.generateAcsClient(stopInstanceRequest.getRegionId());
@@ -127,6 +128,29 @@ public class VMServiceImpl implements VMService {
             result.add(stopInstanceResponse);
         }
         return result;
+    }
+
+    @Override
+    public void bindSecurityGroup(String regionId, String instanceId, String securityGroupId) throws PluginException {
+
+        if (StringUtils.isAnyEmpty(instanceId, securityGroupId)) {
+            String msg = "Either instance ID or security group ID cannot be null or empty";
+            logger.error(msg);
+            throw new PluginException(msg);
+        }
+
+        ModifyInstanceAttributeRequest request = new ModifyInstanceAttributeRequest();
+        request.setRegionId(regionId);
+        request.setInstanceId(instanceId);
+        request.getSecurityGroupIdss().add(securityGroupId);
+
+        final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
+        try {
+            this.acsClientStub.request(client, request);
+        } catch (AliCloudException ex) {
+            throw new PluginException(ex.getMessage());
+        }
+
     }
 
 }
