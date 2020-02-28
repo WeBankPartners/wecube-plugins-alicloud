@@ -93,11 +93,17 @@
             <artifactId>aliyun-java-sdk-core</artifactId>
             <version>4.5.0</version>
         </dependency>
-        <!-- vpc -->
+        <!-- alicloud VPC -->
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-vpc</artifactId>
             <version>3.0.9</version>
+        </dependency>
+        <!-- alicloud ECS -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-ecs</artifactId>
+            <version>4.18.3</version>
         </dependency>
     </dependencies>
 

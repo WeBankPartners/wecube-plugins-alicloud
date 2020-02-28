@@ -8,6 +8,7 @@ import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.service.vswitch.VSwitchService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ import java.util.List;
  * @author howechen
  */
 @RestController
-@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX)
+@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/vswitch")
 public class VSwitchController {
 
     private VSwitchService vSwitchService;
@@ -27,7 +28,7 @@ public class VSwitchController {
         this.vSwitchService = vSwitchService;
     }
 
-    @PostMapping(path = "vswitch")
+    @PostMapping(path = StringUtils.EMPTY)
     @ResponseBody
     public CoreResponseDto<?> createVSwitch(@RequestBody CoreRequestDto<CoreCreateVSwitchRequestDto> coreCreateVSwitchDtoCoreResponseDto) {
         List<CoreCreateVSwitchResponseDto> result;
@@ -39,7 +40,7 @@ public class VSwitchController {
         return new CoreResponseDto<CoreCreateVSwitchResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping(path = "vswitch")
+    @DeleteMapping(path = StringUtils.EMPTY)
     @ResponseBody
     public CoreResponseDto<?> deleteVSwitch(@RequestBody CoreRequestDto<DeleteVSwitchRequest> coreDeleteVSwitchRequestDto) {
         try {

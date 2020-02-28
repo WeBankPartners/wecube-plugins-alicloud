@@ -8,6 +8,7 @@ import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.webank.wecube.plugins.alicloud.common.AliCloudProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,15 @@ public class AcsClientStub {
     }
 
     public IAcsClient generateAcsClient(String regionId) {
+        String locRegionId = regionId;
+        logger.info("Generating ACS Client...");
+        if (StringUtils.isEmpty(regionId)) {
+            String msg = "The regionID not specified from function caller. The profile's regionID would be called.";
+            logger.info(msg);
+            locRegionId = this.aliCloudProperties.getRegionId();
+        }
         DefaultProfile defaultProfile = DefaultProfile.getProfile(
-                regionId,
+                locRegionId,
                 aliCloudProperties.getAccessId(),
                 aliCloudProperties.getAccessSecret()
         );
