@@ -1,10 +1,12 @@
 package com.webank.wecube.plugins.alicloud.service.routeTable;
 
 import com.aliyuncs.IAcsClient;
-import com.aliyuncs.vpc.model.v20160428.*;
+import com.aliyuncs.vpc.model.v20160428.DescribeRouteTablesResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreAssociateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreDeleteRouteTableRequestDto;
 
 import java.util.List;
 
@@ -25,20 +27,21 @@ public interface RouteTableService {
     /**
      * Retrieve the route table data from ali cloud
      *
+     * @param client       AliCloud client
      * @param regionId     region ID
      * @param routeTableId route table ID
      * @return response from ali cloud server
      * @throws PluginException exception while retrieving the route table info
      */
-    DescribeRouteTablesResponse retrieveRouteTable(String regionId, String routeTableId) throws PluginException;
+    DescribeRouteTablesResponse retrieveRouteTable(IAcsClient client, String regionId, String routeTableId) throws PluginException;
 
     /**
      * Delete the route table
      *
-     * @param deleteRouteTableRequestList delete route table request list
+     * @param deleteRouteTableRequestList core delete route table request list
      * @throws PluginException while deleting the route table
      */
-    void deleteRouteTable(List<DeleteRouteTableRequest> deleteRouteTableRequestList) throws PluginException;
+    void deleteRouteTable(List<CoreDeleteRouteTableRequestDto> deleteRouteTableRequestList) throws PluginException;
 
     /**
      * Associate VSwtich with route table
@@ -47,16 +50,18 @@ public interface RouteTableService {
      * @return AssociateRouteTableResponse
      * @throws PluginException while associate VSwitch with route table
      */
-    void associateVSwitch(List<AssociateRouteTableRequest> associateRouteTableRequest) throws PluginException;
+    void associateVSwitch(List<CoreAssociateRouteTableRequestDto> associateRouteTableRequest) throws PluginException;
 
-    /**
-     * Un-associate VSwtich with route table
-     *
-     * @param unassociateRouteTableRequest un-associate route table request
-     * @return UnassociateRouteTableResponse
-     * @throws PluginException while unassociate VSwitch with route table
-     */
-    UnassociateRouteTableResponse unAssociateVSwitch(UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException;
+//    /**
+//     * Un-associate VSwtich with route table
+//     *
+//     * @param identityParamDto             identity params
+//     * @param cloudParamDto                cloud params
+//     * @param unassociateRouteTableRequest un-associate route table request
+//     * @return UnassociateRouteTableResponse
+//     * @throws PluginException while unassociate VSwitch with route table
+//     */
+//    UnassociateRouteTableResponse unAssociateVSwitch(IdentityParamDto identityParamDto, CloudParamDto cloudParamDto, UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException;
 
     /**
      * Check if route table is available for subsequent operation
