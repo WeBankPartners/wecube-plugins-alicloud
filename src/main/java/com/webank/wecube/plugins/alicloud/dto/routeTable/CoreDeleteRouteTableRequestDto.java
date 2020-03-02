@@ -1,37 +1,27 @@
 package com.webank.wecube.plugins.alicloud.dto.routeTable;
 
-import com.aliyuncs.vpc.model.v20160428.CreateRouteTableRequest;
+import com.aliyuncs.vpc.model.v20160428.DeleteRouteTableRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author howechen
  */
-public class CoreCreateRouteTableRequestDto extends CreateRouteTableRequest {
-    private String routeTableId;
+public class CoreDeleteRouteTableRequestDto extends DeleteRouteTableRequest {
     private String identityParams;
     private String cloudParams;
 
-    public CoreCreateRouteTableRequestDto() {
+    public CoreDeleteRouteTableRequestDto() {
     }
 
-    public CoreCreateRouteTableRequestDto(String routeTableId, String identityParams, String cloudParams) {
-        this.routeTableId = routeTableId;
+    public CoreDeleteRouteTableRequestDto(String routeTableId, String identityParams, String cloudParams) {
         this.identityParams = identityParams;
         this.cloudParams = cloudParams;
     }
 
-    public static CreateRouteTableRequest toSdk(CoreCreateRouteTableRequestDto coreCreateRouteTableRequestDto) {
+    public static DeleteRouteTableRequest toSdk(CoreDeleteRouteTableRequestDto coreCreateRouteTableRequestDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateRouteTableRequestDto, CreateRouteTableRequest.class);
-    }
-
-    public String getRouteTableId() {
-        return routeTableId;
-    }
-
-    public void setRouteTableId(String routeTableId) {
-        this.routeTableId = routeTableId;
+        return mapper.convertValue(coreCreateRouteTableRequestDto, DeleteRouteTableRequest.class);
     }
 
     public String getIdentityParams() {
