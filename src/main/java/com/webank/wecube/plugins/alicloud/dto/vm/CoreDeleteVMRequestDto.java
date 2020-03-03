@@ -1,37 +1,27 @@
 package com.webank.wecube.plugins.alicloud.dto.vm;
 
-import com.aliyuncs.ecs.model.v20140526.CreateInstanceRequest;
+import com.aliyuncs.ecs.model.v20140526.DeleteInstanceRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author howechen
  */
-public class CoreCreateVMRequestDto extends CreateInstanceRequest {
-    private String instanceId;
+public class CoreDeleteVMRequestDto extends DeleteInstanceRequest {
     private String identityParams;
     private String cloudParams;
 
-    public CoreCreateVMRequestDto(String instanceId, String identityParams, String cloudParams) {
-        this.instanceId = instanceId;
+    public CoreDeleteVMRequestDto(String instanceId, String identityParams, String cloudParams) {
         this.identityParams = identityParams;
         this.cloudParams = cloudParams;
     }
 
-    public CoreCreateVMRequestDto() {
+    public CoreDeleteVMRequestDto() {
     }
 
-    public static CreateInstanceRequest toSdk(CoreCreateVMRequestDto coreCreateVMRequestDto) {
+    public static DeleteInstanceRequest toSdk(CoreDeleteVMRequestDto coreCreateVMRequestDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateVMRequestDto, CreateInstanceRequest.class);
-    }
-
-    public String getInstanceId() {
-        return instanceId;
-    }
-
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
+        return mapper.convertValue(coreCreateVMRequestDto, DeleteInstanceRequest.class);
     }
 
     public String getIdentityParams() {
