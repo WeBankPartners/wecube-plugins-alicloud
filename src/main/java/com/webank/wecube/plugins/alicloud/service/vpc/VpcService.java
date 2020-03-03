@@ -1,10 +1,11 @@
 package com.webank.wecube.plugins.alicloud.service.vpc;
 
-import com.aliyuncs.vpc.model.v20160428.DeleteVpcRequest;
+import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.DescribeVpcsResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.CoreDeleteVpcRequestDto;
 
 import java.util.List;
 
@@ -25,11 +26,13 @@ public interface VpcService {
     /**
      * Retrieve VPC by ID
      *
-     * @param vpcId vpc ID
+     * @param client   ACS client
+     * @param regionId region ID
+     * @param vpcId    vpc ID
      * @return Found VPC info
      * @throws PluginException for both server and local client exception
      */
-    DescribeVpcsResponse retrieveVpc(String regionId, String vpcId) throws PluginException;
+    DescribeVpcsResponse retrieveVpc(IAcsClient client, String regionId, String vpcId) throws PluginException;
 
     /**
      * Delete VPC
@@ -37,7 +40,7 @@ public interface VpcService {
      * @param deleteVpcRequestList list of DeleteVpcRequest
      * @throws PluginException for both server and local client exception
      */
-    void deleteVpc(List<DeleteVpcRequest> deleteVpcRequestList) throws PluginException;
+    void deleteVpc(List<CoreDeleteVpcRequestDto> deleteVpcRequestList) throws PluginException;
 
 
 }
