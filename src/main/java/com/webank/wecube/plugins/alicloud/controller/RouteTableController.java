@@ -55,7 +55,7 @@ public class RouteTableController {
     @ResponseBody
     public CoreResponseDto<?> associateVSwitch(@RequestBody CoreRequestDto<CoreAssociateRouteTableRequestDto> request) {
         try {
-            this.routeTableService.associateVSwitch(request.getInputs());
+            this.routeTableService.associateRouteTable(request.getInputs());
         } catch (PluginException ex) {
             return CoreResponseDto.error(ex.getMessage());
         }
