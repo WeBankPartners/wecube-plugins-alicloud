@@ -1,12 +1,12 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
-import com.aliyuncs.vpc.model.v20160428.DeleteVSwitchRequest;
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreDeleteVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.service.vswitch.VSwitchService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class VSwitchController {
 
     @DeleteMapping(path = StringUtils.EMPTY)
     @ResponseBody
-    public CoreResponseDto<?> deleteVSwitch(@RequestBody CoreRequestDto<DeleteVSwitchRequest> coreDeleteVSwitchRequestDto) {
+    public CoreResponseDto<?> deleteVSwitch(@RequestBody CoreRequestDto<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
         try {
             this.vSwitchService.deleteVSwitch(coreDeleteVSwitchRequestDto.getInputs());
         } catch (PluginException ex) {
