@@ -52,7 +52,6 @@ public class RouteTableServiceImpl implements RouteTableService {
                 if (response.getTotalCount() == 1) {
                     final DescribeRouteTablesResponse.RouteTable foundRouteTable = response.getRouteTables().get(0);
                     resultList.add(new CoreCreateRouteTableResponseDto(response.getRequestId(), foundRouteTable.getRouteTableId()));
-
                 }
 
             } else {
@@ -122,14 +121,14 @@ public class RouteTableServiceImpl implements RouteTableService {
             }
 
 
-            logger.info("Deleting route table, route table ID: [{}], route table region:[{}]", routeTableId, coreDeleteRouteTableRequestDto.getRegionId());
+            logger.info("Deleting route table, route table ID: [{}], route table region:[{}]", routeTableId, regionId);
 
 
             DeleteRouteTableRequest deleteRouteTableRequest = CoreDeleteRouteTableRequestDto.toSdk(coreDeleteRouteTableRequestDto);
             deleteRouteTableRequest.setRegionId(regionId);
 
-            final DescribeRouteTablesResponse retrieveRouteTableResponse = this.retrieveRouteTable(client, regionId, routeTableId);
             // check if route table already deleted
+            final DescribeRouteTablesResponse retrieveRouteTableResponse = this.retrieveRouteTable(client, regionId, routeTableId);
             if (0 == retrieveRouteTableResponse.getTotalCount()) {
                 continue;
             }
@@ -142,7 +141,7 @@ public class RouteTableServiceImpl implements RouteTableService {
                     unassociateRouteTableRequest.setRegionId(regionId);
                     unassociateRouteTableRequest.setRouteTableId(routeTable.getRouteTableId());
                     unassociateRouteTableRequest.setVSwitchId(vSwitchId);
-                    this.acsClientStub.request(client, unassociateRouteTableRequest);
+                    this.unAssociateRouteTable(client, unassociateRouteTableRequest);
                 }
             }
 
@@ -156,7 +155,7 @@ public class RouteTableServiceImpl implements RouteTableService {
 
             // re-check if route table has already been deleted
             if (0 != this.retrieveRouteTable(client, regionId, routeTableId).getTotalCount()) {
-                String msg = String.format("The route table: [%s] from region: [%s] hasn't been deleted", routeTableId, coreDeleteRouteTableRequestDto.getRegionId());
+                String msg = String.format("The route table: [%s] from region: [%s] hasn't been deleted", routeTableId, regionId);
                 logger.error(msg);
                 throw new PluginException(msg);
             }
@@ -164,7 +163,7 @@ public class RouteTableServiceImpl implements RouteTableService {
     }
 
     @Override
-    public void associateVSwitch(List<CoreAssociateRouteTableRequestDto> coreAssociateRouteTableRequestDtoList) throws PluginException {
+    public void associateRouteTable(List<CoreAssociateRouteTableRequestDto> coreAssociateRouteTableRequestDtoList) throws PluginException {
 
         for (CoreAssociateRouteTableRequestDto coreAssociateRouteTableRequestDto : coreAssociateRouteTableRequestDtoList) {
 
@@ -190,6 +189,41 @@ public class RouteTableServiceImpl implements RouteTableService {
                 throw new PluginException(ex.getMessage());
             }
         }
+    }
+
+    @Override
+    public void associateRouteTable(IAcsClient client, List<AssociateRouteTableRequest> associateRouteTableRequestList) throws PluginException {
+        logger.info("Associating route table with VSwitch.");
+        for (AssociateRouteTableRequest request : associateRouteTableRequestList) {
+
+            if (StringUtils.isAnyEmpty(request.getRegionId(), request.getRouteTableId(), request.getVSwitchId())) {
+                String msg = "Either the region ID, route table ID or VSwitchID cannot be null or empty while associating route table with VSwitch";
+                logger.error(msg);
+                throw new PluginException(msg);
+            }
+
+            try {
+                this.acsClientStub.request(client, request);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public UnassociateRouteTableResponse unAssociateRouteTable(IAcsClient client, UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException {
+        if (StringUtils.isAnyEmpty(unassociateRouteTableRequest.getRegionId(), unassociateRouteTableRequest.getRouteTableId(), unassociateRouteTableRequest.getVSwitchId())) {
+            String msg = "Either the region ID, route table ID or VSwitchID cannot be null or empty while associating route table with VSwitch";
+            logger.error(msg);
+            throw new PluginException(msg);
+        }
+        UnassociateRouteTableResponse response;
+        try {
+            response = this.acsClientStub.request(client, unassociateRouteTableRequest);
+        } catch (AliCloudException ex) {
+            throw new PluginException(ex.getMessage());
+        }
+        return response;
     }
 
     @Override

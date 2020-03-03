@@ -1,7 +1,10 @@
 package com.webank.wecube.plugins.alicloud.service.routeTable;
 
 import com.aliyuncs.IAcsClient;
+import com.aliyuncs.vpc.model.v20160428.AssociateRouteTableRequest;
 import com.aliyuncs.vpc.model.v20160428.DescribeRouteTablesResponse;
+import com.aliyuncs.vpc.model.v20160428.UnassociateRouteTableRequest;
+import com.aliyuncs.vpc.model.v20160428.UnassociateRouteTableResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreAssociateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
@@ -47,21 +50,28 @@ public interface RouteTableService {
      * Associate VSwtich with route table
      *
      * @param associateRouteTableRequest associate route table request
-     * @return AssociateRouteTableResponse
      * @throws PluginException while associate VSwitch with route table
      */
-    void associateVSwitch(List<CoreAssociateRouteTableRequestDto> associateRouteTableRequest) throws PluginException;
+    void associateRouteTable(List<CoreAssociateRouteTableRequestDto> associateRouteTableRequest) throws PluginException;
 
-//    /**
-//     * Un-associate VSwtich with route table
-//     *
-//     * @param identityParamDto             identity params
-//     * @param cloudParamDto                cloud params
-//     * @param unassociateRouteTableRequest un-associate route table request
-//     * @return UnassociateRouteTableResponse
-//     * @throws PluginException while unassociate VSwitch with route table
-//     */
-//    UnassociateRouteTableResponse unAssociateVSwitch(IdentityParamDto identityParamDto, CloudParamDto cloudParamDto, UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException;
+    /**
+     * Associate VSwtich with route table
+     *
+     * @param client                      AWS client
+     * @param associateRouteTableRequests associate route table request
+     * @throws PluginException while associate VSwitch with route table
+     */
+    void associateRouteTable(IAcsClient client, List<AssociateRouteTableRequest> associateRouteTableRequests) throws PluginException;
+
+    /**
+     * Un-associate VSwtich with route table
+     *
+     * @param client                       AWS client
+     * @param unassociateRouteTableRequest un-associate route table request
+     * @return UnassociateRouteTableResponse
+     * @throws PluginException while unassociate VSwitch with route table
+     */
+    UnassociateRouteTableResponse unAssociateRouteTable(IAcsClient client, UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException;
 
     /**
      * Check if route table is available for subsequent operation
