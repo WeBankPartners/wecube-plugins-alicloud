@@ -1,37 +1,27 @@
 package com.webank.wecube.plugins.alicloud.dto.vswitch;
 
-import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
+import com.aliyuncs.vpc.model.v20160428.DeleteVSwitchRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author howechen
  */
-public class CoreCreateVSwitchRequestDto extends CreateVSwitchRequest {
-    private String vSwitchId;
+public class CoreDeleteVSwitchRequestDto extends DeleteVSwitchRequest {
     private String identityParams;
     private String cloudParams;
 
-    public CoreCreateVSwitchRequestDto(String vSwitchId, String identityParams, String cloudParams) {
-        this.vSwitchId = vSwitchId;
+    public CoreDeleteVSwitchRequestDto(String vSwitchId, String identityParams, String cloudParams) {
         this.identityParams = identityParams;
         this.cloudParams = cloudParams;
     }
 
-    public CoreCreateVSwitchRequestDto() {
+    public CoreDeleteVSwitchRequestDto() {
     }
 
-    public static CreateVSwitchRequest toSdk(CoreCreateVSwitchRequestDto coreCreateVSwitchRequestDto) {
+    public static DeleteVSwitchRequest toSdk(CoreDeleteVSwitchRequestDto coreCreateVSwitchRequestDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateVSwitchRequestDto, CreateVSwitchRequest.class);
-    }
-
-    public String getvSwitchId() {
-        return vSwitchId;
-    }
-
-    public void setvSwitchId(String vSwitchId) {
-        this.vSwitchId = vSwitchId;
+        return mapper.convertValue(coreCreateVSwitchRequestDto, DeleteVSwitchRequest.class);
     }
 
     public String getIdentityParams() {
