@@ -9,7 +9,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @author howechen
  */
 public class CoreCreateVpcRequestDto extends CreateVpcRequest {
-    String vpcId;
+    private String vpcId;
+    private String identityParams;
+    private String cloudParams;
+
 
     public static CreateVpcRequest toSdk(CoreCreateVpcRequestDto coreCreateVpcRequestDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -29,5 +32,21 @@ public class CoreCreateVpcRequestDto extends CreateVpcRequest {
 
     public void setVpcId(String vpcId) {
         this.vpcId = vpcId;
+    }
+
+    public String getIdentityParams() {
+        return identityParams;
+    }
+
+    public void setIdentityParams(String identityParams) {
+        this.identityParams = identityParams;
+    }
+
+    public String getCloudParams() {
+        return cloudParams;
+    }
+
+    public void setCloudParams(String cloudParams) {
+        this.cloudParams = cloudParams;
     }
 }
