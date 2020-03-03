@@ -101,7 +101,7 @@ public class VpcServiceImpl implements VpcService {
             final String regionId = cloudParamDto.getRegionId();
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-            logger.info("Deleting VPC, VPC ID: [{}], VPC region:[{}]", requestDto.getVpcId(), regionId);
+
             if (StringUtils.isEmpty(requestDto.getVpcId())) {
                 throw new PluginException("The VPC id cannot be empty or null.");
             }
@@ -115,6 +115,7 @@ public class VpcServiceImpl implements VpcService {
 
 
             // delete VPC
+            logger.info("Deleting VPC, VPC ID: [{}], VPC region:[{}]", requestDto.getVpcId(), regionId);
             this.acsClientStub.request(client, requestDto);
 
             // re-check if VPC has already been deleted
