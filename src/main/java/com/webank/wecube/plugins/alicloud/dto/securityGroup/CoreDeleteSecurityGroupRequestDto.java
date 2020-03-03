@@ -1,37 +1,27 @@
 package com.webank.wecube.plugins.alicloud.dto.securityGroup;
 
-import com.aliyuncs.ecs.model.v20140526.CreateSecurityGroupRequest;
+import com.aliyuncs.ecs.model.v20140526.DeleteSecurityGroupRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author howechen
  */
-public class CoreCreateSecurityGroupRequestDto extends CreateSecurityGroupRequest {
-    private String securityGroupId;
+public class CoreDeleteSecurityGroupRequestDto extends DeleteSecurityGroupRequest {
     private String identityParams;
     private String cloudParams;
 
-    public CoreCreateSecurityGroupRequestDto() {
+    public CoreDeleteSecurityGroupRequestDto() {
     }
 
-    public CoreCreateSecurityGroupRequestDto(String securityGroupId, String identityParams, String cloudParams) {
-        this.securityGroupId = securityGroupId;
+    public CoreDeleteSecurityGroupRequestDto(String securityGroupId, String identityParams, String cloudParams) {
         this.identityParams = identityParams;
         this.cloudParams = cloudParams;
     }
 
-    public static CreateSecurityGroupRequest toSdk(CoreCreateSecurityGroupRequestDto requestDto) {
+    public static DeleteSecurityGroupRequest toSdk(CoreDeleteSecurityGroupRequestDto requestDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, CreateSecurityGroupRequest.class);
-    }
-
-    public String getSecurityGroupId() {
-        return securityGroupId;
-    }
-
-    public void setSecurityGroupId(String securityGroupId) {
-        this.securityGroupId = securityGroupId;
+        return mapper.convertValue(requestDto, DeleteSecurityGroupRequest.class);
     }
 
     public String getIdentityParams() {
