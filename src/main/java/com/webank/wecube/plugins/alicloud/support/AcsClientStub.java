@@ -53,22 +53,6 @@ public class AcsClientStub {
         return this.generateAcsClient(identityParamDto, cloudParamDto);
     }
 
-    public IAcsClient generateAcsClient(String regionId) {
-        String locRegionId = regionId;
-        logger.info("Generating ACS Client...");
-        if (StringUtils.isEmpty(regionId)) {
-            String msg = "The regionID not specified from function caller. The profile's regionID would be called.";
-            logger.info(msg);
-            locRegionId = this.aliCloudProperties.getRegionId();
-        }
-        DefaultProfile defaultProfile = DefaultProfile.getProfile(
-                locRegionId,
-                aliCloudProperties.getAccessId(),
-                aliCloudProperties.getAccessSecret()
-        );
-        return new DefaultAcsClient(defaultProfile);
-    }
-
     public <T extends AcsResponse> T request(IAcsClient client, AcsRequest<T> request) throws AliCloudException {
         T response;
         try {
