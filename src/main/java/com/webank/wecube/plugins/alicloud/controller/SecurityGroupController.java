@@ -1,14 +1,13 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
-import com.aliyuncs.ecs.model.v20140526.DeleteSecurityGroupRequest;
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.securityGroup.CoreCreateSecurityGroupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.securityGroup.CoreCreateSecurityGroupResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.securityGroup.CoreDeleteSecurityGroupRequestDto;
 import com.webank.wecube.plugins.alicloud.service.securityGroup.SecurityGroupService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +27,7 @@ public class SecurityGroupController {
         this.securityGroupService = securityGroupService;
     }
 
-    @PostMapping(path = StringUtils.EMPTY)
+    @PostMapping(path = "/create")
     @ResponseBody
     public CoreResponseDto<?> createSecurityGroup(@RequestBody CoreRequestDto<CoreCreateSecurityGroupRequestDto> request) {
         List<CoreCreateSecurityGroupResponseDto> result;
@@ -40,9 +39,9 @@ public class SecurityGroupController {
         return new CoreResponseDto<CoreCreateSecurityGroupResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping(path = StringUtils.EMPTY)
+    @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteVSwitch(@RequestBody CoreRequestDto<DeleteSecurityGroupRequest> request) {
+    public CoreResponseDto<?> deleteVSwitch(@RequestBody CoreRequestDto<CoreDeleteSecurityGroupRequestDto> request) {
         try {
             this.securityGroupService.deleteSecurityGroup(request.getInputs());
         } catch (PluginException ex) {
