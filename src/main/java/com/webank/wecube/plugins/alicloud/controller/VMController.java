@@ -1,14 +1,13 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
-import com.aliyuncs.ecs.model.v20140526.*;
+import com.aliyuncs.ecs.model.v20140526.StartInstanceResponse;
+import com.aliyuncs.ecs.model.v20140526.StopInstanceResponse;
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.vm.CoreCreateVMRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.vm.CoreCreateVMResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vm.*;
 import com.webank.wecube.plugins.alicloud.service.vm.VMService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +27,7 @@ public class VMController {
         this.vmService = vmService;
     }
 
-    @PostMapping(path = StringUtils.EMPTY)
+    @PostMapping(path = "/create")
     @ResponseBody
     public CoreResponseDto<?> createVM(@RequestBody CoreRequestDto<CoreCreateVMRequestDto> request) {
         List<CoreCreateVMResponseDto> result;
@@ -40,9 +39,9 @@ public class VMController {
         return new CoreResponseDto<CoreCreateVMResponseDto>().okayWithData(result);
     }
 
-    @DeleteMapping(path = StringUtils.EMPTY)
+    @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteVM(@RequestBody CoreRequestDto<DeleteInstanceRequest> request) {
+    public CoreResponseDto<?> deleteVM(@RequestBody CoreRequestDto<CoreDeleteVMRequestDto> request) {
         try {
             this.vmService.deleteVM(request.getInputs());
         } catch (PluginException ex) {
@@ -53,7 +52,7 @@ public class VMController {
 
     @PostMapping(path = "/start")
     @ResponseBody
-    public CoreResponseDto<?> startVM(@RequestBody CoreRequestDto<StartInstanceRequest> request) {
+    public CoreResponseDto<?> startVM(@RequestBody CoreRequestDto<CoreStartVMRequestDto> request) {
         List<StartInstanceResponse> result;
         try {
             result = this.vmService.startVM(request.getInputs());
@@ -65,7 +64,7 @@ public class VMController {
 
     @PostMapping(path = "/stop")
     @ResponseBody
-    public CoreResponseDto<?> stopVM(@RequestBody CoreRequestDto<StopInstanceRequest> request) {
+    public CoreResponseDto<?> stopVM(@RequestBody CoreRequestDto<CoreStopVMRequestDto> request) {
         List<StopInstanceResponse> result;
         try {
             result = this.vmService.stopVM(request.getInputs());
