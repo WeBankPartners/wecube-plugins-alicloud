@@ -49,10 +49,10 @@ public interface RouteTableService {
     /**
      * Associate VSwtich with route table
      *
-     * @param associateRouteTableRequest associate route table request
+     * @param associateRouteTableRequestList associate route table request
      * @throws PluginException while associate VSwitch with route table
      */
-    void associateRouteTable(List<CoreAssociateRouteTableRequestDto> associateRouteTableRequest) throws PluginException;
+    void associateRouteTable(List<CoreAssociateRouteTableRequestDto> associateRouteTableRequestList) throws PluginException;
 
     /**
      * Associate VSwtich with route table

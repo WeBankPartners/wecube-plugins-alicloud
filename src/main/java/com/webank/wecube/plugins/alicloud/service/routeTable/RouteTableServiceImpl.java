@@ -133,13 +133,19 @@ public class RouteTableServiceImpl implements RouteTableService {
                 continue;
             }
 
+            final DescribeRouteTablesResponse.RouteTable foundRouteTable = retrieveRouteTableResponse.getRouteTables().get(0);
+
+            // do not handle the system route table
+            if (StringUtils.equals(AliCloudConstant.ROUTE_TABLE_TYPE_SYSTEM, foundRouteTable.getRouteTableType())) {
+                continue;
+            }
+
             // un-associate all related VSwitches
-            final DescribeRouteTablesResponse.RouteTable routeTable = retrieveRouteTableResponse.getRouteTables().get(0);
-            if (!routeTable.getVSwitchIds().isEmpty()) {
-                for (String vSwitchId : routeTable.getVSwitchIds()) {
+            if (!foundRouteTable.getVSwitchIds().isEmpty()) {
+                for (String vSwitchId : foundRouteTable.getVSwitchIds()) {
                     UnassociateRouteTableRequest unassociateRouteTableRequest = new UnassociateRouteTableRequest();
                     unassociateRouteTableRequest.setRegionId(regionId);
-                    unassociateRouteTableRequest.setRouteTableId(routeTable.getRouteTableId());
+                    unassociateRouteTableRequest.setRouteTableId(foundRouteTable.getRouteTableId());
                     unassociateRouteTableRequest.setVSwitchId(vSwitchId);
                     this.unAssociateRouteTable(client, unassociateRouteTableRequest);
                 }
@@ -179,6 +185,8 @@ public class RouteTableServiceImpl implements RouteTableService {
                 throw new PluginException(msg);
             }
 
+            logger.info(String.format("Associating route table: [%s] with VSwitch: [%s]", coreAssociateRouteTableRequestDto.getRouteTableId(), coreAssociateRouteTableRequestDto.getVSwitchId()));
+
             AssociateRouteTableRequest associateRouteTableRequest = CoreAssociateRouteTableRequestDto.toSdk(coreAssociateRouteTableRequestDto);
             associateRouteTableRequest.setRegionId(regionId);
 
@@ -189,11 +197,11 @@ public class RouteTableServiceImpl implements RouteTableService {
                 throw new PluginException(ex.getMessage());
             }
         }
+        logger.info("Route table and VSwitch successfully un-associated.");
     }
 
     @Override
     public void associateRouteTable(IAcsClient client, List<AssociateRouteTableRequest> associateRouteTableRequestList) throws PluginException {
-        logger.info("Associating route table with VSwitch.");
         for (AssociateRouteTableRequest request : associateRouteTableRequestList) {
 
             if (StringUtils.isAnyEmpty(request.getRegionId(), request.getRouteTableId(), request.getVSwitchId())) {
@@ -201,6 +209,7 @@ public class RouteTableServiceImpl implements RouteTableService {
                 logger.error(msg);
                 throw new PluginException(msg);
             }
+            logger.info(String.format("Associating route table: [%s] with VSwitch: [%s]", request.getRouteTableId(), request.getVSwitchId()));
 
             try {
                 this.acsClientStub.request(client, request);
@@ -208,6 +217,7 @@ public class RouteTableServiceImpl implements RouteTableService {
                 throw new PluginException(ex.getMessage());
             }
         }
+        logger.info("Route table and VSwitch successfully associated.");
     }
 
     @Override
@@ -217,12 +227,15 @@ public class RouteTableServiceImpl implements RouteTableService {
             logger.error(msg);
             throw new PluginException(msg);
         }
+
+        logger.info(String.format("Un-associating route table: [%s] with VSwitch: [%s]", unassociateRouteTableRequest.getRouteTableId(), unassociateRouteTableRequest.getVSwitchId()));
         UnassociateRouteTableResponse response;
         try {
             response = this.acsClientStub.request(client, unassociateRouteTableRequest);
         } catch (AliCloudException ex) {
             throw new PluginException(ex.getMessage());
         }
+        logger.info("Route table and VSwitch successfully un-associated.");
         return response;
     }
 
