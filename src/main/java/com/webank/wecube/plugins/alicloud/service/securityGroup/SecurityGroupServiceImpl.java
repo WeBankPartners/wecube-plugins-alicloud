@@ -3,8 +3,11 @@ package com.webank.wecube.plugins.alicloud.service.securityGroup;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
+import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.securityGroup.CoreCreateSecurityGroupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.securityGroup.CoreCreateSecurityGroupResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.securityGroup.CoreDeleteSecurityGroupRequestDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import org.apache.commons.lang3.StringUtils;
@@ -31,50 +34,59 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
     @Override
-    public List<CoreCreateSecurityGroupResponseDto> createSecurityGroup(List<CoreCreateSecurityGroupRequestDto> requestDtoList) throws PluginException {
+    public List<CoreCreateSecurityGroupResponseDto> createSecurityGroup(List<CoreCreateSecurityGroupRequestDto> coreCreateSecurityGroupRequestDtoList) throws PluginException {
         List<CoreCreateSecurityGroupResponseDto> result = new ArrayList<>();
-        for (CoreCreateSecurityGroupRequestDto requestDto : requestDtoList) {
+        for (CoreCreateSecurityGroupRequestDto requestDto : coreCreateSecurityGroupRequestDtoList) {
+
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+            final String regionId = cloudParamDto.getRegionId();
+            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+
             final String securityGroupId = requestDto.getSecurityGroupId();
             if (StringUtils.isNotEmpty(securityGroupId)) {
-                final DescribeSecurityGroupsResponse foundSecurityGroup = this.retrieveSecurityGroup(requestDto.getRegionId(), securityGroupId);
+                final DescribeSecurityGroupsResponse foundSecurityGroup = this.retrieveSecurityGroup(client, regionId, securityGroupId);
                 result.add(new CoreCreateSecurityGroupResponseDto(foundSecurityGroup.getRequestId(), foundSecurityGroup.getSecurityGroups().get(0).getSecurityGroupId()));
-                continue;
-            }
+            } else {
 
-            CreateSecurityGroupRequest request = new CoreCreateSecurityGroupRequestDto();
-            request = CoreCreateSecurityGroupRequestDto.toSdk(requestDto);
-            final IAcsClient client = this.acsClientStub.generateAcsClient(requestDto.getRegionId());
-            CreateSecurityGroupResponse response;
-            try {
-                response = this.acsClientStub.request(client, request);
-            } catch (AliCloudException ex) {
-                throw new PluginException(ex.getMessage());
+                CreateSecurityGroupRequest request = CoreCreateSecurityGroupRequestDto.toSdk(requestDto);
+                request.setRegionId(regionId);
+                CreateSecurityGroupResponse response;
+                try {
+                    response = this.acsClientStub.request(client, request);
+                } catch (AliCloudException ex) {
+                    throw new PluginException(ex.getMessage());
+                }
+                result.add(CoreCreateSecurityGroupResponseDto.fromSdk(response));
             }
-            result.add(CoreCreateSecurityGroupResponseDto.fromSdk(response));
-
         }
         return result;
     }
 
     @Override
-    public void deleteSecurityGroup(List<DeleteSecurityGroupRequest> deleteSecurityGroupRequestList) throws PluginException {
-        for (DeleteSecurityGroupRequest deleteSecurityGroupRequest : deleteSecurityGroupRequestList) {
-            final String regionId = deleteSecurityGroupRequest.getRegionId();
+    public void deleteSecurityGroup(List<CoreDeleteSecurityGroupRequestDto> coreDeleteSecurityGroupRequestDtoList) throws PluginException {
+        for (CoreDeleteSecurityGroupRequestDto requestDto : coreDeleteSecurityGroupRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+            final String regionId = cloudParamDto.getRegionId();
+            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
             if (StringUtils.isEmpty(regionId)) {
                 String msg = "The message cannot be null or empty.";
                 logger.error(msg);
                 throw new PluginException(regionId);
             }
-            final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
+
+            DeleteSecurityGroupRequest request = CoreDeleteSecurityGroupRequestDto.toSdk(requestDto);
+            request.setRegionId(regionId);
             try {
-                this.acsClientStub.request(client, deleteSecurityGroupRequest);
+                this.acsClientStub.request(client, request);
             } catch (AliCloudException ex) {
                 throw new PluginException(ex.getMessage());
             }
         }
     }
 
-    private DescribeSecurityGroupsResponse retrieveSecurityGroup(String regionId, String securityGroupId) throws PluginException {
+    private DescribeSecurityGroupsResponse retrieveSecurityGroup(IAcsClient client, String regionId, String securityGroupId) throws PluginException {
 
         if (StringUtils.isAnyEmpty(regionId, securityGroupId)) {
             String msg = "Either regionId or securityGroupId cannot be null or empty.";
@@ -84,7 +96,6 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
         logger.info("Retrieving security group info... The region ID is: [{}] and security group ID is: [{}]", regionId, securityGroupId);
 
-        final IAcsClient client = this.acsClientStub.generateAcsClient(regionId);
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest();
         request.setRegionId(regionId);
         request.setSecurityGroupId(securityGroupId);
