@@ -1,7 +1,10 @@
 package com.webank.wecube.plugins.alicloud.service.vswitch;
 
 import com.aliyuncs.IAcsClient;
-import com.aliyuncs.vpc.model.v20160428.*;
+import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
+import com.aliyuncs.vpc.model.v20160428.CreateVSwitchResponse;
+import com.aliyuncs.vpc.model.v20160428.DescribeVSwitchesRequest;
+import com.aliyuncs.vpc.model.v20160428.DescribeVSwitchesResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
@@ -117,8 +120,8 @@ public class VSwitchServiceImpl implements VSwitchService {
                     this.routeTableService.associateRouteTable(client, Collections.singletonList(associateRouteTableRequest));
                 }
 
-                result.setRouteTableId(createdRouteTableId);
                 result = CoreCreateVSwitchResponseDto.fromSdk(createVSwitchResponse);
+                result.setRouteTableId(createdRouteTableId);
             }
             resultList.add(result);
         }
@@ -174,20 +177,19 @@ public class VSwitchServiceImpl implements VSwitchService {
             // check if there is route table associate with given VSwitch ID
             final DescribeVSwitchesResponse.VSwitch vSwitch = retrieveVSwtichResponse.getVSwitches().get(0);
             final DescribeVSwitchesResponse.VSwitch.RouteTable associatedRouteTable = vSwitch.getRouteTable();
+            final String vSwitchId = vSwitch.getVSwitchId();
             if (null != associatedRouteTable) {
                 // can only un-associate and delete non-systematic route table
+                logger.info(associatedRouteTable.getRouteTableType());
                 if (!StringUtils.equals(AliCloudConstant.ROUTE_TABLE_TYPE_SYSTEM, associatedRouteTable.getRouteTableType())) {
-                    final String routeTableId = associatedRouteTable.getRouteTableId();
 
-                    // un-associate route table with VSwitch
-                    UnassociateRouteTableRequest unassociateRouteTableRequest = new UnassociateRouteTableRequest();
-                    unassociateRouteTableRequest.setRegionId(regionId);
-                    unassociateRouteTableRequest.setRouteTableId(routeTableId);
-                    unassociateRouteTableRequest.setVSwitchId(vSwitch.getVSwitchId());
-                    this.routeTableService.unAssociateRouteTable(client, unassociateRouteTableRequest);
+                    // check VSwtich status until it's available
+                    final String routeTableId = associatedRouteTable.getRouteTableId();
 
                     // delete route table
                     CoreDeleteRouteTableRequestDto deleteRouteTableRequest = new CoreDeleteRouteTableRequestDto();
+                    deleteRouteTableRequest.setIdentityParams(request.getIdentityParams());
+                    deleteRouteTableRequest.setCloudParams(request.getCloudParams());
                     deleteRouteTableRequest.setRegionId(regionId);
                     deleteRouteTableRequest.setRouteTableId(routeTableId);
                     this.routeTableService.deleteRouteTable(Collections.singletonList(deleteRouteTableRequest));
@@ -195,7 +197,7 @@ public class VSwitchServiceImpl implements VSwitchService {
             }
 
             // delete VSwitch
-            logger.info("Deleting VSwitch: [{}]", vSwitch.getVSwitchId());
+            logger.info("Deleting VSwitch: [{}]", vSwitchId);
             try {
                 this.acsClientStub.request(client, request);
             } catch (AliCloudException ex) {
