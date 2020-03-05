@@ -105,6 +105,12 @@
             <artifactId>aliyun-java-sdk-ecs</artifactId>
             <version>4.18.3</version>
         </dependency>
+        <!-- alicloud LoadBalancer -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-slb</artifactId>
+            <version>3.2.15</version>
+        </dependency>
     </dependencies>
 
     <build>
