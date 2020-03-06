@@ -8,6 +8,7 @@ import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.disk.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,6 @@ public class DiskServiceImpl implements DiskService {
             final String regionId = cloudParamDto.getRegionId();
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-
             if (StringUtils.isEmpty(requestDto.getDiskId())) {
                 throw new PluginException("The disk id cannot be empty or null.");
             }
@@ -98,7 +98,9 @@ public class DiskServiceImpl implements DiskService {
 
             // delete disk
             logger.info("Deleting disk, disk ID: [{}], disk region:[{}]", diskId, regionId);
-            final DeleteDiskResponse response = this.acsClientStub.request(client, requestDto);
+            DeleteDiskRequest request = CoreDeleteDiskRequestDto.toSdk(requestDto);
+            request.setRegionId(regionId);
+            final DeleteDiskResponse response = this.acsClientStub.request(client, request);
 
             // re-check if disk has already been deleted
             if (0 != this.retrieveDisk(client, regionId, diskId).getTotalCount()) {
@@ -130,9 +132,16 @@ public class DiskServiceImpl implements DiskService {
                 throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
             }
 
-            AttachDiskResponse response = this.acsClientStub.request(client, request);
-            CoreAttachDiskResponseDto responseDto = CoreAttachDiskResponseDto.fromSdk(response);
-            resultList.add(responseDto);
+            AttachDiskResponse response;
+            try {
+                response = this.acsClientStub.request(client, request);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+            CoreAttachDiskResponseDto result = CoreAttachDiskResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
         }
 
         return resultList;
@@ -153,8 +162,10 @@ public class DiskServiceImpl implements DiskService {
             }
 
             DetachDiskResponse response = this.acsClientStub.request(client, request);
-            CoreDetachDiskResponseDto responseDto = CoreDetachDiskResponseDto.fromSdk(response);
-            resultList.add(responseDto);
+            CoreDetachDiskResponseDto result = CoreDetachDiskResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
         }
 
         return resultList;
@@ -167,7 +178,7 @@ public class DiskServiceImpl implements DiskService {
         // create new request
         DescribeDisksRequest retrieveDiskRequest = new DescribeDisksRequest();
         retrieveDiskRequest.setRegionId(regionId);
-        retrieveDiskRequest.setDiskIds(diskId);
+        retrieveDiskRequest.setDiskIds(PluginStringUtils.stringifyList(diskId));
         // send the request and handle the error, then return the response
         return this.acsClientStub.request(client, retrieveDiskRequest);
     }
