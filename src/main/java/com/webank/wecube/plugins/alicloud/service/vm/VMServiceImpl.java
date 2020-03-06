@@ -52,11 +52,11 @@ public class VMServiceImpl implements VMService {
                     resultList.add(new CoreCreateVMResponseDto(response.getRequestId(), foundInstance.getInstanceId()));
                 }
             } else {
-                //            if (PluginStringUtils.isAnyEmpty(request.getImageId(), request.getInstanceType(), request.getZoneId(), request.getRegionId())) {
-//                String msg = "Any of requested fields: ImageId, InstanceType, ZoneId, RegionId cannot be null or empty";
-//                logger.error(msg);
-//                throw new PluginException(msg);
-//            }
+                if (StringUtils.isAnyEmpty(request.getImageId(), request.getInstanceType(), request.getZoneId(), regionId)) {
+                    String msg = "Any of requested fields: ImageId, InstanceType, ZoneId, RegionId cannot be null or empty";
+                    logger.error(msg);
+                    throw new PluginException(msg);
+                }
 
                 // create VM instance
                 final CreateInstanceRequest aliCloudRequest = CoreCreateVMRequestDto.toSdk(request);
@@ -86,7 +86,6 @@ public class VMServiceImpl implements VMService {
 
         DescribeInstancesRequest request = new DescribeInstancesRequest();
         request.setRegionId(regionId);
-//        request.setInstanceIds(instanceId);
         request.setInstanceIds(PluginStringUtils.stringifyList(instanceId));
 
         DescribeInstancesResponse response;
