@@ -7,6 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreCreateLoadBalancerListenerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreCreateLoadBalancerListenerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreDeleteLoadBalancerListenerRequestDto;
@@ -41,12 +42,13 @@ public class LoadBalancerController {
     @PostMapping(path = "/delete")
     @ResponseBody
     public CoreResponseDto<?> deleteLoadBalancer(@RequestBody CoreRequestDto<CoreDeleteLoadBalancerRequestDto> request) {
+        List<CoreDeleteLoadBalancerResponseDto> result;
         try {
-            this.loadBalancerService.deleteLoadBalancer(request.getInputs());
+            result = this.loadBalancerService.deleteLoadBalancer(request.getInputs());
         } catch (PluginException ex) {
             return CoreResponseDto.error(ex.getMessage());
         }
-        return CoreResponseDto.okay();
+        return new CoreResponseDto<CoreDeleteLoadBalancerResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/listener/create")
