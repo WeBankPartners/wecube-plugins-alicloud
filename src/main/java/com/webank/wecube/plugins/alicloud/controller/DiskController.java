@@ -61,7 +61,7 @@ public class DiskController {
         return new CoreResponseDto<CoreAttachDiskResponseDto>().okayWithData(result);
     }
 
-    @PostMapping(path = "/attach")
+    @PostMapping(path = "/detach")
     @ResponseBody
     public CoreResponseDto<?> detachDisk(@RequestBody CoreRequestDto<CoreDetachDiskRequestDto> request) {
         List<CoreDetachDiskResponseDto> result;
