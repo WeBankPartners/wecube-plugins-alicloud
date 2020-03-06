@@ -1,7 +1,5 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
-import com.aliyuncs.ecs.model.v20140526.StartInstanceResponse;
-import com.aliyuncs.ecs.model.v20140526.StopInstanceResponse;
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
@@ -53,24 +51,36 @@ public class VMController {
     @PostMapping(path = "/start")
     @ResponseBody
     public CoreResponseDto<?> startVM(@RequestBody CoreRequestDto<CoreStartVMRequestDto> request) {
-        List<StartInstanceResponse> result;
+        List<CoreStartVMResponseDto> result;
         try {
             result = this.vmService.startVM(request.getInputs());
         } catch (PluginException ex) {
             return CoreResponseDto.error(ex.getMessage());
         }
-        return new CoreResponseDto<StartInstanceResponse>().okayWithData(result);
+        return new CoreResponseDto<CoreStartVMResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/stop")
     @ResponseBody
     public CoreResponseDto<?> stopVM(@RequestBody CoreRequestDto<CoreStopVMRequestDto> request) {
-        List<StopInstanceResponse> result;
+        List<CoreStopVMResponseDto> result;
         try {
             result = this.vmService.stopVM(request.getInputs());
         } catch (PluginException ex) {
             return CoreResponseDto.error(ex.getMessage());
         }
-        return new CoreResponseDto<StopInstanceResponse>().okayWithData(result);
+        return new CoreResponseDto<CoreStopVMResponseDto>().okayWithData(result);
+    }
+
+    @PostMapping(path = "/security-group/bind")
+    @ResponseBody
+    public CoreResponseDto<?> bindSecurityGroup(@RequestBody CoreRequestDto<CoreBindSecurityGroupRequestDto> request) {
+        List<CoreBindSecurityGroupResponseDto> result;
+        try {
+            result = this.vmService.bindSecurityGroup(request.getInputs());
+        } catch (PluginException ex) {
+            return CoreResponseDto.error(ex.getMessage());
+        }
+        return new CoreResponseDto<CoreBindSecurityGroupResponseDto>().okayWithData(result);
     }
 }
