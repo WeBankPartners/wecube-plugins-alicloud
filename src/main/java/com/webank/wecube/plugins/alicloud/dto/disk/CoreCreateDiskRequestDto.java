@@ -13,6 +13,8 @@ public class CoreCreateDiskRequestDto extends CreateDiskRequest {
     private String guid;
     private String callbackParameter;
     private String diskId;
+    private Integer size;
+    private String snapshotId;
 
     public CoreCreateDiskRequestDto() {
     }
@@ -60,5 +62,25 @@ public class CoreCreateDiskRequestDto extends CreateDiskRequest {
 
     public void setDiskId(String diskId) {
         this.diskId = diskId;
+    }
+
+    @Override
+    public Integer getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
+    @Override
+    public String getSnapshotId() {
+        return snapshotId;
+    }
+
+    @Override
+    public void setSnapshotId(String snapshotId) {
+        this.snapshotId = snapshotId;
     }
 }
