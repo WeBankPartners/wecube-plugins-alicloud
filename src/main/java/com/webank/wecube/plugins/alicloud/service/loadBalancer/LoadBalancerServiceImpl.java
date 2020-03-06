@@ -10,6 +10,7 @@ import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreCreateLoadBalancerListenerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreCreateLoadBalancerListenerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreDeleteLoadBalancerListenerRequestDto;
@@ -31,48 +32,6 @@ import java.util.List;
  */
 @Service
 public class LoadBalancerServiceImpl implements LoadBalancerService {
-
-    @Override
-    public List<CoreCreateLoadBalancerListenerResponseDto> createListener(List<CoreCreateLoadBalancerListenerRequestDto> coreCreateLoadBalancerListenerRequestDtoList) throws PluginException {
-        List<CoreCreateLoadBalancerListenerResponseDto> resultList = new ArrayList<>();
-        for (CoreCreateLoadBalancerListenerRequestDto requestDto : coreCreateLoadBalancerListenerRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final String regionId = cloudParamDto.getRegionId();
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String loadBalancerId = requestDto.getLoadBalancerId();
-            final Integer listenerPort = requestDto.getListenerPort();
-            final String listenerProtocol = requestDto.getListenerProtocol();
-            final Integer backendServerPort = requestDto.getBackendServerPort();
-            try {
-                CoreCreateLoadBalancerListenerResponseDto result = this.retrieveListener(client, regionId, loadBalancerId, listenerPort, listenerProtocol);
-                resultList.add(result);
-            } catch (AliCloudException ex) {
-                AcsRequest request;
-                switch (EnumUtils.getEnum(listenerProtocolType.class, listenerProtocol.toUpperCase())) {
-                    case TCP:
-                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkTCPRequest(requestDto);
-                        break;
-                    case UDP:
-                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkUDPRequest(requestDto);
-                        break;
-                    case HTTP:
-                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkHTTPRequest(requestDto);
-                        break;
-                    case HTTPS:
-                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkHTTPSRequest(requestDto);
-                        break;
-                    default:
-                        throw new PluginException("Please specify valid listener protocol type.");
-                }
-                final AcsResponse response = this.acsClientStub.request(client, request);
-                final CoreCreateLoadBalancerListenerResponseDto responseDto = CoreCreateLoadBalancerListenerResponseDto.fromSdk(response);
-                resultList.add(responseDto);
-            }
-
-        }
-        return resultList;
-    }
 
 
     private static Logger logger = LoggerFactory.getLogger(LoadBalancerService.class);
@@ -152,7 +111,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     }
 
     @Override
-    public void deleteLoadBalancer(List<CoreDeleteLoadBalancerRequestDto> coreDeleteLoadBalancerRequestDtoList) throws PluginException {
+    public List<CoreDeleteLoadBalancerResponseDto> deleteLoadBalancer(List<CoreDeleteLoadBalancerRequestDto> coreDeleteLoadBalancerRequestDtoList) throws PluginException {
+        List<CoreDeleteLoadBalancerResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteLoadBalancerRequestDto requestDto : coreDeleteLoadBalancerRequestDtoList) {
             final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
             final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -175,7 +135,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             // delete VPC
             logger.info("Deleting load balancer, load balancer ID: [{}], regionID" +
                     ":[{}]", requestDto.getLoadBalancerId(), regionId);
-            this.acsClientStub.request(client, requestDto);
+            final DeleteLoadBalancerResponse response = this.acsClientStub.request(client, requestDto);
 
             // re-check if VPC has already been deleted
             if (0 != this.retrieveLoadBalancer(client, regionId, loadBalancerId).getTotalCount()) {
@@ -183,7 +143,57 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 logger.error(msg);
                 throw new PluginException(msg);
             }
+
+            final CoreDeleteLoadBalancerResponseDto result = CoreDeleteLoadBalancerResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
         }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreCreateLoadBalancerListenerResponseDto> createListener(List<CoreCreateLoadBalancerListenerRequestDto> coreCreateLoadBalancerListenerRequestDtoList) throws PluginException {
+        List<CoreCreateLoadBalancerListenerResponseDto> resultList = new ArrayList<>();
+        for (CoreCreateLoadBalancerListenerRequestDto requestDto : coreCreateLoadBalancerListenerRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+            final String regionId = cloudParamDto.getRegionId();
+            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+            final String loadBalancerId = requestDto.getLoadBalancerId();
+            final Integer listenerPort = requestDto.getListenerPort();
+            final String listenerProtocol = requestDto.getListenerProtocol();
+            final Integer backendServerPort = requestDto.getBackendServerPort();
+            try {
+                CoreCreateLoadBalancerListenerResponseDto result = this.retrieveListener(client, regionId, loadBalancerId, listenerPort, listenerProtocol);
+                resultList.add(result);
+            } catch (AliCloudException ex) {
+                AcsRequest request;
+                switch (EnumUtils.getEnum(listenerProtocolType.class, listenerProtocol.toUpperCase())) {
+                    case TCP:
+                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkTCPRequest(requestDto);
+                        break;
+                    case UDP:
+                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkUDPRequest(requestDto);
+                        break;
+                    case HTTP:
+                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkHTTPRequest(requestDto);
+                        break;
+                    case HTTPS:
+                        request = CoreCreateLoadBalancerListenerRequestDto.toSdkHTTPSRequest(requestDto);
+                        break;
+                    default:
+                        throw new PluginException("Please specify valid listener protocol type.");
+                }
+                final AcsResponse response = this.acsClientStub.request(client, request);
+                final CoreCreateLoadBalancerListenerResponseDto result = CoreCreateLoadBalancerListenerResponseDto.fromSdk(response);
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
     }
 
     private CoreCreateLoadBalancerListenerResponseDto retrieveListener(IAcsClient client, String regionId, String loadBalancerId, Integer listenerPort, String listenerProtocol) throws PluginException, AliCloudException {
