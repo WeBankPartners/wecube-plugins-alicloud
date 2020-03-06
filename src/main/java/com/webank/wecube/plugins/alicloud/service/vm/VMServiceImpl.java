@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.webank.wecube.plugins.alicloud.support.AliCloudConstant.VM_INSTANCE_STOP_STATUS;
 
@@ -37,29 +38,29 @@ public class VMServiceImpl implements VMService {
     @Override
     public List<CoreCreateVMResponseDto> createVM(List<CoreCreateVMRequestDto> coreCreateVMRequestDtoList) throws PluginException {
         List<CoreCreateVMResponseDto> resultList = new ArrayList<>();
-        for (CoreCreateVMRequestDto request : coreCreateVMRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(request.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(request.getCloudParams());
+        for (CoreCreateVMRequestDto requestDto : coreCreateVMRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
             final String regionId = cloudParamDto.getRegionId();
 
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-            final String instanceId = request.getInstanceId();
+            final String instanceId = requestDto.getInstanceId();
             if (StringUtils.isNotEmpty(instanceId)) {
-                final DescribeInstancesResponse response = this.retrieveVM(client, regionId, request.getInstanceId());
+                final DescribeInstancesResponse response = this.retrieveVM(client, regionId, requestDto.getInstanceId());
                 if (response.getTotalCount() == 1) {
                     final DescribeInstancesResponse.Instance foundInstance = response.getInstances().get(0);
                     resultList.add(new CoreCreateVMResponseDto(response.getRequestId(), foundInstance.getInstanceId()));
                 }
             } else {
-                if (StringUtils.isAnyEmpty(request.getImageId(), request.getInstanceType(), request.getZoneId(), regionId)) {
+                if (StringUtils.isAnyEmpty(requestDto.getImageId(), requestDto.getInstanceType(), requestDto.getZoneId(), regionId)) {
                     String msg = "Any of requested fields: ImageId, InstanceType, ZoneId, RegionId cannot be null or empty";
                     logger.error(msg);
                     throw new PluginException(msg);
                 }
 
                 // create VM instance
-                final CreateInstanceRequest aliCloudRequest = CoreCreateVMRequestDto.toSdk(request);
+                final CreateInstanceRequest aliCloudRequest = CoreCreateVMRequestDto.toSdk(requestDto);
                 aliCloudRequest.setRegionId(regionId);
                 CreateInstanceResponse createInstanceResponse;
                 try {
@@ -67,7 +68,10 @@ public class VMServiceImpl implements VMService {
                 } catch (AliCloudException ex) {
                     throw new PluginException(ex.getMessage());
                 }
-                resultList.add(CoreCreateVMResponseDto.fromSdk(createInstanceResponse));
+                CoreCreateVMResponseDto result = CoreCreateVMResponseDto.fromSdk(createInstanceResponse);
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
             }
         }
         return resultList;
@@ -98,7 +102,8 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public void deleteVM(List<CoreDeleteVMRequestDto> coreDeleteVMRequestDtoList) throws PluginException {
+    public List<CoreDeleteVMResponseDto> deleteVM(List<CoreDeleteVMRequestDto> coreDeleteVMRequestDtoList) throws PluginException {
+        List<CoreDeleteVMResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteVMRequestDto requestDto : coreDeleteVMRequestDtoList) {
 
             final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
@@ -124,8 +129,9 @@ public class VMServiceImpl implements VMService {
             // delete VM instance
             DeleteInstanceRequest deleteInstanceRequest = CoreDeleteVMRequestDto.toSdk(requestDto);
             deleteInstanceRequest.setRegionId(regionId);
+            DeleteInstanceResponse response;
             try {
-                this.acsClientStub.request(client, deleteInstanceRequest);
+                response = this.acsClientStub.request(client, deleteInstanceRequest);
             } catch (AliCloudException ex) {
                 throw new PluginException(ex.getMessage());
             }
@@ -137,68 +143,101 @@ public class VMServiceImpl implements VMService {
                 logger.error(msg);
                 throw new PluginException(msg);
             }
+
+            CoreDeleteVMResponseDto result = CoreDeleteVMResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
         }
+        return resultList;
     }
 
     @Override
-    public List<StartInstanceResponse> startVM(List<CoreStartVMRequestDto> coreStartVMRequestDtoList) throws PluginException {
-        List<StartInstanceResponse> result = new ArrayList<>();
-        for (CoreStartVMRequestDto request : coreStartVMRequestDtoList) {
+    public List<CoreStartVMResponseDto> startVM(List<CoreStartVMRequestDto> coreStartVMRequestDtoList) throws PluginException {
+        List<CoreStartVMResponseDto> resultList = new ArrayList<>();
+        for (CoreStartVMRequestDto requestDto : coreStartVMRequestDtoList) {
 
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(request.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(request.getCloudParams());
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-            StartInstanceResponse startInstanceResponse;
+            StartInstanceResponse response;
             try {
-                startInstanceResponse = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, requestDto);
             } catch (AliCloudException ex) {
                 throw new PluginException(ex.getMessage());
             }
-            result.add(startInstanceResponse);
+
+            final CoreStartVMResponseDto result = CoreStartVMResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
         }
-        return result;
+        return resultList;
     }
 
     @Override
-    public List<StopInstanceResponse> stopVM(List<CoreStopVMRequestDto> coreStopVMRequestDtoList) throws PluginException {
-        List<StopInstanceResponse> result = new ArrayList<>();
-        for (CoreStopVMRequestDto request : coreStopVMRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(request.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(request.getCloudParams());
+    public List<CoreStopVMResponseDto> stopVM(List<CoreStopVMRequestDto> coreStopVMRequestDtoList) throws PluginException {
+        List<CoreStopVMResponseDto> resultList = new ArrayList<>();
+        for (CoreStopVMRequestDto requestDto : coreStopVMRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-            StopInstanceResponse stopInstanceResponse;
+            StopInstanceResponse response;
             try {
-                stopInstanceResponse = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, requestDto);
             } catch (AliCloudException ex) {
                 throw new PluginException(ex.getMessage());
             }
-            result.add(stopInstanceResponse);
+            CoreStopVMResponseDto result = CoreStopVMResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
         }
-        return result;
+        return resultList;
     }
 
     @Override
-    public void bindSecurityGroup(IAcsClient client, String regionId, String instanceId, String securityGroupId) throws PluginException {
+    public List<CoreBindSecurityGroupResponseDto> bindSecurityGroup(List<CoreBindSecurityGroupRequestDto> coreBindSecurityGroupRequestDtoList) throws PluginException {
+        List<CoreBindSecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreBindSecurityGroupRequestDto requestDto : coreBindSecurityGroupRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+            final String regionId = cloudParamDto.getRegionId();
+            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+            final String securityGroupId = requestDto.getSecurityGroupId();
+            final String instanceId = requestDto.getInstanceId();
 
-        if (StringUtils.isAnyEmpty(instanceId, securityGroupId)) {
-            String msg = "Either instance ID or security group ID cannot be null or empty";
-            logger.error(msg);
-            throw new PluginException(msg);
+            final DescribeInstancesResponse retrieveVMResponse = this.retrieveVM(client, regionId, instanceId);
+            if (0 == retrieveVMResponse.getTotalCount()) {
+                String msg = String.format("Cannot retrieve instance info according to given regionId: [%s] and instanceId: [%s]", regionId, instanceId);
+                logger.error(msg);
+                throw new PluginException(msg);
+            }
+
+            final DescribeInstancesResponse.Instance foundInstance = retrieveVMResponse.getInstances().get(0);
+            List<String> currentSecurityGroupIdList = foundInstance.getSecurityGroupIds();
+            currentSecurityGroupIdList.add(securityGroupId);
+            currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
+
+            ModifyInstanceAttributeRequest request = CoreBindSecurityGroupRequestDto.toSdk(requestDto);
+            request.setSecurityGroupIdss(currentSecurityGroupIdList);
+
+            ModifyInstanceAttributeResponse response;
+            try {
+                response = this.acsClientStub.request(client, request);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+
+            CoreBindSecurityGroupResponseDto result = CoreBindSecurityGroupResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
+
         }
-
-        ModifyInstanceAttributeRequest request = new ModifyInstanceAttributeRequest();
-        request.setRegionId(regionId);
-        request.setInstanceId(instanceId);
-        request.getSecurityGroupIdss().add(securityGroupId);
-
-        try {
-            this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
-
+        return resultList;
     }
 
     @Override
