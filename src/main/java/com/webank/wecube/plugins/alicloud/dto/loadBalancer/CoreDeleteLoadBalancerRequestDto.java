@@ -5,10 +5,15 @@ import com.aliyuncs.slb.model.v20140515.DeleteLoadBalancerRequest;
 public class CoreDeleteLoadBalancerRequestDto extends DeleteLoadBalancerRequest {
     private String identityParams;
     private String cloudParams;
+    private String guid;
+    private String callbackParameter;
 
-    public CoreDeleteLoadBalancerRequestDto(String identityParams, String cloudParams) {
+
+    public CoreDeleteLoadBalancerRequestDto(String identityParams, String cloudParams, String guid, String callbackParameter) {
         this.identityParams = identityParams;
         this.cloudParams = cloudParams;
+        this.guid = guid;
+        this.callbackParameter = callbackParameter;
     }
 
     public CoreDeleteLoadBalancerRequestDto() {
@@ -28,5 +33,21 @@ public class CoreDeleteLoadBalancerRequestDto extends DeleteLoadBalancerRequest 
 
     public void setCloudParams(String cloudParams) {
         this.cloudParams = cloudParams;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getCallbackParameter() {
+        return callbackParameter;
+    }
+
+    public void setCallbackParameter(String callbackParameter) {
+        this.callbackParameter = callbackParameter;
     }
 }
