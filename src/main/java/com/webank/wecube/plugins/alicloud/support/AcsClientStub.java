@@ -7,14 +7,12 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.profile.DefaultProfile;
-import com.webank.wecube.plugins.alicloud.common.AliCloudProperties;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,12 +21,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class AcsClientStub {
     private final static Logger logger = LoggerFactory.getLogger(AcsClientStub.class);
-    private AliCloudProperties aliCloudProperties;
-
-    @Autowired
-    public AcsClientStub(AliCloudProperties aliCloudProperties) {
-        this.aliCloudProperties = aliCloudProperties;
-    }
 
 
     public IAcsClient generateAcsClient(IdentityParamDto identityParamDto, CloudParamDto cloudParamDto) throws PluginException {
