@@ -38,7 +38,7 @@ public class VMServiceImpl implements VMService {
     public List<CoreCreateVMResponseDto> createVM(List<CoreCreateVMRequestDto> coreCreateVMRequestDtoList) throws PluginException {
         List<CoreCreateVMResponseDto> resultList = new ArrayList<>();
         for (CoreCreateVMRequestDto request : coreCreateVMRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(request.getInstanceId());
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(request.getIdentityParams());
             final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(request.getCloudParams());
             final String regionId = cloudParamDto.getRegionId();
 
