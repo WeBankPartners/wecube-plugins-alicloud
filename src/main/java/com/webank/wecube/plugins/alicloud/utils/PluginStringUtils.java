@@ -8,7 +8,7 @@ public class PluginStringUtils {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
 
         for (String string : strings) {
-            joiner.add(string);
+            joiner.add("\"" + string + "\"");
         }
         return joiner.toString();
     }
