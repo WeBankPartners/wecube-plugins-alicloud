@@ -16,11 +16,6 @@ public class CoreCreateLoadBalancerResponseDto extends CreateLoadBalancerRespons
     public CoreCreateLoadBalancerResponseDto() {
     }
 
-    public CoreCreateLoadBalancerResponseDto(String requestId, String instanceId) {
-        super();
-        this.setRequestId(requestId);
-    }
-
     public static CoreCreateLoadBalancerResponseDto fromSdk(CreateLoadBalancerResponse createInstanceResponse) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.convertValue(createInstanceResponse, CoreCreateLoadBalancerResponseDto.class);
