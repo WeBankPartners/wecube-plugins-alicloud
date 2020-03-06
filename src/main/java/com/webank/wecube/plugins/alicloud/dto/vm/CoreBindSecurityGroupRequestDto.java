@@ -1,22 +1,25 @@
 package com.webank.wecube.plugins.alicloud.dto.vm;
 
-import com.aliyuncs.ecs.model.v20140526.StopInstanceRequest;
+import com.aliyuncs.ecs.model.v20140526.ModifyInstanceAttributeRequest;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author howechen
  */
-public class CoreStopVMRequestDto extends StopInstanceRequest {
+public class CoreBindSecurityGroupRequestDto extends ModifyInstanceAttributeRequest {
     private String identityParams;
     private String cloudParams;
     private String guid;
     private String callbackParameter;
+    private String securityGroupId;
 
-    public CoreStopVMRequestDto(String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
+    public CoreBindSecurityGroupRequestDto() {
     }
 
-    public CoreStopVMRequestDto() {
+    public static ModifyInstanceAttributeRequest toSdk(CoreBindSecurityGroupRequestDto coreBindSecurityGroupRequestDto) {
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.convertValue(coreBindSecurityGroupRequestDto, ModifyInstanceAttributeRequest.class);
     }
 
     public String getIdentityParams() {
@@ -49,5 +52,13 @@ public class CoreStopVMRequestDto extends StopInstanceRequest {
 
     public void setCallbackParameter(String callbackParameter) {
         this.callbackParameter = callbackParameter;
+    }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
     }
 }

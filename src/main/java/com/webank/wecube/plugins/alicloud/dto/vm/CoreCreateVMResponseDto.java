@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author howechen
  */
 public class CoreCreateVMResponseDto extends CreateInstanceResponse {
+    private String guid;
+    private String callbackParameter;
 
     public CoreCreateVMResponseDto() {
     }
@@ -26,5 +28,21 @@ public class CoreCreateVMResponseDto extends CreateInstanceResponse {
     public static CoreCreateVMResponseDto fromSdk(DescribeInstancesResponse.Instance instance) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.convertValue(instance, CoreCreateVMResponseDto.class);
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getCallbackParameter() {
+        return callbackParameter;
+    }
+
+    public void setCallbackParameter(String callbackParameter) {
+        this.callbackParameter = callbackParameter;
     }
 }

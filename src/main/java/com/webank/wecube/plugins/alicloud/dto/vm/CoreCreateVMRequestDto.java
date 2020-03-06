@@ -11,6 +11,8 @@ public class CoreCreateVMRequestDto extends CreateInstanceRequest {
     private String instanceId;
     private String identityParams;
     private String cloudParams;
+    private String guid;
+    private String callbackParameter;
 
     public CoreCreateVMRequestDto(String instanceId, String identityParams, String cloudParams) {
         this.instanceId = instanceId;
@@ -48,5 +50,21 @@ public class CoreCreateVMRequestDto extends CreateInstanceRequest {
 
     public void setCloudParams(String cloudParams) {
         this.cloudParams = cloudParams;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getCallbackParameter() {
+        return callbackParameter;
+    }
+
+    public void setCallbackParameter(String callbackParameter) {
+        this.callbackParameter = callbackParameter;
     }
 }

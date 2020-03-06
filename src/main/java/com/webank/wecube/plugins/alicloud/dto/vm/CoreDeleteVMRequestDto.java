@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class CoreDeleteVMRequestDto extends DeleteInstanceRequest {
     private String identityParams;
     private String cloudParams;
+    private String guid;
+    private String callbackParameter;
 
     public CoreDeleteVMRequestDto(String instanceId, String identityParams, String cloudParams) {
         this.identityParams = identityParams;
@@ -38,5 +40,21 @@ public class CoreDeleteVMRequestDto extends DeleteInstanceRequest {
 
     public void setCloudParams(String cloudParams) {
         this.cloudParams = cloudParams;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getCallbackParameter() {
+        return callbackParameter;
+    }
+
+    public void setCallbackParameter(String callbackParameter) {
+        this.callbackParameter = callbackParameter;
     }
 }
