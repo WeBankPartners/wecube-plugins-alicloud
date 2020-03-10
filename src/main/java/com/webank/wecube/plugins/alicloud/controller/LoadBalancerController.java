@@ -8,10 +8,10 @@ import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalance
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreCreateLoadBalancerListenerRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreCreateLoadBalancerListenerResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreDeleteLoadBalancerListenerRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.listener.CoreDeleteLoadBalancerListenerResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreAddBackendServerRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreAddBackendServerResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreRemoveBackendServerRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreRemoveBackendServerResponseDto;
 import com.webank.wecube.plugins.alicloud.service.loadBalancer.LoadBalancerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,27 +51,27 @@ public class LoadBalancerController {
         return new CoreResponseDto<CoreDeleteLoadBalancerResponseDto>().okayWithData(result);
     }
 
-    @PostMapping(path = "/listener/create")
+    @PostMapping(path = "/backend-server/add")
     @ResponseBody
-    public CoreResponseDto<?> createListener(@RequestBody CoreRequestDto<CoreCreateLoadBalancerListenerRequestDto> request) {
-        List<CoreCreateLoadBalancerListenerResponseDto> result;
+    public CoreResponseDto<?> createListener(@RequestBody CoreRequestDto<CoreAddBackendServerRequestDto> request) {
+        List<CoreAddBackendServerResponseDto> result;
         try {
-            result = this.loadBalancerService.createListener(request.getInputs());
+            result = this.loadBalancerService.addBackendServer(request.getInputs());
         } catch (PluginException ex) {
             return CoreResponseDto.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateLoadBalancerListenerResponseDto>().okayWithData(result);
+        return new CoreResponseDto<CoreAddBackendServerResponseDto>().okayWithData(result);
     }
 
-    @PostMapping(path = "/listener/delete")
+    @PostMapping(path = "/backend-server/remove")
     @ResponseBody
-    public CoreResponseDto<?> deleteListener(@RequestBody CoreRequestDto<CoreDeleteLoadBalancerListenerRequestDto> request) {
-        List<CoreDeleteLoadBalancerListenerResponseDto> result;
+    public CoreResponseDto<?> deleteListener(@RequestBody CoreRequestDto<CoreRemoveBackendServerRequestDto> request) {
+        List<CoreRemoveBackendServerResponseDto> result;
         try {
-            result = this.loadBalancerService.deleteListener(request.getInputs());
+            result = this.loadBalancerService.removeBackendServer(request.getInputs());
         } catch (PluginException ex) {
             return CoreResponseDto.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreDeleteLoadBalancerListenerResponseDto>().okayWithData(result);
+        return new CoreResponseDto<CoreRemoveBackendServerResponseDto>().okayWithData(result);
     }
 }
