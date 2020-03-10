@@ -8,6 +8,10 @@ import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreAssociateRouteTable
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreDeleteRouteTableRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryResponseDto;
 import com.webank.wecube.plugins.alicloud.service.routeTable.RouteTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -60,5 +64,29 @@ public class RouteTableController {
             return CoreResponseDto.error(ex.getMessage());
         }
         return CoreResponseDto.okay();
+    }
+
+    @PostMapping(path = "/route_entry/create")
+    @ResponseBody
+    public CoreResponseDto<?> createRouteEntry(@RequestBody CoreRequestDto<CoreCreateRouteEntryRequestDto> request) {
+        List<CoreCreateRouteEntryResponseDto> result;
+        try {
+            result = this.routeTableService.createRouteEntry(request.getInputs());
+        } catch (PluginException ex) {
+            return CoreResponseDto.error(ex.getMessage());
+        }
+        return new CoreResponseDto<CoreCreateRouteEntryResponseDto>().okayWithData(result);
+    }
+
+    @PostMapping(path = "/route_entry/delete")
+    @ResponseBody
+    public CoreResponseDto<?> deleteRouteEntry(@RequestBody CoreRequestDto<CoreDeleteRouteEntryRequestDto> request) {
+        List<CoreDeleteRouteEntryResponseDto> result;
+        try {
+            result = this.routeTableService.deleteRouteEntry(request.getInputs());
+        } catch (PluginException ex) {
+            return CoreResponseDto.error(ex.getMessage());
+        }
+        return new CoreResponseDto<CoreDeleteRouteEntryResponseDto>().okayWithData(result);
     }
 }
