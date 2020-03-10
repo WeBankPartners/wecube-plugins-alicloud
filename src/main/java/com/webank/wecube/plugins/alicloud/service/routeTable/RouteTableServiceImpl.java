@@ -9,6 +9,10 @@ import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreAssociateRouteTable
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreDeleteRouteTableRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudConstant;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
@@ -260,6 +264,60 @@ public class RouteTableServiceImpl implements RouteTableService {
         }
 
         return StringUtils.equals(AliCloudConstant.RESOURCE_AVAILABLE_STATUS, response.getRouteTables().get(0).getStatus());
+    }
+
+    @Override
+    public List<CoreCreateRouteEntryResponseDto> createRouteEntry(List<CoreCreateRouteEntryRequestDto> coreCreateRouteEntryRequestDtoList) throws PluginException {
+        List<CoreCreateRouteEntryResponseDto> resultList = new ArrayList<>();
+        for (CoreCreateRouteEntryRequestDto requestDto : coreCreateRouteEntryRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+            final String regionId = cloudParamDto.getRegionId();
+            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+            requestDto.setRegionId(regionId);
+
+            CreateRouteEntryRequest request = CoreCreateRouteEntryRequestDto.toSdk(requestDto);
+            CreateRouteEntryResponse response;
+
+            try {
+                response = this.acsClientStub.request(client, request);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+
+            CoreCreateRouteEntryResponseDto result = CoreCreateRouteEntryResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreDeleteRouteEntryResponseDto> deleteRouteEntry(List<CoreDeleteRouteEntryRequestDto> coreDeleteRouteEntryRequestDtoList) throws PluginException {
+        List<CoreDeleteRouteEntryResponseDto> resultList = new ArrayList<>();
+        for (CoreDeleteRouteEntryRequestDto requestDto : coreDeleteRouteEntryRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+            final String regionId = cloudParamDto.getRegionId();
+            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+            requestDto.setRegionId(regionId);
+
+            DeleteRouteEntryRequest request = CoreDeleteRouteEntryRequestDto.toSdk(requestDto);
+            DeleteRouteEntryResponse response;
+
+            try {
+                response = this.acsClientStub.request(client, request);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+
+            CoreDeleteRouteEntryResponseDto result = CoreDeleteRouteEntryResponseDto.fromSdk(response);
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
+        }
+        return resultList;
     }
 
 

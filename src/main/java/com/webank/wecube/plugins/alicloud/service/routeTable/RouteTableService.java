@@ -10,6 +10,10 @@ import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreAssociateRouteTable
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreDeleteRouteTableRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryResponseDto;
 
 import java.util.List;
 
@@ -83,4 +87,22 @@ public interface RouteTableService {
      * @throws PluginException when checking the route table status
      */
     boolean checkIfRouteTableAvailable(IAcsClient client, String regionId, String routeTableId) throws PluginException;
+
+    /**
+     * Create route entry
+     *
+     * @param coreCreateRouteEntryRequestDtoList core create route entry request dto list
+     * @return core create route entry response dto list
+     * @throws PluginException plugin exception
+     */
+    List<CoreCreateRouteEntryResponseDto> createRouteEntry(List<CoreCreateRouteEntryRequestDto> coreCreateRouteEntryRequestDtoList) throws PluginException;
+
+    /**
+     * Delete route entry
+     *
+     * @param coreDeleteRouteEntryRequestDtoList core delete route entry request dto list
+     * @return core delete route entry response dto list
+     * @throws PluginException plugin exception
+     */
+    List<CoreDeleteRouteEntryResponseDto> deleteRouteEntry(List<CoreDeleteRouteEntryRequestDto> coreDeleteRouteEntryRequestDtoList) throws PluginException;
 }
