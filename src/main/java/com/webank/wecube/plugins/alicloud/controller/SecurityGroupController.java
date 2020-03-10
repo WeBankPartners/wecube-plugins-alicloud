@@ -15,7 +15,7 @@ import java.util.List;
  * @author howechen
  */
 @RestController
-@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/security-group")
+@RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/security_group")
 public class SecurityGroupController {
 
     private SecurityGroupService securityGroupService;
