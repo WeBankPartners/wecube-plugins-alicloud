@@ -60,6 +60,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     // add the new backendServer to that particular VServerGroup
                     logger.info(String.format("Adding backend server to VServerGroup with ID: [%s]", foundVServerGroupId));
                     final AddBackendServersRequest addBackendServersRequest = CoreAddBackendServerRequestDto.toSdk(requestDto);
+                    addBackendServersRequest.setRegionId(regionId);
                     AddBackendServersResponse response;
                     try {
                         response = this.acsClientStub.request(client, addBackendServersRequest);
@@ -225,6 +226,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
             final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
             final String regionId = cloudParamDto.getRegionId();
+            requestDto.setRegionId(regionId);
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
 
@@ -243,7 +245,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             // delete VPC
             logger.info("Deleting load balancer, load balancer ID: [{}], regionID" +
                     ":[{}]", requestDto.getLoadBalancerId(), regionId);
-            final DeleteLoadBalancerResponse response = this.acsClientStub.request(client, requestDto);
+            final DeleteLoadBalancerRequest deleteLoadBalancerRequest = CoreDeleteLoadBalancerRequestDto.toSdk(requestDto);
+            final DeleteLoadBalancerResponse response = this.acsClientStub.request(client, deleteLoadBalancerRequest);
 
             // re-check if VPC has already been deleted
             if (0 != this.retrieveLoadBalancer(client, regionId, loadBalancerId).getTotalCount()) {
@@ -267,6 +270,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
             final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
             final String regionId = cloudParamDto.getRegionId();
+            requestDto.setRegionId(regionId);
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
             RemoveBackendServersRequest request = CoreRemoveBackendServerRequestDto.toSdk(requestDto);
