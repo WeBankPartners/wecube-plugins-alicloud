@@ -1,13 +1,22 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.DeleteLoadBalancerRequest;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * @author howechen
+ */
 public class CoreDeleteLoadBalancerRequestDto extends DeleteLoadBalancerRequest {
     private String identityParams;
     private String cloudParams;
     private String guid;
     private String callbackParameter;
 
+    public static DeleteLoadBalancerRequest toSdk(CoreDeleteLoadBalancerRequestDto requestDto) {
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.convertValue(requestDto, DeleteLoadBalancerRequest.class);
+    }
 
     public CoreDeleteLoadBalancerRequestDto(String identityParams, String cloudParams, String guid, String callbackParameter) {
         this.identityParams = identityParams;
