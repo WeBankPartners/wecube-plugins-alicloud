@@ -29,119 +29,6 @@ import java.util.List;
  */
 @Service
 public class LoadBalancerServiceImpl implements LoadBalancerService {
-    @Override
-    public List<CoreAddBackendServerResponseDto> addBackendServer(List<CoreAddBackendServerRequestDto> coreAddBackendServerRequestDtoList) throws PluginException {
-        List<CoreAddBackendServerResponseDto> resultList = new ArrayList<>();
-        for (CoreAddBackendServerRequestDto requestDto : coreAddBackendServerRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final String regionId = cloudParamDto.getRegionId();
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final Integer listenerPort = requestDto.getListenerPort();
-            final String loadBalancerId = requestDto.getLoadBalancerId();
-
-            // check if there is VServerGroupId bound
-            DescribeLoadBalancerTCPListenerAttributeRequest tcpListenerAttributeRequest = new DescribeLoadBalancerTCPListenerAttributeRequest();
-            tcpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
-            tcpListenerAttributeRequest.setListenerPort(listenerPort);
-            tcpListenerAttributeRequest.setRegionId(regionId);
-            DescribeLoadBalancerTCPListenerAttributeResponse tcpListenerAttributeResponse;
-            try {
-                tcpListenerAttributeResponse = this.acsClientStub.request(client, tcpListenerAttributeRequest);
-            } catch (AliCloudException ex) {
-                throw new PluginException(ex.getMessage());
-            }
-
-            final String foundVServerGroupId = tcpListenerAttributeResponse.getVServerGroupId();
-            if (StringUtils.isNotEmpty(foundVServerGroupId)) {
-                logger.info("Found VServerGroupId: [{}]", foundVServerGroupId);
-                // there is VServerGroup bound in the request listener and port
-                if (StringUtils.isNotEmpty(requestDto.getBackendServers())) {
-                    // add the new backendServer to that particular VServerGroup
-                    logger.info(String.format("Adding backend server to VServerGroup with ID: [%s]", foundVServerGroupId));
-                    final AddBackendServersRequest addBackendServersRequest = CoreAddBackendServerRequestDto.toSdk(requestDto);
-                    addBackendServersRequest.setRegionId(regionId);
-                    AddBackendServersResponse response;
-                    try {
-                        response = this.acsClientStub.request(client, addBackendServersRequest);
-                    } catch (AliCloudException ex) {
-                        throw new PluginException(ex.getMessage());
-                    }
-                    CoreAddBackendServerResponseDto result = CoreAddBackendServerResponseDto.fromSdk(response);
-                    result.setGuid(requestDto.getGuid());
-                    result.setCallbackParameter(requestDto.getCallbackParameter());
-                    resultList.add(result);
-
-                } else {
-                    // only want to retrieve the info of resource
-                    // then retrieve the VServerGroup's all backendServers' into then return
-                    logger.info(String.format("Retrieving VServerGroup ID: [%s]'s all backend servers info...", foundVServerGroupId));
-
-                    DescribeVServerGroupAttributeRequest vServerGroupAttributeRequest = new DescribeVServerGroupAttributeRequest();
-                    vServerGroupAttributeRequest.setRegionId(regionId);
-                    vServerGroupAttributeRequest.setVServerGroupId(foundVServerGroupId);
-                    DescribeVServerGroupAttributeResponse vServerGroupAttributeResponse;
-                    try {
-                        vServerGroupAttributeResponse = this.acsClientStub.request(client, vServerGroupAttributeRequest);
-                    } catch (AliCloudException ex) {
-                        throw new PluginException(ex.getMessage());
-                    }
-                    final List<DescribeVServerGroupAttributeResponse.BackendServer> foundBackendServerList = vServerGroupAttributeResponse.getBackendServers();
-
-                    CoreAddBackendServerResponseDto result = new CoreAddBackendServerResponseDto();
-                    result.setBackendServers(CoreAddBackendServerResponseDto.transferRetrieveBackendServerInfoFromSDK(foundBackendServerList));
-                    result.setRequestId(vServerGroupAttributeResponse.getRequestId());
-                    result.setGuid(requestDto.getGuid());
-                    result.setCallbackParameter(requestDto.getCallbackParameter());
-                    resultList.add(result);
-                }
-
-            } else {
-                logger.info("No VServerGroup bound, need to add new VServerGroup then add the backend server.");
-                // no VServerGroup bound, need to create new VServerGroup and bind a new backend server onto this VServerGroup
-                // create new VServerGroup
-                final String backendServerInfoString = requestDto.getBackendServers();
-                CreateVServerGroupRequest createVServerGroupRequest = new CreateVServerGroupRequest();
-                createVServerGroupRequest.setRegionId(regionId);
-                createVServerGroupRequest.setLoadBalancerId(loadBalancerId);
-                createVServerGroupRequest.setBackendServers(backendServerInfoString);
-
-                CreateVServerGroupResponse createVServerGroupResponse;
-                try {
-                    createVServerGroupResponse = this.acsClientStub.request(client, createVServerGroupRequest);
-                } catch (AliCloudException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
-
-                final String createdVServerGroupId = createVServerGroupResponse.getVServerGroupId();
-
-                logger.info("VServerGroup: [{}] created successfully.", createdVServerGroupId);
-
-                // create new TCP listener, add that VServerGroupId on that listener
-                CreateLoadBalancerTCPListenerRequest createLoadBalancerTCPListenerRequest = new CreateLoadBalancerTCPListenerRequest();
-                createLoadBalancerTCPListenerRequest.setRegionId(regionId);
-                createLoadBalancerTCPListenerRequest.setListenerPort(listenerPort);
-                createLoadBalancerTCPListenerRequest.setLoadBalancerId(loadBalancerId);
-                createLoadBalancerTCPListenerRequest.setVServerGroupId(createdVServerGroupId);
-
-                try {
-                    this.acsClientStub.request(client, createLoadBalancerTCPListenerRequest);
-                } catch (AliCloudException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
-
-                logger.info("The listener bound with ServerGroupId: [{}] created successfully.", createdVServerGroupId);
-
-                CoreAddBackendServerResponseDto result = new CoreAddBackendServerResponseDto();
-                result.setBackendServers(CoreAddBackendServerResponseDto.transferCreatedBackendServerInfoFromSDK(createVServerGroupResponse.getBackendServers()));
-                result.setRequestId(createVServerGroupResponse.getRequestId());
-                result.setGuid(requestDto.getGuid());
-                result.setCallbackParameter(requestDto.getCallbackParameter());
-                resultList.add(result);
-            }
-        }
-        return resultList;
-    }
 
     private static Logger logger = LoggerFactory.getLogger(LoadBalancerService.class);
 
@@ -259,6 +146,120 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             result.setGuid(requestDto.getGuid());
             result.setCallbackParameter(requestDto.getCallbackParameter());
             resultList.add(result);
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreAddBackendServerResponseDto> addBackendServer(List<CoreAddBackendServerRequestDto> coreAddBackendServerRequestDtoList) throws PluginException {
+        List<CoreAddBackendServerResponseDto> resultList = new ArrayList<>();
+        for (CoreAddBackendServerRequestDto requestDto : coreAddBackendServerRequestDtoList) {
+            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+            final String regionId = cloudParamDto.getRegionId();
+            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+            final Integer listenerPort = requestDto.getListenerPort();
+            final String loadBalancerId = requestDto.getLoadBalancerId();
+
+            // check if there is VServerGroupId bound
+            DescribeLoadBalancerTCPListenerAttributeRequest tcpListenerAttributeRequest = new DescribeLoadBalancerTCPListenerAttributeRequest();
+            tcpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
+            tcpListenerAttributeRequest.setListenerPort(listenerPort);
+            tcpListenerAttributeRequest.setRegionId(regionId);
+            DescribeLoadBalancerTCPListenerAttributeResponse tcpListenerAttributeResponse;
+            try {
+                tcpListenerAttributeResponse = this.acsClientStub.request(client, tcpListenerAttributeRequest);
+            } catch (AliCloudException ex) {
+                throw new PluginException(ex.getMessage());
+            }
+
+            final String foundVServerGroupId = tcpListenerAttributeResponse.getVServerGroupId();
+            if (StringUtils.isNotEmpty(foundVServerGroupId)) {
+                logger.info("Found VServerGroupId: [{}]", foundVServerGroupId);
+                // there is VServerGroup bound in the request listener and port
+                if (StringUtils.isNotEmpty(requestDto.getBackendServers())) {
+                    // add the new backendServer to that particular VServerGroup
+                    logger.info(String.format("Adding backend server to VServerGroup with ID: [%s]", foundVServerGroupId));
+                    final AddBackendServersRequest addBackendServersRequest = CoreAddBackendServerRequestDto.toSdk(requestDto);
+                    addBackendServersRequest.setRegionId(regionId);
+                    AddBackendServersResponse response;
+                    try {
+                        response = this.acsClientStub.request(client, addBackendServersRequest);
+                    } catch (AliCloudException ex) {
+                        throw new PluginException(ex.getMessage());
+                    }
+                    CoreAddBackendServerResponseDto result = CoreAddBackendServerResponseDto.fromSdk(response);
+                    result.setGuid(requestDto.getGuid());
+                    result.setCallbackParameter(requestDto.getCallbackParameter());
+                    resultList.add(result);
+
+                } else {
+                    // only want to retrieve the info of resource
+                    // then retrieve the VServerGroup's all backendServers' into then return
+                    logger.info(String.format("Retrieving VServerGroup ID: [%s]'s all backend servers info...", foundVServerGroupId));
+
+                    DescribeVServerGroupAttributeRequest vServerGroupAttributeRequest = new DescribeVServerGroupAttributeRequest();
+                    vServerGroupAttributeRequest.setRegionId(regionId);
+                    vServerGroupAttributeRequest.setVServerGroupId(foundVServerGroupId);
+                    DescribeVServerGroupAttributeResponse vServerGroupAttributeResponse;
+                    try {
+                        vServerGroupAttributeResponse = this.acsClientStub.request(client, vServerGroupAttributeRequest);
+                    } catch (AliCloudException ex) {
+                        throw new PluginException(ex.getMessage());
+                    }
+                    final List<DescribeVServerGroupAttributeResponse.BackendServer> foundBackendServerList = vServerGroupAttributeResponse.getBackendServers();
+
+                    CoreAddBackendServerResponseDto result = new CoreAddBackendServerResponseDto();
+                    result.setBackendServers(CoreAddBackendServerResponseDto.transferRetrieveBackendServerInfoFromSDK(foundBackendServerList));
+                    result.setRequestId(vServerGroupAttributeResponse.getRequestId());
+                    result.setGuid(requestDto.getGuid());
+                    result.setCallbackParameter(requestDto.getCallbackParameter());
+                    resultList.add(result);
+                }
+
+            } else {
+                logger.info("No VServerGroup bound, need to add new VServerGroup then add the backend server.");
+                // no VServerGroup bound, need to create new VServerGroup and bind a new backend server onto this VServerGroup
+                // create new VServerGroup
+                final String backendServerInfoString = requestDto.getBackendServers();
+                CreateVServerGroupRequest createVServerGroupRequest = new CreateVServerGroupRequest();
+                createVServerGroupRequest.setRegionId(regionId);
+                createVServerGroupRequest.setLoadBalancerId(loadBalancerId);
+                createVServerGroupRequest.setBackendServers(backendServerInfoString);
+
+                CreateVServerGroupResponse createVServerGroupResponse;
+                try {
+                    createVServerGroupResponse = this.acsClientStub.request(client, createVServerGroupRequest);
+                } catch (AliCloudException ex) {
+                    throw new PluginException(ex.getMessage());
+                }
+
+                final String createdVServerGroupId = createVServerGroupResponse.getVServerGroupId();
+
+                logger.info("VServerGroup: [{}] created successfully.", createdVServerGroupId);
+
+                // create new TCP listener, add that VServerGroupId on that listener
+                CreateLoadBalancerTCPListenerRequest createLoadBalancerTCPListenerRequest = new CreateLoadBalancerTCPListenerRequest();
+                createLoadBalancerTCPListenerRequest.setRegionId(regionId);
+                createLoadBalancerTCPListenerRequest.setListenerPort(listenerPort);
+                createLoadBalancerTCPListenerRequest.setLoadBalancerId(loadBalancerId);
+                createLoadBalancerTCPListenerRequest.setVServerGroupId(createdVServerGroupId);
+
+                try {
+                    this.acsClientStub.request(client, createLoadBalancerTCPListenerRequest);
+                } catch (AliCloudException ex) {
+                    throw new PluginException(ex.getMessage());
+                }
+
+                logger.info("The listener bound with ServerGroupId: [{}] created successfully.", createdVServerGroupId);
+
+                CoreAddBackendServerResponseDto result = new CoreAddBackendServerResponseDto();
+                result.setBackendServers(CoreAddBackendServerResponseDto.transferCreatedBackendServerInfoFromSDK(createVServerGroupResponse.getBackendServers()));
+                result.setRequestId(createVServerGroupResponse.getRequestId());
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
+            }
         }
         return resultList;
     }
