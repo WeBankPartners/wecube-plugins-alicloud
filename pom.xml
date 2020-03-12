@@ -117,6 +117,12 @@
             <artifactId>aliyun-java-sdk-r-kvstore</artifactId>
             <version>2.1.5</version>
         </dependency>
+        <!-- alicloud rds -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-rds</artifactId>
+            <version>2.4.4</version>
+        </dependency>
     </dependencies>
 
     <build>
