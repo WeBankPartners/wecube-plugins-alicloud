@@ -51,7 +51,7 @@ public class LoadBalancerController {
         return new CoreResponseDto<CoreDeleteLoadBalancerResponseDto>().okayWithData(result);
     }
 
-    @PostMapping(path = "/backend-server/add")
+    @PostMapping(path = "/backend_server/add")
     @ResponseBody
     public CoreResponseDto<?> createListener(@RequestBody CoreRequestDto<CoreAddBackendServerRequestDto> request) {
         List<CoreAddBackendServerResponseDto> result;
@@ -63,7 +63,7 @@ public class LoadBalancerController {
         return new CoreResponseDto<CoreAddBackendServerResponseDto>().okayWithData(result);
     }
 
-    @PostMapping(path = "/backend-server/remove")
+    @PostMapping(path = "/backend_server/remove")
     @ResponseBody
     public CoreResponseDto<?> deleteListener(@RequestBody CoreRequestDto<CoreRemoveBackendServerRequestDto> request) {
         List<CoreRemoveBackendServerResponseDto> result;
