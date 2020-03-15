@@ -1,9 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.securityGroup;
 
-import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupEgressRequest;
 import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author howechen
@@ -14,23 +12,14 @@ public class CoreAuthorizeSecurityGroupRequestDto extends AuthorizeSecurityGroup
     private String guid;
     private String callbackParameter;
 
-    private boolean isEgress;
+    @JsonProperty(value = "isEgress")
+    private boolean isEgress = false;
 
     private String destGroupId;
     private String destGroupOwnerAccount;
     private Long destGroupOwnerId;
 
     public CoreAuthorizeSecurityGroupRequestDto() {
-    }
-
-    public static AuthorizeSecurityGroupRequest toSdk(CoreAuthorizeSecurityGroupRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, AuthorizeSecurityGroupRequest.class);
-    }
-
-    public static AuthorizeSecurityGroupEgressRequest toEgressSdk(CoreAuthorizeSecurityGroupRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, AuthorizeSecurityGroupEgressRequest.class);
     }
 
     public String getIdentityParams() {
