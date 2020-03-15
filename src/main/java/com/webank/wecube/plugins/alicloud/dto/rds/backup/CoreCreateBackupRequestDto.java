@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 
 import com.aliyuncs.rds.model.v20140815.CreateBackupRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author howechen
@@ -10,7 +11,19 @@ public class CoreCreateBackupRequestDto extends CreateBackupRequest {
     private String cloudParams;
     private String guid;
     private String callbackParameter;
-    private String backupJobId;
+    private String backupId;
+
+    @JsonProperty(value = "dBInstanceId")
+    @Override
+    public void setDBInstanceId(String dBInstanceId) {
+        super.setDBInstanceId(dBInstanceId);
+    }
+
+    @JsonProperty(value = "dBName")
+    @Override
+    public void setDBName(String dBName) {
+        super.setDBName(dBName);
+    }
 
     public CoreCreateBackupRequestDto() {
     }
@@ -47,11 +60,11 @@ public class CoreCreateBackupRequestDto extends CreateBackupRequest {
         this.callbackParameter = callbackParameter;
     }
 
-    public String getBackupJobId() {
-        return backupJobId;
+    public String getBackupId() {
+        return backupId;
     }
 
-    public void setBackupJobId(String backupJobId) {
-        this.backupJobId = backupJobId;
+    public void setBackupId(String backupId) {
+        this.backupId = backupId;
     }
 }
