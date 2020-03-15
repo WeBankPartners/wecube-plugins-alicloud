@@ -1,30 +1,22 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
-import com.aliyuncs.slb.model.v20140515.RemoveBackendServersRequest;
-import com.aliyuncs.slb.model.v20140515.RemoveBackendServersResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.aliyuncs.slb.model.v20140515.RemoveVServerGroupBackendServersRequest;
 
 /**
  * @author howechen
  */
-public class CoreRemoveBackendServerRequestDto extends RemoveBackendServersRequest {
+public class CoreRemoveBackendServerRequestDto extends RemoveVServerGroupBackendServersRequest {
     private String identityParams;
     private String cloudParams;
     private String guid;
     private String callbackParameter;
 
+    private Integer listenerPort;
+    private String loadBalancerId;
+    private String listenerProtocol;
+
+
     public CoreRemoveBackendServerRequestDto() {
-    }
-
-    public static RemoveBackendServersRequest toSdk(CoreRemoveBackendServerRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, RemoveBackendServersRequest.class);
-    }
-
-    public static CoreRemoveBackendServerResponseDto fromSdk(RemoveBackendServersResponse response) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(response, CoreRemoveBackendServerResponseDto.class);
     }
 
     public String getIdentityParams() {
@@ -57,5 +49,29 @@ public class CoreRemoveBackendServerRequestDto extends RemoveBackendServersReque
 
     public void setCallbackParameter(String callbackParameter) {
         this.callbackParameter = callbackParameter;
+    }
+
+    public Integer getListenerPort() {
+        return listenerPort;
+    }
+
+    public void setListenerPort(Integer listenerPort) {
+        this.listenerPort = listenerPort;
+    }
+
+    public String getLoadBalancerId() {
+        return loadBalancerId;
+    }
+
+    public void setLoadBalancerId(String loadBalancerId) {
+        this.loadBalancerId = loadBalancerId;
+    }
+
+    public String getListenerProtocol() {
+        return listenerProtocol;
+    }
+
+    public void setListenerProtocol(String listenerProtocol) {
+        this.listenerProtocol = listenerProtocol;
     }
 }

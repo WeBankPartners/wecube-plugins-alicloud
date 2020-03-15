@@ -1,11 +1,11 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
-import com.aliyuncs.slb.model.v20140515.RemoveBackendServersResponse;
+import com.aliyuncs.slb.model.v20140515.RemoveVServerGroupBackendServersResponse;
 
 /**
  * @author howechen
  */
-public class CoreRemoveBackendServerResponseDto extends RemoveBackendServersResponse {
+public class CoreRemoveBackendServerResponseDto extends RemoveVServerGroupBackendServersResponse {
     private String guid;
     private String callbackParameter;
 
