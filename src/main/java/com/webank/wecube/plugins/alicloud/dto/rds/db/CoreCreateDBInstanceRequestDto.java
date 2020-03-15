@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.CreateDBInstanceRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author howechen
@@ -11,6 +12,7 @@ public class CoreCreateDBInstanceRequestDto extends CreateDBInstanceRequest {
     private String guid;
     private String callbackParameter;
 
+    @JsonProperty("dBInstanceId")
     private String dBInstanceId;
 
     public CoreCreateDBInstanceRequestDto() {
@@ -48,11 +50,41 @@ public class CoreCreateDBInstanceRequestDto extends CreateDBInstanceRequest {
         this.callbackParameter = callbackParameter;
     }
 
-    public String getdBInstanceId() {
+    public String getDBInstanceId() {
         return dBInstanceId;
     }
 
-    public void setdBInstanceId(String dBInstanceId) {
+    public void setDBInstanceId(String dBInstanceId) {
         this.dBInstanceId = dBInstanceId;
+    }
+
+    @JsonProperty("dBInstanceClass")
+    @Override
+    public void setDBInstanceClass(String dBInstanceClass) {
+        super.setDBInstanceClass(dBInstanceClass);
+    }
+
+    @JsonProperty("dBInstanceStorage")
+    @Override
+    public void setDBInstanceStorage(Integer dBInstanceStorage) {
+        super.setDBInstanceStorage(dBInstanceStorage);
+    }
+
+    @JsonProperty("dBInstanceDescription")
+    @Override
+    public void setDBInstanceDescription(String dBInstanceDescription) {
+        super.setDBInstanceDescription(dBInstanceDescription);
+    }
+
+    @JsonProperty("dBInstanceStorageType")
+    @Override
+    public void setDBInstanceStorageType(String dBInstanceStorageType) {
+        super.setDBInstanceStorageType(dBInstanceStorageType);
+    }
+
+    @JsonProperty("dBInstanceNetType")
+    @Override
+    public void setDBInstanceNetType(String dBInstanceNetType) {
+        super.setDBInstanceNetType(dBInstanceNetType);
     }
 }

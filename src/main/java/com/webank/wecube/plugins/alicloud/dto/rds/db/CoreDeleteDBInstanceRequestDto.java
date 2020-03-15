@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.DeleteDBInstanceRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author howechen
@@ -44,5 +45,11 @@ public class CoreDeleteDBInstanceRequestDto extends DeleteDBInstanceRequest {
 
     public void setCallbackParameter(String callbackParameter) {
         this.callbackParameter = callbackParameter;
+    }
+
+    @JsonProperty(value = "dBInstanceId")
+    @Override
+    public void setDBInstanceId(String dBInstanceId) {
+        super.setDBInstanceId(dBInstanceId);
     }
 }
