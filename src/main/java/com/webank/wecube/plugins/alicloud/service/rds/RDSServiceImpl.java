@@ -165,17 +165,20 @@ public class RDSServiceImpl implements RDSService {
             final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
             final String regionId = cloudParamDto.getRegionId();
             requestDto.setRegionId(regionId);
+            final String dbInstanceId = requestDto.getDBInstanceId();
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+            final String backupId = requestDto.getBackupId();
 
-            if (StringUtils.isNotEmpty(requestDto.getBackupJobId())) {
-                final String backupJobId = requestDto.getBackupJobId();
-                final DescribeBackupsResponse describeBackupsResponse = this.retrieveBackups(client, regionId, requestDto.getDBInstanceId(), backupJobId);
+            CoreCreateBackupResponseDto result;
+            if (StringUtils.isNotEmpty(backupId)) {
+
+                final DescribeBackupsResponse describeBackupsResponse = this.retrieveBackups(client, regionId, dbInstanceId, backupId);
                 if (StringUtils.isNotEmpty(describeBackupsResponse.getTotalRecordCount())) {
                     final DescribeBackupsResponse.Backup foundBackup = describeBackupsResponse.getItems().get(0);
-                    CoreCreateBackupResponseDto result = PluginSdkBridge.fromSdk(foundBackup, CoreCreateBackupResponseDto.class);
-                    result.setGuid(requestDto.getGuid());
-                    result.setCallbackParameter(requestDto.getCallbackParameter());
-                    resultList.add(result);
+                    result = PluginSdkBridge.fromSdk(foundBackup, CoreCreateBackupResponseDto.class);
+                    result.setRequestId(describeBackupsResponse.getRequestId());
+                } else {
+                    throw new PluginException(String.format("Cannot found backup through backupID: [%s]", backupId));
                 }
 
             } else {
@@ -188,12 +191,14 @@ public class RDSServiceImpl implements RDSService {
                 } catch (AliCloudException ex) {
                     throw new PluginException(ex.getMessage());
                 }
-                CoreCreateBackupResponseDto result = PluginSdkBridge.fromSdk(response, CoreCreateBackupResponseDto.class);
-                result.setGuid(requestDto.getGuid());
-                result.setCallbackParameter(requestDto.getCallbackParameter());
+                final DescribeBackupTasksResponse.BackupJob backupJob = this.retrieveBackupFromJobId(client, dbInstanceId, response.getBackupJobId());
 
-                resultList.add(result);
+                result = PluginSdkBridge.fromSdk(backupJob, CoreCreateBackupResponseDto.class);
+                result.setRequestId(response.getRequestId());
             }
+            result.setGuid(requestDto.getGuid());
+            result.setCallbackParameter(requestDto.getCallbackParameter());
+            resultList.add(result);
         }
         return resultList;
     }
@@ -208,10 +213,16 @@ public class RDSServiceImpl implements RDSService {
             final String regionId = cloudParamDto.getRegionId();
 
             final String dbInstanceId = requestDto.getDBInstanceId();
-            final String backupId = requestDto.getBackupId();
+            String backupId = requestDto.getBackupId();
+            final String backupJobId = requestDto.getBackupJobId();
 
-            if (StringUtils.isAnyEmpty(regionId, dbInstanceId, backupId)) {
-                throw new PluginException("Either the regionId, dbInstanceId or backupId cannot be empty or null.");
+            requestDto.setRegionId(regionId);
+
+            // if backup job exists, get backupId through job ID first
+            if (StringUtils.isNotEmpty(backupJobId) && StringUtils.isEmpty(backupId)) {
+                // retrieve backupId through backupJobId
+                final DescribeBackupTasksResponse.BackupJob backup = this.retrieveBackupFromJobId(client, dbInstanceId, backupJobId);
+                backupId = backup.getBackupId();
             }
 
             DescribeBackupsResponse describeBackupsResponse = this.retrieveBackups(client, regionId, dbInstanceId, backupId);
@@ -221,8 +232,8 @@ public class RDSServiceImpl implements RDSService {
 
             logger.info("Deleting backup...");
 
-            requestDto.setRegionId(regionId);
             final DeleteBackupRequest deleteBackupRequest = PluginSdkBridge.toSdk(requestDto, DeleteBackupRequest.class);
+            deleteBackupRequest.setBackupId(backupId);
             DeleteBackupResponse response;
             try {
                 response = this.acsClientStub.request(client, deleteBackupRequest);
@@ -241,6 +252,31 @@ public class RDSServiceImpl implements RDSService {
             resultList.add(result);
         }
         return resultList;
+    }
+
+    private DescribeBackupTasksResponse.BackupJob retrieveBackupFromJobId(IAcsClient client, String dbInstanceId, String backupJobId) throws PluginException {
+        DescribeBackupTasksRequest retrieveTasksRequest = new DescribeBackupTasksRequest();
+        retrieveTasksRequest.setDBInstanceId(dbInstanceId);
+        retrieveTasksRequest.setBackupJobId(backupJobId);
+        DescribeBackupTasksResponse retrieveTasksRepsonse;
+        try {
+            retrieveTasksRepsonse = this.acsClientStub.request(client, retrieveTasksRequest);
+        } catch (AliCloudException ex) {
+            throw new PluginException(ex.getMessage());
+        }
+        final List<DescribeBackupTasksResponse.BackupJob> foundBackupsList = retrieveTasksRepsonse.getItems();
+        if (foundBackupsList.isEmpty()) {
+            throw new PluginException("Cannot find backup through job ID");
+        }
+
+        DescribeBackupTasksResponse.BackupJob result;
+        if (1 == foundBackupsList.size()) {
+            result = foundBackupsList.get(0);
+        } else {
+            throw new PluginException(String.format("Error! Found multiple backups from one Job ID: [%s]", backupJobId));
+        }
+
+        return result;
     }
 
     private DescribeDBInstancesResponse retrieveDBInstance(IAcsClient client, String regionId, String dbInstanceId) throws PluginException {
