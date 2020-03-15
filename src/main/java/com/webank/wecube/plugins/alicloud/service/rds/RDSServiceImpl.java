@@ -52,8 +52,8 @@ public class RDSServiceImpl implements RDSService {
             requestDto.setRegionId(regionId);
             final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-            if (StringUtils.isNotEmpty(requestDto.getdBInstanceId())) {
-                final String instanceId = requestDto.getdBInstanceId();
+            if (StringUtils.isNotEmpty(requestDto.getDBInstanceId())) {
+                final String instanceId = requestDto.getDBInstanceId();
                 final DescribeDBInstancesResponse retrieveDBInstance = this.retrieveDBInstance(client, regionId, instanceId);
                 if (1 == retrieveDBInstance.getTotalRecordCount()) {
                     final DescribeDBInstancesResponse.DBInstance dbInstance = retrieveDBInstance.getItems().get(0);
