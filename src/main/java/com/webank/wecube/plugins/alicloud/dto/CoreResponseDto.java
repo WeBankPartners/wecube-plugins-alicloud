@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -62,6 +63,21 @@ public class CoreResponseDto<E> {
         return this;
     }
 
+    public CoreResponseDto<E> withErrorCheck(List<E> data) {
+        for (E singleData : data) {
+            String errorCode = null;
+            try {
+                errorCode = String.valueOf(singleData.getClass().getMethod("getErrorCode").invoke(singleData));
+            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            if (STATUS_ERROR.equals(errorCode)) {
+                return error("Unsuccess").withData(data);
+            }
+        }
+        return okay().withData(data);
+    }
+
     public CoreResponseDto<E> okayWithData(List<E> data) {
         return okay().withData(data);
     }
@@ -84,4 +100,6 @@ public class CoreResponseDto<E> {
             this.outputs = outputs;
         }
     }
+
+
 }
