@@ -4,6 +4,7 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.rds.model.v20140815.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupResponseDto;
@@ -204,7 +205,7 @@ public class RDSServiceImpl implements RDSService {
     }
 
     @Override
-    public List<CoreDeleteBackupResponseDto> deleteBackup(List<CoreDeleteBackupRequestDto> requestDtoList) throws PluginException {
+    public List<CoreDeleteBackupResponseDto> deleteBackup(List<CoreDeleteBackupRequestDto> requestDtoList) {
         List<CoreDeleteBackupResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteBackupRequestDto requestDto : requestDtoList) {
             final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
@@ -218,38 +219,44 @@ public class RDSServiceImpl implements RDSService {
 
             requestDto.setRegionId(regionId);
 
-            // if backup job exists, get backupId through job ID first
-            if (StringUtils.isNotEmpty(backupJobId) && StringUtils.isEmpty(backupId)) {
-                // retrieve backupId through backupJobId
-                final DescribeBackupTasksResponse.BackupJob backup = this.retrieveBackupFromJobId(client, dbInstanceId, backupJobId);
-                backupId = backup.getBackupId();
-            }
-
-            DescribeBackupsResponse describeBackupsResponse = this.retrieveBackups(client, regionId, dbInstanceId, backupId);
-            if (StringUtils.isEmpty(describeBackupsResponse.getTotalRecordCount())) {
-                throw new PluginException("The given db instance has already been released...");
-            }
-
-            logger.info("Deleting backup...");
-
-            final DeleteBackupRequest deleteBackupRequest = PluginSdkBridge.toSdk(requestDto, DeleteBackupRequest.class);
-            deleteBackupRequest.setBackupId(backupId);
-            DeleteBackupResponse response;
+            CoreDeleteBackupResponseDto result = new CoreDeleteBackupResponseDto();
             try {
-                response = this.acsClientStub.request(client, deleteBackupRequest);
-            } catch (AliCloudException ex) {
-                throw new PluginException(ex.getMessage());
+                // if backup job exists, get backupId through job ID first
+                if (StringUtils.isNotEmpty(backupJobId) && StringUtils.isEmpty(backupId)) {
+                    // retrieve backupId through backupJobId
+                    final DescribeBackupTasksResponse.BackupJob backup = this.retrieveBackupFromJobId(client, dbInstanceId, backupJobId);
+                    backupId = backup.getBackupId();
+                }
+
+                DescribeBackupsResponse describeBackupsResponse = this.retrieveBackups(client, regionId, dbInstanceId, backupId);
+
+                if (StringUtils.isEmpty(describeBackupsResponse.getTotalRecordCount())) {
+                    throw new PluginException("The given db instance has already been released...");
+                }
+
+                logger.info("Deleting backup...");
+
+                final DeleteBackupRequest deleteBackupRequest = PluginSdkBridge.toSdk(requestDto, DeleteBackupRequest.class);
+                deleteBackupRequest.setBackupId(backupId);
+
+                DeleteBackupResponse response = this.acsClientStub.request(client, deleteBackupRequest);
+
+                describeBackupsResponse = this.retrieveBackups(client, regionId, dbInstanceId, backupId);
+
+                if (StringUtils.isNotEmpty(describeBackupsResponse.getTotalRecordCount())) {
+                    throw new PluginException("The given db instance cannot be released");
+                }
+
+                result = PluginSdkBridge.fromSdk(response, CoreDeleteBackupResponseDto.class);
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
             }
 
-            describeBackupsResponse = this.retrieveBackups(client, regionId, dbInstanceId, backupId);
-            if (StringUtils.isNotEmpty(describeBackupsResponse.getTotalRecordCount())) {
-                throw new PluginException("The given db instance cannot be released");
-            }
-
-            CoreDeleteBackupResponseDto result = PluginSdkBridge.fromSdk(response, CoreDeleteBackupResponseDto.class);
-            result.setGuid(requestDto.getGuid());
-            result.setCallbackParameter(requestDto.getCallbackParameter());
-            resultList.add(result);
         }
         return resultList;
     }
