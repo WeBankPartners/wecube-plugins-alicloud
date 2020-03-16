@@ -16,11 +16,13 @@ public interface PluginSdkBridge {
     /**
      * Transfer from core object to sdk object
      *
-     * @param requestDto core request dto
-     * @param clazz      target object class
-     * @param <T>        target SDK object
-     * @param <K>        request core object
+     * @param requestDto   core request dto
+     * @param clazz        target object class
+     * @param <T>          target SDK object
+     * @param <K>          request core object
+     * @param transLineage if do transLineage transition
      * @return transferred result
+     * @throws PluginException plugin exception
      */
     static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz, boolean transLineage) throws PluginException {
         final T result;
@@ -46,8 +48,9 @@ public interface PluginSdkBridge {
      * @param <T>        target SDK object
      * @param <K>        request core object
      * @return transferred result
+     * @throws PluginException plugin exception
      */
-    static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz) throws PluginException {
+    static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.convertValue(requestDto, clazz);
     }
@@ -60,8 +63,9 @@ public interface PluginSdkBridge {
      * @param <T>        target SDK object
      * @param <K>        request core object
      * @return transferred result
+     * @throws PluginException plugin exception
      */
-    static <T extends AcsRequest<?>, K> T toSdkStrict(K requestDto, Class<T> clazz) throws PluginException {
+    static <T extends AcsRequest<?>, K> T toSdkStrict(K requestDto, Class<T> clazz) {
         ObjectMapper mapper = new ObjectMapper();
         final T result = mapper.convertValue(requestDto, clazz);
         try {
