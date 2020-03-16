@@ -84,13 +84,9 @@ public class RDSController {
 
     @PostMapping(path = "/backup/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteBackup(@RequestBody CoreRequestDto<CoreDeleteBackupRequestDto> request) {
+    public CoreResponseDto<CoreDeleteBackupResponseDto> deleteBackup(@RequestBody CoreRequestDto<CoreDeleteBackupRequestDto> request) {
         List<CoreDeleteBackupResponseDto> result;
-        try {
-            result = this.rdsServcie.deleteBackup(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
-        }
-        return new CoreResponseDto<CoreDeleteBackupResponseDto>().okayWithData(result);
+        result = this.rdsServcie.deleteBackup(request.getInputs());
+        return new CoreResponseDto<CoreDeleteBackupResponseDto>().withErrorCheck(result);
     }
 }
