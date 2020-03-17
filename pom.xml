@@ -123,6 +123,12 @@
             <artifactId>aliyun-java-sdk-rds</artifactId>
             <version>2.4.4</version>
         </dependency>
+        <!-- alicloud cbn -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-cbn</artifactId>
+            <version>1.0.5</version>
+        </dependency>
     </dependencies>
 
     <build>
