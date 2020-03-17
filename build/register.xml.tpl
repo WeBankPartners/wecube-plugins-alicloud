@@ -32,20 +32,15 @@
         <plugin name="vpc" targetPackage="wecmdb" targetEntity="network_zone">
             <interface action="create" path="/qcloud/v1/vpc/create">
                 <inputParameters>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.id" required="Y">guid</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.data_center>wecmdb:data_center.NONE" required="N">provider_params</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.key_name" required="Y">name</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.network_segment>wecmdb:network_segment.code" required="Y">cidr_block</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.vpc_asset_code" required="Y">id</parameter>
-                    <parameter datatype="string" mappingType="system_variable" mappingSystemVariableName="QCLOUD_API_SECRET" required="Y">api_secret</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.data_center>wecmdb:data_center.location" required="Y">location</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identity_params</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloud_params</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidr</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">id</parameter>
                 </inputParameters>
                 <outputParameters>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.id">guid</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.vpc_asset_code">id</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="wecmdb:network_zone.route_table_asset_code">route_table_id</parameter>
-                    <parameter datatype="string" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">id</parameter>
                 </outputParameters>
             </interface>
         </plugin>
