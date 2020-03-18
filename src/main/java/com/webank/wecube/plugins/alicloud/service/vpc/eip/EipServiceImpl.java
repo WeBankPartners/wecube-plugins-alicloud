@@ -126,6 +126,19 @@ public class EipServiceImpl implements EipService {
     }
 
     @Override
+    public void releaseEipAddress(IAcsClient client, String regionId, List<String> eipAllocationId) throws PluginException, AliCloudException {
+        for (String allocationId : eipAllocationId) {
+
+            logger.info("Releasing EIP address...");
+
+            ReleaseEipAddressRequest request = new ReleaseEipAddressRequest();
+            request.setRegionId(regionId);
+            request.setAllocationId(allocationId);
+            this.acsClientStub.request(client, request);
+        }
+    }
+
+    @Override
     public List<CoreAssociateEipResponseDto> associateEipAddress(List<CoreAssociateEipRequestDto> requestDtoList) {
         List<CoreAssociateEipResponseDto> resultList = new ArrayList<>();
         for (CoreAssociateEipRequestDto requestDto : requestDtoList) {
