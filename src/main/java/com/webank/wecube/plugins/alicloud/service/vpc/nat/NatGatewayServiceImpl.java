@@ -10,6 +10,7 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayReques
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayResponseDto;
+import com.webank.wecube.plugins.alicloud.service.vpc.eip.EipService;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -33,11 +35,13 @@ public class NatGatewayServiceImpl implements NatGatewayService {
 
     private AcsClientStub acsClientStub;
     private DtoValidator dtoValidator;
+    private EipService eipService;
 
     @Autowired
-    public NatGatewayServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
+    public NatGatewayServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, EipService eipService) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
+        this.eipService = eipService;
     }
 
     @Override
@@ -108,6 +112,13 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                     throw new PluginException(msg);
                 }
 
+                // need to release the eip first
+
+                logger.info("Releasing NAT gateway bound EIp first...");
+
+                final List<DescribeNatGatewaysResponse.NatGateway.IpList> eipList = foundNatGateway.getIpLists();
+                final List<String> allocationIdList = eipList.stream().map(DescribeNatGatewaysResponse.NatGateway.IpList::getAllocationId).collect(Collectors.toList());
+                this.eipService.releaseEipAddress(client, regionId, allocationIdList);
 
                 logger.info("Deleting NAT gateway...");
 
