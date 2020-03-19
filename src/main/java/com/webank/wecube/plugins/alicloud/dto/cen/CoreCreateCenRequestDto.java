@@ -1,20 +1,35 @@
 package com.webank.wecube.plugins.alicloud.dto.cen;
 
 import com.aliyuncs.cbn.model.v20170912.CreateCenRequest;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreCreateCenRequestDto extends CreateCenRequest {
+    @NotEmpty(message = "identityParams cannot be null or empty")
     private String identityParams;
+    @NotEmpty(message = "cloudParams cannot be null or empty")
     private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+    private String guid = StringUtils.EMPTY;
+    private String callbackParameter = StringUtils.EMPTY;
 
     private String cenId;
 
-    private String resourceOwnerId;
-    private String ownerId;
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreCreateCenRequestDto() {
     }
@@ -57,13 +72,5 @@ public class CoreCreateCenRequestDto extends CreateCenRequest {
 
     public void setCenId(String cenId) {
         this.cenId = cenId;
-    }
-
-    public void setResourceOwnerId(String resourceOwnerId) {
-        super.setResourceOwnerId(Long.valueOf(resourceOwnerId));
-    }
-
-    public void setOwnerId(String ownerId) {
-        super.setOwnerId(Long.valueOf(ownerId));
     }
 }

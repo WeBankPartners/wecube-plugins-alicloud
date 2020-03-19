@@ -1,15 +1,40 @@
 package com.webank.wecube.plugins.alicloud.dto.cen;
 
 import com.aliyuncs.cbn.model.v20170912.AttachCenChildInstanceRequest;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreAttachCenChildRequestDto extends AttachCenChildInstanceRequest {
+    @NotEmpty(message = "identityParams cannot be null or empty")
     private String identityParams;
+    @NotEmpty(message = "cloudParams cannot be null or empty")
     private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+    private String guid = StringUtils.EMPTY;
+    private String callbackParameter = StringUtils.EMPTY;
+
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setChildInstanceOwnerId(Long childInstanceOwnerId) {
+        super.setChildInstanceOwnerId(childInstanceOwnerId);
+    }
 
     public CoreAttachCenChildRequestDto() {
     }

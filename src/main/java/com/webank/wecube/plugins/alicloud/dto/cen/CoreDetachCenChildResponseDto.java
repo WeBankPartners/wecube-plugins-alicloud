@@ -1,13 +1,15 @@
 package com.webank.wecube.plugins.alicloud.dto.cen;
 
 import com.aliyuncs.cbn.model.v20170912.DetachCenChildInstanceResponse;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author howechen
  */
 public class CoreDetachCenChildResponseDto extends DetachCenChildInstanceResponse {
-    private String errorCode;
-    private String errorMessage;
+    private String errorCode = CoreResponseDto.STATUS_OK;
+    private String errorMessage = StringUtils.EMPTY;
     private String guid;
     private String callbackParameter;
 
