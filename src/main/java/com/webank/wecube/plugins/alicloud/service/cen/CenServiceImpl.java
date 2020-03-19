@@ -9,6 +9,7 @@ import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.cen.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,10 +30,12 @@ public class CenServiceImpl implements CenService {
     private static final Logger logger = LoggerFactory.getLogger(CenService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator validator;
 
     @Autowired
-    public CenServiceImpl(AcsClientStub acsClientStub) {
+    public CenServiceImpl(AcsClientStub acsClientStub, DtoValidator validator) {
         this.acsClientStub = acsClientStub;
+        this.validator = validator;
     }
 
     @Override
@@ -40,13 +43,15 @@ public class CenServiceImpl implements CenService {
         List<CoreCreateCenResponseDto> resultList = new ArrayList<>();
         for (CoreCreateCenRequestDto requestDto : requestDtoList) {
             CoreCreateCenResponseDto result = new CoreCreateCenResponseDto();
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
-
             try {
+
+                validator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                requestDto.setRegionId(regionId);
 
                 final String cenId = requestDto.getCenId();
                 if (StringUtils.isNotEmpty(cenId)) {
@@ -81,13 +86,15 @@ public class CenServiceImpl implements CenService {
         for (CoreDeleteCenRequestDto requestDto : requestDtoList) {
             CoreDeleteCenResponseDto result = new CoreDeleteCenResponseDto();
 
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
-
             try {
+
+                validator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                requestDto.setRegionId(regionId);
 
                 final String cenId = requestDto.getCenId();
                 if (StringUtils.isNotEmpty(cenId)) {
@@ -121,13 +128,16 @@ public class CenServiceImpl implements CenService {
         List<CoreAttachCenChildResponseDto> resultList = new ArrayList<>();
         for (CoreAttachCenChildRequestDto requestDto : requestDtoList) {
             CoreAttachCenChildResponseDto result = new CoreAttachCenChildResponseDto();
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
 
             try {
+
+                validator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                requestDto.setRegionId(regionId);
 
                 logger.info("Attaching Cen child instance...");
 
@@ -152,15 +162,18 @@ public class CenServiceImpl implements CenService {
         List<CoreDetachCenChildResponseDto> resultList = new ArrayList<>();
         for (CoreDetachCenChildRequestDto requestDto : requestDtoList) {
             CoreDetachCenChildResponseDto result = new CoreDetachCenChildResponseDto();
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
 
             try {
 
-                logger.info("Attaching Cen child instance...");
+                validator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                requestDto.setRegionId(regionId);
+
+                logger.info("Detaching Cen child instance...");
 
                 DetachCenChildInstanceRequest request = PluginSdkBridge.toSdk(requestDto, DetachCenChildInstanceRequest.class);
                 DetachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
