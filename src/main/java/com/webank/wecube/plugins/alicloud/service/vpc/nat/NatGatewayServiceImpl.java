@@ -11,6 +11,7 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayRespon
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayResponseDto;
 import com.webank.wecube.plugins.alicloud.service.vpc.eip.EipService;
+import com.webank.wecube.plugins.alicloud.service.vpc.eip.EipServiceImpl;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
@@ -23,7 +24,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.webank.wecube.plugins.alicloud.support.PluginConstant.COUNT_DOWN_TIME;
 
 /**
  * @author howechen
@@ -102,23 +106,38 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 final String regionId = cloudParamDto.getRegionId();
                 requestDto.setRegionId(regionId);
 
-                DescribeNatGatewaysRequest retrieveNatGatewayRequest = new DescribeNatGatewaysRequest();
-                retrieveNatGatewayRequest.setNatGatewayId(requestDto.getNatGatewayId());
-                retrieveNatGatewayRequest.setRegionId(regionId);
-                final DescribeNatGatewaysResponse.NatGateway foundNatGateway = this.retrieveNatGateway(client, retrieveNatGatewayRequest);
+                final DescribeNatGatewaysResponse.NatGateway foundNatGateway = this.retrieveNatGateway(client, requestDto.getNatGatewayId(), regionId);
                 if (null == foundNatGateway) {
                     String msg = String.format("Cannot find Nat gateway info by ID: [%s]", requestDto.getNatGatewayId());
                     logger.error(msg);
                     throw new PluginException(msg);
                 }
 
-                // need to release the eip first
-
-                logger.info("Releasing NAT gateway bound EIp first...");
-
+                // need to un-associate then release the eip first
                 final List<DescribeNatGatewaysResponse.NatGateway.IpList> eipList = foundNatGateway.getIpLists();
-                final List<String> allocationIdList = eipList.stream().map(DescribeNatGatewaysResponse.NatGateway.IpList::getAllocationId).collect(Collectors.toList());
-                this.eipService.releaseEipAddress(client, regionId, allocationIdList);
+                final String natGatewayId = foundNatGateway.getNatGatewayId();
+                if (!eipList.isEmpty()) {
+                    final List<String> allocationIdList = eipList.stream().map(DescribeNatGatewaysResponse.NatGateway.IpList::getAllocationId).collect(Collectors.toList());
+
+                    logger.info("Un-associating NAT gateway with bound EIp...");
+                    this.eipService.unAssociateEipAddress(client, regionId, allocationIdList, natGatewayId, "Nat");
+//
+//                    logger.info("Releasing EIp");
+//                    this.eipService.releaseEipAddress(client, regionId, allocationIdList);
+                }
+
+                // TODO: need to optimize the timer
+                try {
+                    for (int i = 0; i < COUNT_DOWN_TIME; i++) {
+                        boolean ifAllEipUnAssociated = this.eipService.ifEipIsAvailable(client, regionId, EipServiceImpl.AssociatedInstanceType.Nat.toString(), natGatewayId);
+                        if (ifAllEipUnAssociated) {
+                            break;
+                        }
+                        TimeUnit.SECONDS.sleep(1);
+                    }
+                } catch (InterruptedException ex) {
+                    throw new PluginException(ex.getMessage());
+                }
 
                 logger.info("Deleting NAT gateway...");
 
@@ -137,6 +156,18 @@ public class NatGatewayServiceImpl implements NatGatewayService {
 
         }
         return resultList;
+    }
+
+    private DescribeNatGatewaysResponse.NatGateway retrieveNatGateway(IAcsClient client, String natGatewayId, String regionId) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(natGatewayId, regionId)) {
+            throw new PluginException("Either natGatewayId or regionId cannot be null or empty");
+        }
+
+        DescribeNatGatewaysRequest request = new DescribeNatGatewaysRequest();
+        request.setNatGatewayId(natGatewayId);
+        request.setRegionId(regionId);
+
+        return this.retrieveNatGateway(client, request);
     }
 
     private DescribeNatGatewaysResponse.NatGateway retrieveNatGateway(IAcsClient client, DescribeNatGatewaysRequest request) throws AliCloudException, PluginException {
