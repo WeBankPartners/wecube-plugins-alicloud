@@ -11,6 +11,7 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ import java.util.List;
  */
 @Service
 public class EipServiceImpl implements EipService {
+
+    public enum AssociatedInstanceType {EcsInstance, SlbInstance, Nat, HaVip, NetworkInterface}
 
     private static final Logger logger = LoggerFactory.getLogger(EipService.class);
 
@@ -139,6 +142,21 @@ public class EipServiceImpl implements EipService {
     }
 
     @Override
+    public void unAssociateEipAddress(IAcsClient client, String regionId, List<String> eipAllocationId, String instanceId, String instanceType) throws PluginException, AliCloudException {
+        for (String allocationId : eipAllocationId) {
+
+            logger.info("Un-associating EIP address with the instance...");
+
+            UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
+            request.setRegionId(regionId);
+            request.setAllocationId(allocationId);
+            request.setInstanceId(instanceId);
+            request.setInstanceType(instanceType);
+            this.acsClientStub.request(client, request);
+        }
+    }
+
+    @Override
     public List<CoreAssociateEipResponseDto> associateEipAddress(List<CoreAssociateEipRequestDto> requestDtoList) {
         List<CoreAssociateEipResponseDto> resultList = new ArrayList<>();
         for (CoreAssociateEipRequestDto requestDto : requestDtoList) {
@@ -201,6 +219,29 @@ public class EipServiceImpl implements EipService {
 
         }
         return resultList;
+    }
+
+    @Override
+    public boolean ifEipIsAvailable(IAcsClient client, String regionId, String associatedInstanceType, String associatedInstanceId) throws PluginException, AliCloudException {
+
+        if (!EnumUtils.isValidEnumIgnoreCase(AssociatedInstanceType.class, associatedInstanceType)) {
+            throw new PluginException("Invalid associatedInstanceType.");
+        }
+
+        if (StringUtils.isAnyEmpty(regionId, associatedInstanceId)) {
+            throw new PluginException("Either regionId or associatedInstanceId cannot be null or empty.");
+        }
+
+        logger.info("Retrieving if the given resource have no Eip bound.");
+
+        DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
+        request.setRegionId(regionId);
+        request.setAssociatedInstanceType(associatedInstanceType);
+        request.setAssociatedInstanceId(associatedInstanceId);
+
+        DescribeEipAddressesResponse response;
+        response = this.acsClientStub.request(client, request);
+        return response.getTotalCount().equals(0);
     }
 
     private DescribeEipAddressesResponse.EipAddress retrieveEipAddress(IAcsClient client, DescribeEipAddressesRequest request) throws AliCloudException, PluginException {
