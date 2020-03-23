@@ -4,6 +4,8 @@ import com.aliyuncs.ecs.model.v20140526.CreateInstanceResponse;
 import com.aliyuncs.ecs.model.v20140526.DescribeInstancesResponse;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 /**
  * @author howechen
@@ -11,6 +13,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class CoreCreateVMResponseDto extends CreateInstanceResponse {
     private String guid;
     private String callbackParameter;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Override
+    public void setTradePrice(Float tradePrice) {
+        super.setTradePrice(tradePrice);
+    }
 
     public CoreCreateVMResponseDto() {
     }

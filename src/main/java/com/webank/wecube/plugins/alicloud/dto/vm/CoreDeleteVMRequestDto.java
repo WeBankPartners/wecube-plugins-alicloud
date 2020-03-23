@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vm;
 import com.aliyuncs.ecs.model.v20140526.DeleteInstanceRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -12,6 +13,30 @@ public class CoreDeleteVMRequestDto extends DeleteInstanceRequest {
     private String cloudParams;
     private String guid;
     private String callbackParameter;
+
+    @JsonDeserialize(as = Boolean.class)
+    @Override
+    public void setTerminateSubscription(Boolean terminateSubscription) {
+        super.setTerminateSubscription(terminateSubscription);
+    }
+
+    @JsonDeserialize(as = Boolean.class)
+    @Override
+    public void setForce(Boolean force) {
+        super.setForce(force);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreDeleteVMRequestDto(String instanceId, String identityParams, String cloudParams) {
         this.identityParams = identityParams;

@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vm;
 import com.aliyuncs.ecs.model.v20140526.ModifyInstanceAttributeRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -13,6 +14,30 @@ public class CoreBindSecurityGroupRequestDto extends ModifyInstanceAttributeRequ
     private String guid;
     private String callbackParameter;
     private String securityGroupId;
+
+    @JsonDeserialize(as = Boolean.class)
+    @Override
+    public void setRecyclable(Boolean recyclable) {
+        super.setRecyclable(recyclable);
+    }
+
+    @JsonDeserialize(as = Boolean.class)
+    @Override
+    public void setDeletionProtection(Boolean deletionProtection) {
+        super.setDeletionProtection(deletionProtection);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreBindSecurityGroupRequestDto() {
     }
