@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.securityGroup;
 import com.aliyuncs.ecs.model.v20140526.DeleteSecurityGroupRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -10,6 +11,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class CoreDeleteSecurityGroupRequestDto extends DeleteSecurityGroupRequest {
     private String identityParams;
     private String cloudParams;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreDeleteSecurityGroupRequestDto() {
     }

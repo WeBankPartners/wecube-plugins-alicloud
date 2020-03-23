@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.dto.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.RevokeSecurityGroupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -13,11 +14,30 @@ public class CoreRevokeSecurityGroupRequestDto extends RevokeSecurityGroupReques
     private String callbackParameter;
 
     @JsonProperty(value = "isEgress")
+    @JsonDeserialize(as = Boolean.class)
     private boolean isEgress;
 
     private String destGroupId;
     private String destGroupOwnerAccount;
     private Long destGroupOwnerId;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setSourceGroupOwnerId(Long sourceGroupOwnerId) {
+        super.setSourceGroupOwnerId(sourceGroupOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreRevokeSecurityGroupRequestDto() {
     }
