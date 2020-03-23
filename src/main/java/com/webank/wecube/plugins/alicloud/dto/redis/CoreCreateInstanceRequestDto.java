@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.CreateInstanceRequest;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -12,6 +13,24 @@ public class CoreCreateInstanceRequestDto extends CreateInstanceRequest {
     private String callbackParameter;
 
     private String instanceId;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setCapacity(Long capacity) {
+        super.setCapacity(capacity);
+    }
 
     public CoreCreateInstanceRequestDto() {
     }

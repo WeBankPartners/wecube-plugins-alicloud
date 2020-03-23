@@ -1,16 +1,28 @@
 package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.DeleteInstanceRequest;
-import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
  */
-public class CoreDeleteInstanceRequestDto extends DeleteInstanceRequest implements PluginSdkBridge {
+public class CoreDeleteInstanceRequestDto extends DeleteInstanceRequest {
     private String identityParams;
     private String cloudParams;
     private String guid;
     private String callbackParameter;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreDeleteInstanceRequestDto() {
     }
