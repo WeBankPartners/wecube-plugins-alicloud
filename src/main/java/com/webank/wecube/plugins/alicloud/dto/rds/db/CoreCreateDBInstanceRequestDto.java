@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.CreateDBInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -12,8 +13,15 @@ public class CoreCreateDBInstanceRequestDto extends CreateDBInstanceRequest {
     private String guid;
     private String callbackParameter;
 
+
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
 
     public CoreCreateDBInstanceRequestDto() {
     }

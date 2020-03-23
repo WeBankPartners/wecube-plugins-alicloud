@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.dto.rds.securityIP;
 
 import com.aliyuncs.rds.model.v20140815.ModifySecurityIpsRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -11,6 +12,12 @@ public class CoreModifySecurityIPsRequestDto extends ModifySecurityIpsRequest {
     private String cloudParams;
     private String guid;
     private String callbackParameter;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
 
     @JsonProperty(value = "dBInstanceId")
     @Override

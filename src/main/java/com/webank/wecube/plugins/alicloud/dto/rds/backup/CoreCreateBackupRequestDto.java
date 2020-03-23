@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 
 import com.aliyuncs.rds.model.v20140815.CreateBackupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -23,6 +24,12 @@ public class CoreCreateBackupRequestDto extends CreateBackupRequest {
     @Override
     public void setDBName(String dBName) {
         super.setDBName(dBName);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
     }
 
     public CoreCreateBackupRequestDto() {
