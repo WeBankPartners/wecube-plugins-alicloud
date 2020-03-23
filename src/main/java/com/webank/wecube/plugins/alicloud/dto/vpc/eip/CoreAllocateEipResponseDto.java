@@ -1,56 +1,58 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 
-import com.aliyuncs.vpc.model.v20160428.AllocateEipAddressResponse;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 
 /**
  * @author howechen
  */
-public class CoreAllocateEipResponseDto extends AllocateEipAddressResponse {
-    private String errorCode;
-    private String errorMessage;
-    private String guid;
-    private String callbackParameter;
+public class CoreAllocateEipResponseDto extends CoreResponseOutputDto<CoreAllocateEipResponseDto> {
 
-    @JsonSerialize(using = ToStringSerializer.class)
-    @Override
-    public void setOrderId(Long orderId) {
-        super.setOrderId(orderId);
-    }
+    private String requestId;
+    private String allocationId;
+    private String eipAddress;
+    private String orderId;
+    private String resourceGroupId;
 
     public CoreAllocateEipResponseDto() {
     }
 
-    public String getErrorCode() {
-        return errorCode;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getAllocationId() {
+        return allocationId;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setAllocationId(String allocationId) {
+        this.allocationId = allocationId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getEipAddress() {
+        return eipAddress;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setEipAddress(String eipAddress) {
+        this.eipAddress = eipAddress;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getOrderId() {
+        return orderId;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    public String getResourceGroupId() {
+        return resourceGroupId;
+    }
+
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
     }
 }

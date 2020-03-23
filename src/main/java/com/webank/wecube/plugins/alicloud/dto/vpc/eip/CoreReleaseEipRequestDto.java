@@ -1,66 +1,57 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 
-import com.aliyuncs.vpc.model.v20160428.ReleaseEipAddressRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.constraints.NotEmpty;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 
 /**
  * @author howechen
  */
-public class CoreReleaseEipRequestDto extends ReleaseEipAddressRequest {
-    @NotEmpty(message = "identityParams cannot be null or empty")
-    private String identityParams;
-    @NotEmpty(message = "cloudParams cannot be null or empty")
-    private String cloudParams;
-    private String guid = StringUtils.EMPTY;
-    private String callbackParameter = StringUtils.EMPTY;
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+public class CoreReleaseEipRequestDto extends CoreRequestInputDto<CoreReleaseEipRequestDto> {
+    private String resourceOwnerId;
+    private String allocationId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
 
     public CoreReleaseEipRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getAllocationId() {
+        return allocationId;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setAllocationId(String allocationId) {
+        this.allocationId = allocationId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getOwnerAccount() {
+        return ownerAccount;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 }

@@ -1,87 +1,30 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 
-import com.aliyuncs.vpc.model.v20160428.AllocateEipAddressRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.constraints.NotEmpty;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 
 /**
  * @author howechen
  */
-public class CoreAllocateEipRequestDto extends AllocateEipAddressRequest {
-    @NotEmpty(message = "identityParams cannot be null or empty")
-    private String identityParams;
-    @NotEmpty(message = "cloudParams cannot be null or empty")
-    private String cloudParams;
-    private String guid = StringUtils.EMPTY;
-    private String callbackParameter = StringUtils.EMPTY;
-
+public class CoreAllocateEipRequestDto extends CoreRequestInputDto<CoreAllocateEipRequestDto> {
     private String allocationId;
 
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setAutoPay(Boolean autoPay) {
-        super.setAutoPay(autoPay);
-    }
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setIgnoreSSLCerts(boolean ignoreSSLCerts) {
-        super.setIgnoreSSLCerts(ignoreSSLCerts);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setActivityId(Long activityId) {
-        super.setActivityId(activityId);
-    }
+    private String resourceOwnerId;
+    private String clientToken;
+    private String iSP;
+    private String resourceGroupId;
+    private String netmode;
+    private String instanceChargeType;
+    private String period;
+    private String autoPay;
+    private String resourceOwnerAccount;
+    private String bandwidth;
+    private String ownerAccount;
+    private String ownerId;
+    private String activityId;
+    private String internetChargeType;
+    private String pricingCycle;
 
     public CoreAllocateEipRequestDto() {
-    }
-
-    public String getIdentityParams() {
-        return identityParams;
-    }
-
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
-    }
-
-    public String getCloudParams() {
-        return cloudParams;
-    }
-
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
     }
 
     public String getAllocationId() {
@@ -90,5 +33,125 @@ public class CoreAllocateEipRequestDto extends AllocateEipAddressRequest {
 
     public void setAllocationId(String allocationId) {
         this.allocationId = allocationId;
+    }
+
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
+    }
+
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
+    }
+
+    public String getClientToken() {
+        return clientToken;
+    }
+
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public String getiSP() {
+        return iSP;
+    }
+
+    public void setiSP(String iSP) {
+        this.iSP = iSP;
+    }
+
+    public String getResourceGroupId() {
+        return resourceGroupId;
+    }
+
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
+    }
+
+    public String getNetmode() {
+        return netmode;
+    }
+
+    public void setNetmode(String netmode) {
+        this.netmode = netmode;
+    }
+
+    public String getInstanceChargeType() {
+        return instanceChargeType;
+    }
+
+    public void setInstanceChargeType(String instanceChargeType) {
+        this.instanceChargeType = instanceChargeType;
+    }
+
+    public String getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(String period) {
+        this.period = period;
+    }
+
+    public String getAutoPay() {
+        return autoPay;
+    }
+
+    public void setAutoPay(String autoPay) {
+        this.autoPay = autoPay;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getBandwidth() {
+        return bandwidth;
+    }
+
+    public void setBandwidth(String bandwidth) {
+        this.bandwidth = bandwidth;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
+    }
+
+    public String getInternetChargeType() {
+        return internetChargeType;
+    }
+
+    public void setInternetChargeType(String internetChargeType) {
+        this.internetChargeType = internetChargeType;
+    }
+
+    public String getPricingCycle() {
+        return pricingCycle;
+    }
+
+    public void setPricingCycle(String pricingCycle) {
+        this.pricingCycle = pricingCycle;
     }
 }
