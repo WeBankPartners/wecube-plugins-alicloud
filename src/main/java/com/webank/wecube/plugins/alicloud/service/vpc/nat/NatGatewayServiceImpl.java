@@ -16,6 +16,8 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +26,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.webank.wecube.plugins.alicloud.support.PluginConstant.COUNT_DOWN_TIME;
 
 /**
  * @author howechen
@@ -121,23 +121,12 @@ public class NatGatewayServiceImpl implements NatGatewayService {
 
                     logger.info("Un-associating NAT gateway with bound EIp...");
                     this.eipService.unAssociateEipAddress(client, regionId, allocationIdList, natGatewayId, "Nat");
-//
-//                    logger.info("Releasing EIp");
-//                    this.eipService.releaseEipAddress(client, regionId, allocationIdList);
+
                 }
 
-                // TODO: need to optimize the timer
-                try {
-                    for (int i = 0; i < COUNT_DOWN_TIME; i++) {
-                        boolean ifAllEipUnAssociated = this.eipService.ifEipIsAvailable(client, regionId, EipServiceImpl.AssociatedInstanceType.Nat.toString(), natGatewayId);
-                        if (ifAllEipUnAssociated) {
-                            break;
-                        }
-                        TimeUnit.SECONDS.sleep(1);
-                    }
-                } catch (InterruptedException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
+                // setup a timer to poll whether the EIP has already un-associated with the NAT gateway
+                Function<?, Boolean> checkIfAllEipUnAssociated = o -> this.eipService.ifEipIsAvailable(client, regionId, EipServiceImpl.AssociatedInstanceType.Nat.toString(), natGatewayId);
+                PluginTimer.runTask(new PluginTimerTask(checkIfAllEipUnAssociated));
 
                 logger.info("Deleting NAT gateway...");
 
