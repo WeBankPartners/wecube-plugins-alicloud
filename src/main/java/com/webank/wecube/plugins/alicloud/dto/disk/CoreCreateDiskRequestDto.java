@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.disk;
 import com.aliyuncs.ecs.model.v20140526.CreateDiskRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -13,8 +14,36 @@ public class CoreCreateDiskRequestDto extends CreateDiskRequest {
     private String guid;
     private String callbackParameter;
     private String diskId;
-    private Integer size;
-    private String snapshotId;
+
+    @JsonDeserialize(as = Integer.class)
+    @Override
+    public void setStorageSetPartitionNumber(Integer storageSetPartitionNumber) {
+        super.setStorageSetPartitionNumber(storageSetPartitionNumber);
+    }
+
+    @JsonDeserialize(as = Integer.class)
+    @Override
+    public void setSize(Integer size) {
+        super.setSize(size);
+    }
+
+    @JsonDeserialize(as = Boolean.class)
+    @Override
+    public void setEncrypted(Boolean encrypted) {
+        super.setEncrypted(encrypted);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreCreateDiskRequestDto() {
     }
@@ -62,25 +91,5 @@ public class CoreCreateDiskRequestDto extends CreateDiskRequest {
 
     public void setDiskId(String diskId) {
         this.diskId = diskId;
-    }
-
-    @Override
-    public Integer getSize() {
-        return size;
-    }
-
-    @Override
-    public void setSize(Integer size) {
-        this.size = size;
-    }
-
-    @Override
-    public String getSnapshotId() {
-        return snapshotId;
-    }
-
-    @Override
-    public void setSnapshotId(String snapshotId) {
-        this.snapshotId = snapshotId;
     }
 }
