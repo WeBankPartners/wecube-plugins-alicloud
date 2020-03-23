@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.CreateVServerGroupRequest;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -17,6 +18,17 @@ public class CoreAddBackendServerRequestDto extends CreateVServerGroupRequest {
     private Integer bandwidth;
     private String serverId;
 
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreAddBackendServerRequestDto() {
     }

@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.RemoveVServerGroupBackendServersRequest;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -15,6 +16,17 @@ public class CoreRemoveBackendServerRequestDto extends RemoveVServerGroupBackend
     private String loadBalancerId;
     private String listenerProtocol;
 
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreRemoveBackendServerRequestDto() {
     }

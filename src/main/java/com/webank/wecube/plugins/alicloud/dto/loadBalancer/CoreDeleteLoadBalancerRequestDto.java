@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 import com.aliyuncs.slb.model.v20140515.DeleteLoadBalancerRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -12,6 +13,18 @@ public class CoreDeleteLoadBalancerRequestDto extends DeleteLoadBalancerRequest 
     private String cloudParams;
     private String guid;
     private String callbackParameter;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public static DeleteLoadBalancerRequest toSdk(CoreDeleteLoadBalancerRequestDto requestDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

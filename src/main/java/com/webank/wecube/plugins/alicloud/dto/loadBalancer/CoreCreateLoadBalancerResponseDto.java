@@ -4,6 +4,8 @@ import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerResponse;
 import com.aliyuncs.slb.model.v20140515.DescribeLoadBalancersResponse;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 /**
  * @author howechen
@@ -12,6 +14,12 @@ public class CoreCreateLoadBalancerResponseDto extends CreateLoadBalancerRespons
 
     private String guid;
     private String callbackParameter;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Override
+    public void setOrderId(Long orderId) {
+        super.setOrderId(orderId);
+    }
 
     public CoreCreateLoadBalancerResponseDto() {
     }
