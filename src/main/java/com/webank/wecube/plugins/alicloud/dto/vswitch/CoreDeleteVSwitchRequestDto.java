@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vswitch;
 import com.aliyuncs.vpc.model.v20160428.DeleteVSwitchRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -10,6 +11,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class CoreDeleteVSwitchRequestDto extends DeleteVSwitchRequest {
     private String identityParams;
     private String cloudParams;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreDeleteVSwitchRequestDto(String vSwitchId, String identityParams, String cloudParams) {
         this.identityParams = identityParams;

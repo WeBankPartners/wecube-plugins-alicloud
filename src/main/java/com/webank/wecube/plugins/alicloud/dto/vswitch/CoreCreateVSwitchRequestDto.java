@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vswitch;
 import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -11,6 +12,24 @@ public class CoreCreateVSwitchRequestDto extends CreateVSwitchRequest {
     private String vSwitchId;
     private String identityParams;
     private String cloudParams;
+
+    @JsonDeserialize(as = Integer.class)
+    @Override
+    public void setIpv6CidrBlock(Integer ipv6CidrBlock) {
+        super.setIpv6CidrBlock(ipv6CidrBlock);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreCreateVSwitchRequestDto(String vSwitchId, String identityParams, String cloudParams) {
         this.vSwitchId = vSwitchId;
