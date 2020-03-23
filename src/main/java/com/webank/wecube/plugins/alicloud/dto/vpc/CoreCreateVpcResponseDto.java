@@ -8,12 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * @author howechen
  */
-public class CoreCreateVpcResponseDto {
-    private String requestId;
-    private String vpcId;
+public class CoreCreateVpcResponseDto extends CreateVpcResponse {
     private String vRouterId;
-    private String routeTableId;
-    private String resourceGroupId;
     private String cidrBlock;
     private String vpcName;
 
@@ -27,44 +23,12 @@ public class CoreCreateVpcResponseDto {
         return mapper.convertValue(createVpcResponse, CoreCreateVpcResponseDto.class);
     }
 
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-
-    public String getVpcId() {
-        return vpcId;
-    }
-
-    public void setVpcId(String vpcId) {
-        this.vpcId = vpcId;
-    }
-
     public String getvRouterId() {
         return vRouterId;
     }
 
     public void setvRouterId(String vRouterId) {
         this.vRouterId = vRouterId;
-    }
-
-    public String getRouteTableId() {
-        return routeTableId;
-    }
-
-    public void setRouteTableId(String routeTableId) {
-        this.routeTableId = routeTableId;
-    }
-
-    public String getResourceGroupId() {
-        return resourceGroupId;
-    }
-
-    public void setResourceGroupId(String resourceGroupId) {
-        this.resourceGroupId = resourceGroupId;
     }
 
     public String getCidrBlock() {

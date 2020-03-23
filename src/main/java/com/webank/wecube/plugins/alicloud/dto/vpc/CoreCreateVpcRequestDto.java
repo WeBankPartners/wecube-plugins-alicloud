@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vpc;
 import com.aliyuncs.vpc.model.v20160428.CreateVpcRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -13,6 +14,34 @@ public class CoreCreateVpcRequestDto extends CreateVpcRequest {
     private String identityParams;
     private String cloudParams;
 
+    @JsonDeserialize(as = Boolean.class)
+    @Override
+    public void setEnableIpv6(Boolean enableIpv6) {
+        super.setEnableIpv6(enableIpv6);
+    }
+
+    @JsonDeserialize(as = Boolean.class)
+    @Override
+    public void setDryRun(Boolean dryRun) {
+        super.setDryRun(dryRun);
+    }
+
+    @Override
+    public void setIgnoreSSLCerts(boolean ignoreSSLCerts) {
+        super.setIgnoreSSLCerts(ignoreSSLCerts);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public static CreateVpcRequest toSdk(CoreCreateVpcRequestDto coreCreateVpcRequestDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
