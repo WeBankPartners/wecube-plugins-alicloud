@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry;
 import com.aliyuncs.vpc.model.v20160428.DeleteRouteEntryRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author howechen
@@ -12,6 +13,18 @@ public class CoreDeleteRouteEntryRequestDto extends DeleteRouteEntryRequest {
     private String cloudParams;
     private String guid;
     private String callbackParameter;
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        super.setResourceOwnerId(resourceOwnerId);
+    }
+
+    @JsonDeserialize(as = Long.class)
+    @Override
+    public void setOwnerId(Long ownerId) {
+        super.setOwnerId(ownerId);
+    }
 
     public CoreDeleteRouteEntryRequestDto() {
     }
