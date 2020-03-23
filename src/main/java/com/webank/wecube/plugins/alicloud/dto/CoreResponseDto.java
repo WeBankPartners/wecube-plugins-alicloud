@@ -81,24 +81,5 @@ public class CoreResponseDto<E extends CoreResponseOutputDto<E>> {
         return okay().withData(data);
     }
 
-    private class Results {
-        private List<E> outputs;
-
-        public Results(List<E> outputs) {
-            this.outputs = outputs;
-        }
-
-        public Results() {
-        }
-
-        public List<E> getOutputs() {
-            return outputs;
-        }
-
-        public void setOutputs(List<E> outputs) {
-            this.outputs = outputs;
-        }
-    }
-
 
 }
