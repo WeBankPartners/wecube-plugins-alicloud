@@ -10,6 +10,7 @@ import java.lang.reflect.ParameterizedType;
  */
 public interface PluginSdkOutputBridge<T> {
 
+    @SuppressWarnings("unchecked")
     default <K> T fromSdk(K responseDto) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.convertValue(responseDto, (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]);
