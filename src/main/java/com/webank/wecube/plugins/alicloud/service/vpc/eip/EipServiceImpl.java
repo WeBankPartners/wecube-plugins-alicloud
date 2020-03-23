@@ -4,13 +4,12 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.eip.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,7 +51,6 @@ public class EipServiceImpl implements EipService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
 
                 if (StringUtils.isNotEmpty(requestDto.getAllocationId())) {
                     DescribeEipAddressesRequest retrieveEipAddressRequest = new DescribeEipAddressesRequest();
@@ -60,19 +58,19 @@ public class EipServiceImpl implements EipService {
                     retrieveEipAddressRequest.setRegionId(regionId);
                     final DescribeEipAddressesResponse.EipAddress foundEip = this.retrieveEipAddress(client, retrieveEipAddressRequest);
                     if (null != foundEip) {
-                        result = PluginSdkBridge.fromSdk(foundEip, CoreAllocateEipResponseDto.class);
+                        result = result.fromSdk(foundEip);
                         continue;
                     }
                 }
 
                 logger.info("Allocating EIP address...");
 
-                AllocateEipAddressRequest allocateEipAddressRequest = PluginSdkBridge.toSdk(requestDto, AllocateEipAddressRequest.class);
+                AllocateEipAddressRequest allocateEipAddressRequest = requestDto.toSdk(requestDto, AllocateEipAddressRequest.class);
                 AllocateEipAddressResponse response = this.acsClientStub.request(client, allocateEipAddressRequest);
-                result = PluginSdkBridge.fromSdk(response, CoreAllocateEipResponseDto.class);
+                result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -96,7 +94,6 @@ public class EipServiceImpl implements EipService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
 
                 DescribeEipAddressesRequest retrieveEipAddressRequest = new DescribeEipAddressesRequest();
                 retrieveEipAddressRequest.setAllocationId(requestDto.getAllocationId());
@@ -111,12 +108,13 @@ public class EipServiceImpl implements EipService {
 
                 logger.info("Releasing EIP address...");
 
-                ReleaseEipAddressRequest request = PluginSdkBridge.toSdk(requestDto, ReleaseEipAddressRequest.class);
+                ReleaseEipAddressRequest request = requestDto.toSdk(requestDto, ReleaseEipAddressRequest.class);
+                request.setRegionId(regionId);
                 ReleaseEipAddressResponse response = this.acsClientStub.request(client, request);
-                result = PluginSdkBridge.fromSdk(response, CoreReleaseEipResponseDto.class);
+                result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -168,16 +166,16 @@ public class EipServiceImpl implements EipService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
 
                 logger.info("Associating EIP address...");
 
-                AssociateEipAddressRequest request = PluginSdkBridge.toSdk(requestDto, AssociateEipAddressRequest.class);
+                AssociateEipAddressRequest request = requestDto.toSdk(requestDto, AssociateEipAddressRequest.class);
+                request.setRegionId(regionId);
                 AssociateEipAddressResponse response = this.acsClientStub.request(client, request);
-                result = PluginSdkBridge.fromSdk(response, CoreAssociateEipResponseDto.class);
+                result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -201,15 +199,15 @@ public class EipServiceImpl implements EipService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
 
                 logger.info("Un-associating EIP address...");
 
-                UnassociateEipAddressRequest request = PluginSdkBridge.toSdk(requestDto, UnassociateEipAddressRequest.class);
+                UnassociateEipAddressRequest request = requestDto.toSdk(requestDto, UnassociateEipAddressRequest.class);
+                request.setRegionId(regionId);
                 UnassociateEipAddressResponse response = this.acsClientStub.request(client, request);
-                result = PluginSdkBridge.fromSdk(response, CoreUnAssociateEipResponseDto.class);
+                result = result.fromSdk(response);
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
