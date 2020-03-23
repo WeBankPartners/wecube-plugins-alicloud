@@ -2,8 +2,8 @@ package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceRequestDto;
@@ -30,25 +30,25 @@ public class RedisController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDto<?> createInstance(@RequestBody CoreRequestDto<CoreCreateInstanceRequestDto> requestBody) {
+    public CoreResponseDtoBkp<?> createInstance(@RequestBody CoreRequestDtoBkp<CoreCreateInstanceRequestDto> requestBody) {
         List<CoreCreateInstanceResponseDto> result;
         try {
             result = this.redisService.createInstance(requestBody.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateInstanceResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateInstanceResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteInstance(@RequestBody CoreRequestDto<CoreDeleteInstanceRequestDto> requestBody) {
+    public CoreResponseDtoBkp<?> deleteInstance(@RequestBody CoreRequestDtoBkp<CoreDeleteInstanceRequestDto> requestBody) {
         List<CoreDeleteInstanceResponseDto> result;
         try {
             result = this.redisService.deleteInstance(requestBody.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreDeleteInstanceResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreDeleteInstanceResponseDto>().okayWithData(result);
     }
 }

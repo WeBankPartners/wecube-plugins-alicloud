@@ -2,8 +2,8 @@ package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreAssociateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
@@ -34,59 +34,59 @@ public class RouteTableController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDto<?> createRouteTable(@RequestBody CoreRequestDto<CoreCreateRouteTableRequestDto> requestBody) {
+    public CoreResponseDtoBkp<?> createRouteTable(@RequestBody CoreRequestDtoBkp<CoreCreateRouteTableRequestDto> requestBody) {
         List<CoreCreateRouteTableResponseDto> result;
         try {
             result = this.routeTableService.createRouteTable(requestBody.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateRouteTableResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateRouteTableResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteRouteTable(@RequestBody CoreRequestDto<CoreDeleteRouteTableRequestDto> request) {
+    public CoreResponseDtoBkp<?> deleteRouteTable(@RequestBody CoreRequestDtoBkp<CoreDeleteRouteTableRequestDto> request) {
         try {
             this.routeTableService.deleteRouteTable(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return CoreResponseDto.okay();
+        return CoreResponseDtoBkp.okay();
     }
 
     @PostMapping(path = "/vswitch/associate")
     @ResponseBody
-    public CoreResponseDto<?> associateVSwitch(@RequestBody CoreRequestDto<CoreAssociateRouteTableRequestDto> request) {
+    public CoreResponseDtoBkp<?> associateVSwitch(@RequestBody CoreRequestDtoBkp<CoreAssociateRouteTableRequestDto> request) {
         try {
             this.routeTableService.associateRouteTable(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return CoreResponseDto.okay();
+        return CoreResponseDtoBkp.okay();
     }
 
     @PostMapping(path = "/route_entry/create")
     @ResponseBody
-    public CoreResponseDto<?> createRouteEntry(@RequestBody CoreRequestDto<CoreCreateRouteEntryRequestDto> request) {
+    public CoreResponseDtoBkp<?> createRouteEntry(@RequestBody CoreRequestDtoBkp<CoreCreateRouteEntryRequestDto> request) {
         List<CoreCreateRouteEntryResponseDto> result;
         try {
             result = this.routeTableService.createRouteEntry(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateRouteEntryResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateRouteEntryResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/route_entry/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteRouteEntry(@RequestBody CoreRequestDto<CoreDeleteRouteEntryRequestDto> request) {
+    public CoreResponseDtoBkp<?> deleteRouteEntry(@RequestBody CoreRequestDtoBkp<CoreDeleteRouteEntryRequestDto> request) {
         List<CoreDeleteRouteEntryResponseDto> result;
         try {
             result = this.routeTableService.deleteRouteEntry(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreDeleteRouteEntryResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreDeleteRouteEntryResponseDto>().okayWithData(result);
     }
 }

@@ -2,8 +2,8 @@ package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreDeleteVpcRequestDto;
@@ -25,25 +25,25 @@ public class VpcController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDto<?> createVpc(@RequestBody CoreRequestDto<CoreCreateVpcRequestDto> coreRequestDto) {
+    public CoreResponseDtoBkp<?> createVpc(@RequestBody CoreRequestDtoBkp<CoreCreateVpcRequestDto> coreRequestDto) {
         List<CoreCreateVpcResponseDto> result;
         try {
             result = this.vpcService.createVpc(coreRequestDto.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateVpcResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateVpcResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteVpc(@RequestBody CoreRequestDto<CoreDeleteVpcRequestDto> coreRequestDto) {
+    public CoreResponseDtoBkp<?> deleteVpc(@RequestBody CoreRequestDtoBkp<CoreDeleteVpcRequestDto> coreRequestDto) {
         try {
             this.vpcService.deleteVpc(coreRequestDto.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return CoreResponseDto.okay();
+        return CoreResponseDtoBkp.okay();
     }
 
 

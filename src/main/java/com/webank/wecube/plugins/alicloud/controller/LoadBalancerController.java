@@ -2,8 +2,8 @@ package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerRequestDto;
@@ -29,49 +29,49 @@ public class LoadBalancerController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDto<?> createLoadBalancer(@RequestBody CoreRequestDto<CoreCreateLoadBalancerRequestDto> request) {
+    public CoreResponseDtoBkp<?> createLoadBalancer(@RequestBody CoreRequestDtoBkp<CoreCreateLoadBalancerRequestDto> request) {
         List<CoreCreateLoadBalancerResponseDto> result;
         try {
             result = this.loadBalancerService.createLoadBalancer(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateLoadBalancerResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateLoadBalancerResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteLoadBalancer(@RequestBody CoreRequestDto<CoreDeleteLoadBalancerRequestDto> request) {
+    public CoreResponseDtoBkp<?> deleteLoadBalancer(@RequestBody CoreRequestDtoBkp<CoreDeleteLoadBalancerRequestDto> request) {
         List<CoreDeleteLoadBalancerResponseDto> result;
         try {
             result = this.loadBalancerService.deleteLoadBalancer(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreDeleteLoadBalancerResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreDeleteLoadBalancerResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/backend_server/add")
     @ResponseBody
-    public CoreResponseDto<?> createListener(@RequestBody CoreRequestDto<CoreAddBackendServerRequestDto> request) {
+    public CoreResponseDtoBkp<?> createListener(@RequestBody CoreRequestDtoBkp<CoreAddBackendServerRequestDto> request) {
         List<CoreAddBackendServerResponseDto> result;
         try {
             result = this.loadBalancerService.addBackendServer(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreAddBackendServerResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreAddBackendServerResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/backend_server/remove")
     @ResponseBody
-    public CoreResponseDto<?> deleteListener(@RequestBody CoreRequestDto<CoreRemoveBackendServerRequestDto> request) {
+    public CoreResponseDtoBkp<?> deleteListener(@RequestBody CoreRequestDtoBkp<CoreRemoveBackendServerRequestDto> request) {
         List<CoreRemoveBackendServerResponseDto> result;
         try {
             result = this.loadBalancerService.removeBackendServer(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreRemoveBackendServerResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreRemoveBackendServerResponseDto>().okayWithData(result);
     }
 }

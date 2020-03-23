@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author howechen
  */
-public class CoreRequestDto<E extends CoreRequestInputDto<E>> {
+public class CoreRequestDtoBkp<E> {
     private String requestId;
     private String operator;
     private List<E> inputs;

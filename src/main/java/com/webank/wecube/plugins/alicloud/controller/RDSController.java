@@ -2,8 +2,8 @@ package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreDeleteBackupRequestDto;
@@ -36,57 +36,57 @@ public class RDSController {
 
     @PostMapping(path = "/db/create")
     @ResponseBody
-    public CoreResponseDto<?> createDB(@RequestBody CoreRequestDto<CoreCreateDBInstanceRequestDto> request) {
+    public CoreResponseDtoBkp<?> createDB(@RequestBody CoreRequestDtoBkp<CoreCreateDBInstanceRequestDto> request) {
         List<CoreCreateDBInstanceResponseDto> result;
         try {
             result = this.rdsServcie.createDB(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateDBInstanceResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateDBInstanceResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/db/delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteDB(@RequestBody CoreRequestDto<CoreDeleteDBInstanceRequestDto> request) {
+    public CoreResponseDtoBkp<?> deleteDB(@RequestBody CoreRequestDtoBkp<CoreDeleteDBInstanceRequestDto> request) {
         List<CoreDeleteDBInstanceResponseDto> result;
         try {
             result = this.rdsServcie.deleteDB(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreDeleteDBInstanceResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreDeleteDBInstanceResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/security_ip/modify")
     @ResponseBody
-    public CoreResponseDto<?> modifySecurityIp(@RequestBody CoreRequestDto<CoreModifySecurityIPsRequestDto> request) {
+    public CoreResponseDtoBkp<?> modifySecurityIp(@RequestBody CoreRequestDtoBkp<CoreModifySecurityIPsRequestDto> request) {
         List<CoreModifySecurityIPsResponseDto> result;
         try {
             result = this.rdsServcie.modifySecurityIPs(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreModifySecurityIPsResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreModifySecurityIPsResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/backup/create")
     @ResponseBody
-    public CoreResponseDto<?> createBackup(@RequestBody CoreRequestDto<CoreCreateBackupRequestDto> request) {
+    public CoreResponseDtoBkp<?> createBackup(@RequestBody CoreRequestDtoBkp<CoreCreateBackupRequestDto> request) {
         List<CoreCreateBackupResponseDto> result;
         try {
             result = this.rdsServcie.createBackup(request.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateBackupResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateBackupResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "/backup/delete")
     @ResponseBody
-    public CoreResponseDto<CoreDeleteBackupResponseDto> deleteBackup(@RequestBody CoreRequestDto<CoreDeleteBackupRequestDto> request) {
+    public CoreResponseDtoBkp<CoreDeleteBackupResponseDto> deleteBackup(@RequestBody CoreRequestDtoBkp<CoreDeleteBackupRequestDto> request) {
         List<CoreDeleteBackupResponseDto> result;
         result = this.rdsServcie.deleteBackup(request.getInputs());
-        return new CoreResponseDto<CoreDeleteBackupResponseDto>().withErrorCheck(result);
+        return new CoreResponseDtoBkp<CoreDeleteBackupResponseDto>().withErrorCheck(result);
     }
 }

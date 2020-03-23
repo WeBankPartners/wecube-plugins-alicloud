@@ -4,7 +4,7 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.cbn.model.v20170912.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.cen.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
@@ -72,7 +72,7 @@ public class CenServiceImpl implements CenService {
                 result = PluginSdkBridge.fromSdk(response, CoreCreateCenResponseDto.class);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -144,7 +144,7 @@ public class CenServiceImpl implements CenService {
                 }
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -208,7 +208,7 @@ public class CenServiceImpl implements CenService {
                 result = PluginSdkBridge.fromSdk(response, CoreAttachCenChildResponseDto.class);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -242,7 +242,7 @@ public class CenServiceImpl implements CenService {
                 result = PluginSdkBridge.fromSdk(response, CoreDetachCenChildResponseDto.class);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());

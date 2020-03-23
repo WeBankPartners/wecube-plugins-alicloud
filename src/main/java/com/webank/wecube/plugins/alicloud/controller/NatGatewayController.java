@@ -1,8 +1,8 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayRequestDto;
@@ -30,16 +30,16 @@ public class NatGatewayController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDto<CoreCreateNatGatewayResponseDto> createNatGateway(@RequestBody CoreRequestDto<CoreCreateNatGatewayRequestDto> request) {
+    public CoreResponseDtoBkp<CoreCreateNatGatewayResponseDto> createNatGateway(@RequestBody CoreRequestDtoBkp<CoreCreateNatGatewayRequestDto> request) {
         List<CoreCreateNatGatewayResponseDto> result = this.natGatewayService.createNatGateway(request.getInputs());
-        return new CoreResponseDto<CoreCreateNatGatewayResponseDto>().withErrorCheck(result);
+        return new CoreResponseDtoBkp<CoreCreateNatGatewayResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDto<CoreDeleteNatGatewayResponseDto> releaseEipAddress(@RequestBody CoreRequestDto<CoreDeleteNatGatewayRequestDto> request) {
+    public CoreResponseDtoBkp<CoreDeleteNatGatewayResponseDto> releaseEipAddress(@RequestBody CoreRequestDtoBkp<CoreDeleteNatGatewayRequestDto> request) {
         List<CoreDeleteNatGatewayResponseDto> result = this.natGatewayService.deleteNatGateway(request.getInputs());
-        return new CoreResponseDto<CoreDeleteNatGatewayResponseDto>().withErrorCheck(result);
+        return new CoreResponseDtoBkp<CoreDeleteNatGatewayResponseDto>().withErrorCheck(result);
     }
 }
 

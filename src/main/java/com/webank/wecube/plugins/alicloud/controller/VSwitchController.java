@@ -2,8 +2,8 @@ package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreCreateVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vswitch.CoreDeleteVSwitchRequestDto;
@@ -29,24 +29,24 @@ public class VSwitchController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDto<?> createVSwitch(@RequestBody CoreRequestDto<CoreCreateVSwitchRequestDto> coreCreateVSwitchDtoCoreResponseDto) {
+    public CoreResponseDtoBkp<?> createVSwitch(@RequestBody CoreRequestDtoBkp<CoreCreateVSwitchRequestDto> coreCreateVSwitchDtoCoreResponseDto) {
         List<CoreCreateVSwitchResponseDto> result;
         try {
             result = this.vSwitchService.createVSwitch(coreCreateVSwitchDtoCoreResponseDto.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return new CoreResponseDto<CoreCreateVSwitchResponseDto>().okayWithData(result);
+        return new CoreResponseDtoBkp<CoreCreateVSwitchResponseDto>().okayWithData(result);
     }
 
     @PostMapping(path = "delete")
     @ResponseBody
-    public CoreResponseDto<?> deleteVSwitch(@RequestBody CoreRequestDto<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
+    public CoreResponseDtoBkp<?> deleteVSwitch(@RequestBody CoreRequestDtoBkp<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
         try {
             this.vSwitchService.deleteVSwitch(coreDeleteVSwitchRequestDto.getInputs());
         } catch (PluginException ex) {
-            return CoreResponseDto.error(ex.getMessage());
+            return CoreResponseDtoBkp.error(ex.getMessage());
         }
-        return CoreResponseDto.okay();
+        return CoreResponseDtoBkp.okay();
     }
 }

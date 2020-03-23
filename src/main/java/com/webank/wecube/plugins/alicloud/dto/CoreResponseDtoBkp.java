@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author howechen
  */
-public class CoreResponseDto<E extends CoreResponseOutputDto<E>> {
+public class CoreResponseDtoBkp<E> {
     public final static String STATUS_OK = "0";
     public final static String STATUS_ERROR = "1";
 
@@ -17,17 +17,17 @@ public class CoreResponseDto<E extends CoreResponseOutputDto<E>> {
     @JsonProperty(value = "result_message")
     private String resultMessage;
     @JsonProperty(value = "results")
-    private List<E> results;
+    private Results results;
 
-    public static CoreResponseDto okay() {
-        CoreResponseDto result = new CoreResponseDto();
+    public static CoreResponseDtoBkp okay() {
+        CoreResponseDtoBkp result = new CoreResponseDtoBkp();
         result.setResultCode(STATUS_OK);
         result.setResultMessage("Success");
         return result;
     }
 
-    public static CoreResponseDto error(String errorMessage) {
-        CoreResponseDto result = new CoreResponseDto();
+    public static CoreResponseDtoBkp error(String errorMessage) {
+        CoreResponseDtoBkp result = new CoreResponseDtoBkp();
         result.setResultCode(STATUS_ERROR);
         result.setResultMessage(errorMessage);
         return result;
@@ -49,20 +49,21 @@ public class CoreResponseDto<E extends CoreResponseOutputDto<E>> {
         this.resultMessage = resultMessage;
     }
 
-    public List<E> getResults() {
+    public Results getResults() {
         return results;
     }
 
-    public void setResults(List<E> results) {
-        this.results = results;
+    public void setResults(List<E> responseResult) {
+
+        this.results = new Results(responseResult);
     }
 
-    public CoreResponseDto<E> withData(List<E> data) {
+    public CoreResponseDtoBkp<E> withData(List<E> data) {
         setResults(data);
         return this;
     }
 
-    public CoreResponseDto<E> withErrorCheck(List<E> data) {
+    public CoreResponseDtoBkp<E> withErrorCheck(List<E> data) {
         for (E singleData : data) {
             String errorCode = null;
             try {
@@ -77,7 +78,7 @@ public class CoreResponseDto<E extends CoreResponseOutputDto<E>> {
         return okay().withData(data);
     }
 
-    public CoreResponseDto<E> okayWithData(List<E> data) {
+    public CoreResponseDtoBkp<E> okayWithData(List<E> data) {
         return okay().withData(data);
     }
 

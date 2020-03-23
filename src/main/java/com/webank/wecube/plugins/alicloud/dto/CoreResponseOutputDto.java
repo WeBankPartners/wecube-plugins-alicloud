@@ -1,20 +1,12 @@
-package com.webank.wecube.plugins.alicloud.dto.cen;
+package com.webank.wecube.plugins.alicloud.dto;
 
-import com.aliyuncs.cbn.model.v20170912.DeleteCenResponse;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
-import org.apache.commons.lang3.StringUtils;
-
-/**
- * @author howechen
- */
-public class CoreDeleteCenResponseDto extends DeleteCenResponse {
-
-    private String errorCode = CoreResponseDtoBkp.STATUS_OK;
-    private String errorMessage = StringUtils.EMPTY;
+public class CoreResponseOutputDto<T> implements PluginSdkOutputBridge<T> {
+    private String errorCode;
+    private String errorMessage;
     private String guid;
     private String callbackParameter;
 
-    public CoreDeleteCenResponseDto() {
+    public CoreResponseOutputDto() {
     }
 
     public String getErrorCode() {
