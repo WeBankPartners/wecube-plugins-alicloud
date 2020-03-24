@@ -1,11 +1,13 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 
+import com.aliyuncs.vpc.model.v20160428.AllocateEipAddressResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreAllocateEipResponseDto extends CoreResponseOutputDto<CoreAllocateEipResponseDto> {
+public class CoreAllocateEipResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreAllocateEipResponseDto, AllocateEipAddressResponse> {
 
     private String requestId;
     private String allocationId;

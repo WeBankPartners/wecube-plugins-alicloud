@@ -1,11 +1,13 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 
+import com.aliyuncs.vpc.model.v20160428.UnassociateEipAddressRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreUnAssociateEipRequestDto extends CoreRequestInputDto<CoreUnAssociateEipRequestDto> {
+public class CoreUnAssociateEipRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreUnAssociateEipRequestDto, UnassociateEipAddressRequest> {
     private String resourceOwnerId;
     private String allocationId;
     private String instanceType;
