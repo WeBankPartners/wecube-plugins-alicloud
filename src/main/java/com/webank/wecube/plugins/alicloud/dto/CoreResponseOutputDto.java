@@ -1,6 +1,6 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
-public class CoreResponseOutputDto<T> implements PluginSdkOutputBridge<T> {
+public class CoreResponseOutputDto {
     private String errorCode;
     private String errorMessage;
     private String guid;

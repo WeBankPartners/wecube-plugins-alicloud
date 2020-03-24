@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 
-public class CoreRequestInputDto<T> implements PluginSdkInputBridge<T> {
+public class CoreRequestInputDto {
     @NotEmpty(message = "identityParams cannot be null or empty")
     private String identityParams;
     @NotEmpty(message = "cloudParams cannot be null or empty")

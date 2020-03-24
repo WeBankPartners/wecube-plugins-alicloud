@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author howechen
  */
-public class CoreResponseDto<E extends CoreResponseOutputDto<E>> {
+public class CoreResponseDto<E extends CoreResponseOutputDto> {
     public final static String STATUS_OK = "0";
     public final static String STATUS_ERROR = "1";
 
