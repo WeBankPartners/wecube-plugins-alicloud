@@ -5,7 +5,7 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.*;
-import com.webank.wecube.plugins.alicloud.service.securityGroup.SecurityGroupService;
+import com.webank.wecube.plugins.alicloud.service.ecs.securityGroup.SecurityGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

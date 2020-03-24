@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.securityGroup;
+package com.webank.wecube.plugins.alicloud.service.ecs.securityGroup;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;

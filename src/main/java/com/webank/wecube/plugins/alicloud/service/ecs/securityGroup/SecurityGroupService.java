@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.securityGroup;
+package com.webank.wecube.plugins.alicloud.service.ecs.securityGroup;
 
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.*;

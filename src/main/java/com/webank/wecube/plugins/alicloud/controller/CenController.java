@@ -4,7 +4,7 @@ import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.cbn.cen.*;
-import com.webank.wecube.plugins.alicloud.service.cen.CenService;
+import com.webank.wecube.plugins.alicloud.service.cbn.cen.CenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

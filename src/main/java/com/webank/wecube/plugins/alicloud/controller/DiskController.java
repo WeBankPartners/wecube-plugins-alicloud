@@ -5,7 +5,7 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.ecs.disk.*;
-import com.webank.wecube.plugins.alicloud.service.disk.DiskService;
+import com.webank.wecube.plugins.alicloud.service.ecs.disk.DiskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

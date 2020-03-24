@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.cen;
+package com.webank.wecube.plugins.alicloud.service.cbn.cen;
 
 import com.webank.wecube.plugins.alicloud.dto.cbn.cen.*;
 

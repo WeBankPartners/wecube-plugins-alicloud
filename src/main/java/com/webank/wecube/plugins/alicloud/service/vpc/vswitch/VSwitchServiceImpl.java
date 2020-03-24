@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.vswitch;
+package com.webank.wecube.plugins.alicloud.service.vpc.vswitch;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
@@ -15,7 +15,7 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreDeleteRouteTabl
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreDeleteVSwitchRequestDto;
-import com.webank.wecube.plugins.alicloud.service.routeTable.RouteTableService;
+import com.webank.wecube.plugins.alicloud.service.vpc.routeTable.RouteTableService;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudConstant;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;

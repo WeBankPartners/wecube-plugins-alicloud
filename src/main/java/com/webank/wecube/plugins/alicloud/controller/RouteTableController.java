@@ -12,7 +12,7 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreCrea
 import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreCreateRouteEntryResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreDeleteRouteEntryRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreDeleteRouteEntryResponseDto;
-import com.webank.wecube.plugins.alicloud.service.routeTable.RouteTableService;
+import com.webank.wecube.plugins.alicloud.service.vpc.routeTable.RouteTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

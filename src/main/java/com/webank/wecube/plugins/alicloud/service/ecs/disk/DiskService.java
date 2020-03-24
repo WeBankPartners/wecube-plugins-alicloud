@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.disk;
+package com.webank.wecube.plugins.alicloud.service.ecs.disk;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.DescribeDisksResponse;

@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.routeTable;
+package com.webank.wecube.plugins.alicloud.service.vpc.routeTable;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.AssociateRouteTableRequest;

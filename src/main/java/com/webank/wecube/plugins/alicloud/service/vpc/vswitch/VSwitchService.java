@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.vswitch;
+package com.webank.wecube.plugins.alicloud.service.vpc.vswitch;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.DescribeVSwitchesResponse;

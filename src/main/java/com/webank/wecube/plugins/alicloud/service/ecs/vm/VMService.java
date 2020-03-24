@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.service.vm;
+package com.webank.wecube.plugins.alicloud.service.ecs.vm;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.DescribeInstancesResponse;
