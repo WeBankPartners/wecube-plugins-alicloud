@@ -1,7 +1,7 @@
 package com.webank.wecube.plugins.alicloud.service.securityGroup;
 
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.securityGroup.*;
+import com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.*;
 
 import java.util.List;
 

@@ -6,14 +6,14 @@ import com.aliyuncs.vpc.model.v20160428.DescribeRouteTablesResponse;
 import com.aliyuncs.vpc.model.v20160428.UnassociateRouteTableRequest;
 import com.aliyuncs.vpc.model.v20160428.UnassociateRouteTableResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreAssociateRouteTableRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreCreateRouteTableResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.CoreDeleteRouteTableRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreCreateRouteEntryResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.routeTable.routeEntry.CoreDeleteRouteEntryResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreAssociateRouteTableRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreCreateRouteTableRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreCreateRouteTableResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreDeleteRouteTableRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreCreateRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreCreateRouteEntryResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreDeleteRouteEntryRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreDeleteRouteEntryResponseDto;
 
 import java.util.List;
 

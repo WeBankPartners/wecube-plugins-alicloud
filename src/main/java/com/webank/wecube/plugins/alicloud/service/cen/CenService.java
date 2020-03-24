@@ -1,6 +1,6 @@
 package com.webank.wecube.plugins.alicloud.service.cen;
 
-import com.webank.wecube.plugins.alicloud.dto.cen.*;
+import com.webank.wecube.plugins.alicloud.dto.cbn.cen.*;
 
 import java.util.List;
 

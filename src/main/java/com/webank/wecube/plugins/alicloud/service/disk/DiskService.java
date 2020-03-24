@@ -3,7 +3,7 @@ package com.webank.wecube.plugins.alicloud.service.disk;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.DescribeDisksResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.disk.*;
+import com.webank.wecube.plugins.alicloud.dto.ecs.disk.*;
 
 import java.util.List;
 

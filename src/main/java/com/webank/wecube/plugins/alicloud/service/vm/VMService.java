@@ -3,7 +3,7 @@ package com.webank.wecube.plugins.alicloud.service.vm;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.DescribeInstancesResponse;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.vm.*;
+import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 
 import java.util.List;
 
