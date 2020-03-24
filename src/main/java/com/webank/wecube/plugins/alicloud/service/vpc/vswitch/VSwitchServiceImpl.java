@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -96,19 +95,10 @@ public class VSwitchServiceImpl implements VSwitchService {
                 final String createdRouteTableId = createRouteTableResponseDtoList.get(0).getRouteTableId();
 
                 // associate route table with VSwitch
-                // todo: need to optimize the timer
-                try {
-                    for (int i = 0; i < COUNT_DOWN_TIME; i++) {
-                        final boolean ifVSwitchAvailable = this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
-                        final boolean ifRouteTableAvailable = this.routeTableService.checkIfRouteTableAvailable(client, regionId, createdRouteTableId);
-                        if (ifVSwitchAvailable && ifRouteTableAvailable) {
-                            break;
-                        }
-                        TimeUnit.SECONDS.sleep(1);
-                    }
-                } catch (InterruptedException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
+                // wait till both route table and vSwitch are available to be configured
+                Function<?, Boolean> func = this.ifBothRouteTableAndVSwitchAvailable(client, regionId, createdRouteTableId, vSwitchId);
+                final PluginTimerTask checkRouteTableStatusTask = new PluginTimerTask(func);
+                PluginTimer.runTask(checkRouteTableStatusTask);
 
                 if (!createRouteTableResponseDtoList.isEmpty()) {
                     CoreAssociateRouteTableRequestDto associateRouteTableRequest = new CoreAssociateRouteTableRequestDto();
@@ -189,6 +179,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                         // check VSwtich status until it's available
                         final String routeTableId = associatedRouteTable.getRouteTableId();
 
+                        // wait till both route table and vSwitch are available to be configured
                         Function<?, Boolean> func = this.ifBothRouteTableAndVSwitchAvailable(client, regionId, routeTableId, foundVSwitchId);
                         final PluginTimerTask checkRouteTableStatusTask = new PluginTimerTask(func);
                         PluginTimer.runTask(checkRouteTableStatusTask);
@@ -200,6 +191,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                         unassociateRouteTableRequest.setVSwitchId(foundVSwitchId);
                         this.routeTableService.unAssociateRouteTable(client, unassociateRouteTableRequest);
 
+                        // wait till both route table and vSwitch are available to be configured
                         PluginTimer.runTask(checkRouteTableStatusTask);
 
                         // delete route table
