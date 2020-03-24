@@ -1,53 +1,60 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteVpcRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteVpcRequestDto extends DeleteVpcRequest {
-    private String identityParams;
-    private String cloudParams;
+public class CoreDeleteVpcRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreDeleteVpcRequestDto, DeleteVpcRequest> {
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
+    private String resourceOwnerId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String vpcId;
+
+    public CoreDeleteVpcRequestDto() {
     }
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-
-    public CoreDeleteVpcRequestDto(String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public static DeleteVpcRequest toSdk(CoreDeleteVpcRequestDto coreCreateVpcRequestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateVpcRequestDto, DeleteVpcRequest.class);
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getOwnerAccount() {
+        return ownerAccount;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setVpcId(String vpcId) {
+        this.vpcId = vpcId;
     }
 }

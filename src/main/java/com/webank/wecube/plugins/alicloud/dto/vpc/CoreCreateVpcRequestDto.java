@@ -1,58 +1,31 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc;
 
 import com.aliyuncs.vpc.model.v20160428.CreateVpcRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateVpcRequestDto extends CreateVpcRequest {
+public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreCreateVpcRequestDto, CreateVpcRequest> {
+
     private String vpcId;
-    private String identityParams;
-    private String cloudParams;
 
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setEnableIpv6(Boolean enableIpv6) {
-        super.setEnableIpv6(enableIpv6);
-    }
+    private String resourceOwnerId;
+    private String clientToken;
+    private String enableIpv6;
+    private String description;
+    private String vpcName;
+    private String resourceGroupId;
+    private String userCidr;
+    private String dryRun;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String ipv6CidrBlock;
+    private String cidrBlock;
 
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setDryRun(Boolean dryRun) {
-        super.setDryRun(dryRun);
-    }
-
-    @Override
-    public void setIgnoreSSLCerts(boolean ignoreSSLCerts) {
-        super.setIgnoreSSLCerts(ignoreSSLCerts);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    public static CreateVpcRequest toSdk(CoreCreateVpcRequestDto coreCreateVpcRequestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateVpcRequestDto, CreateVpcRequest.class);
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("vpcId", vpcId)
-                .toString();
+    public CoreCreateVpcRequestDto() {
     }
 
     public String getVpcId() {
@@ -63,19 +36,107 @@ public class CoreCreateVpcRequestDto extends CreateVpcRequest {
         this.vpcId = vpcId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getClientToken() {
+        return clientToken;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public String getEnableIpv6() {
+        return enableIpv6;
+    }
+
+    public void setEnableIpv6(String enableIpv6) {
+        this.enableIpv6 = enableIpv6;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getVpcName() {
+        return vpcName;
+    }
+
+    public void setVpcName(String vpcName) {
+        this.vpcName = vpcName;
+    }
+
+    public String getResourceGroupId() {
+        return resourceGroupId;
+    }
+
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
+    }
+
+    public String getUserCidr() {
+        return userCidr;
+    }
+
+    public void setUserCidr(String userCidr) {
+        this.userCidr = userCidr;
+    }
+
+    public String getDryRun() {
+        return dryRun;
+    }
+
+    public void setDryRun(String dryRun) {
+        this.dryRun = dryRun;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getIpv6CidrBlock() {
+        return ipv6CidrBlock;
+    }
+
+    public void setIpv6CidrBlock(String ipv6CidrBlock) {
+        this.ipv6CidrBlock = ipv6CidrBlock;
+    }
+
+    public String getCidrBlock() {
+        return cidrBlock;
+    }
+
+    public void setCidrBlock(String cidrBlock) {
+        this.cidrBlock = cidrBlock;
     }
 }

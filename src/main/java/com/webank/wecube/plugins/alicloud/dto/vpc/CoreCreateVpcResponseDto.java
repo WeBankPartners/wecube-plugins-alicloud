@@ -1,26 +1,23 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc;
 
 import com.aliyuncs.vpc.model.v20160428.CreateVpcResponse;
-import com.aliyuncs.vpc.model.v20160428.DescribeVpcsResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateVpcResponseDto extends CreateVpcResponse {
+public class CoreCreateVpcResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateVpcResponseDto, CreateVpcResponse> {
     private String vRouterId;
     private String cidrBlock;
     private String vpcName;
 
-    public static CoreCreateVpcResponseDto fromSdk(CreateVpcResponse createVpcResponse) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(createVpcResponse, CoreCreateVpcResponseDto.class);
-    }
+    private String requestId;
+    private String vpcId;
+    private String routeTableId;
+    private String resourceGroupId;
 
-    public static CoreCreateVpcResponseDto fromSdk(DescribeVpcsResponse.Vpc createVpcResponse) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(createVpcResponse, CoreCreateVpcResponseDto.class);
+    public CoreCreateVpcResponseDto() {
     }
 
     public String getvRouterId() {
@@ -45,5 +42,37 @@ public class CoreCreateVpcResponseDto extends CreateVpcResponse {
 
     public void setVpcName(String vpcName) {
         this.vpcName = vpcName;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setVpcId(String vpcId) {
+        this.vpcId = vpcId;
+    }
+
+    public String getRouteTableId() {
+        return routeTableId;
+    }
+
+    public void setRouteTableId(String routeTableId) {
+        this.routeTableId = routeTableId;
+    }
+
+    public String getResourceGroupId() {
+        return resourceGroupId;
+    }
+
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
     }
 }
