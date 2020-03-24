@@ -1,12 +1,12 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreCreateVpcResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreDeleteVpcRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.CoreDeleteVpcResponseDto;
 import com.webank.wecube.plugins.alicloud.service.vpc.VpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,25 +25,16 @@ public class VpcController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDtoBkp<?> createVpc(@RequestBody CoreRequestDtoBkp<CoreCreateVpcRequestDto> coreRequestDto) {
-        List<CoreCreateVpcResponseDto> result;
-        try {
-            result = this.vpcService.createVpc(coreRequestDto.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreCreateVpcResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreCreateVpcResponseDto> createVpc(@RequestBody CoreRequestDto<CoreCreateVpcRequestDto> coreRequestDto) {
+        List<CoreCreateVpcResponseDto> result = this.vpcService.createVpc(coreRequestDto.getInputs());
+        return new CoreResponseDto<CoreCreateVpcResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDtoBkp<?> deleteVpc(@RequestBody CoreRequestDtoBkp<CoreDeleteVpcRequestDto> coreRequestDto) {
-        try {
-            this.vpcService.deleteVpc(coreRequestDto.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return CoreResponseDtoBkp.okay();
+    public CoreResponseDto<CoreDeleteVpcResponseDto> deleteVpc(@RequestBody CoreRequestDto<CoreDeleteVpcRequestDto> coreRequestDto) {
+        List<CoreDeleteVpcResponseDto> result = this.vpcService.deleteVpc(coreRequestDto.getInputs());
+        return new CoreResponseDto<CoreDeleteVpcResponseDto>().withErrorCheck(result);
     }
 
 
