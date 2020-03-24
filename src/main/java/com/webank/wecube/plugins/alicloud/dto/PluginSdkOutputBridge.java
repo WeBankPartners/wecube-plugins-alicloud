@@ -32,6 +32,6 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
      */
     default <V> T fromSdkCrossLineage(V response) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[1]);
+        return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
     }
 }
