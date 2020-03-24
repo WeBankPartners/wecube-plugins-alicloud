@@ -1,48 +1,28 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.vswitch;
 
 import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateVSwitchRequestDto extends CreateVSwitchRequest {
+public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreCreateVSwitchRequestDto, CreateVSwitchRequest> {
     private String vSwitchId;
-    private String identityParams;
-    private String cloudParams;
 
-    @JsonDeserialize(as = Integer.class)
-    @Override
-    public void setIpv6CidrBlock(Integer ipv6CidrBlock) {
-        super.setIpv6CidrBlock(ipv6CidrBlock);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    public CoreCreateVSwitchRequestDto(String vSwitchId, String identityParams, String cloudParams) {
-        this.vSwitchId = vSwitchId;
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
-    }
+    private String resourceOwnerId;
+    private String clientToken;
+    private String description;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String ipv6CidrBlock;
+    private String vpcId;
+    private String vSwitchName;
+    private String cidrBlock;
+    private String zoneId;
 
     public CoreCreateVSwitchRequestDto() {
-    }
-
-    public static CreateVSwitchRequest toSdk(CoreCreateVSwitchRequestDto coreCreateVSwitchRequestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateVSwitchRequestDto, CreateVSwitchRequest.class);
     }
 
     public String getvSwitchId() {
@@ -53,19 +33,91 @@ public class CoreCreateVSwitchRequestDto extends CreateVSwitchRequest {
         this.vSwitchId = vSwitchId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getClientToken() {
+        return clientToken;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getIpv6CidrBlock() {
+        return ipv6CidrBlock;
+    }
+
+    public void setIpv6CidrBlock(String ipv6CidrBlock) {
+        this.ipv6CidrBlock = ipv6CidrBlock;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setVpcId(String vpcId) {
+        this.vpcId = vpcId;
+    }
+
+    public String getvSwitchName() {
+        return vSwitchName;
+    }
+
+    public void setvSwitchName(String vSwitchName) {
+        this.vSwitchName = vSwitchName;
+    }
+
+    public String getCidrBlock() {
+        return cidrBlock;
+    }
+
+    public void setCidrBlock(String cidrBlock) {
+        this.cidrBlock = cidrBlock;
+    }
+
+    public String getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(String zoneId) {
+        this.zoneId = zoneId;
     }
 }

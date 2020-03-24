@@ -6,6 +6,8 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreDeleteVSwitchRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreDeleteVSwitchResponseDto;
+import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 
 import java.util.List;
 
@@ -14,9 +16,9 @@ import java.util.List;
  */
 public interface VSwitchService {
 
-    List<CoreCreateVSwitchResponseDto> createVSwitch(List<CoreCreateVSwitchRequestDto> coreCreateVSwitchRequestDtoList) throws PluginException;
+    List<CoreCreateVSwitchResponseDto> createVSwitch(List<CoreCreateVSwitchRequestDto> requestDtoList);
 
-    DescribeVSwitchesResponse retrieveVSwtich(IAcsClient client, String regionId, String vSwitchId) throws PluginException;
+    DescribeVSwitchesResponse retrieveVSwitch(IAcsClient client, String regionId, String vSwitchId) throws PluginException, AliCloudException;
 
-    void deleteVSwitch(List<CoreDeleteVSwitchRequestDto> deleteVSwitchRequestList) throws PluginException;
+    List<CoreDeleteVSwitchResponseDto> deleteVSwitch(List<CoreDeleteVSwitchRequestDto> requestDtoList);
 }

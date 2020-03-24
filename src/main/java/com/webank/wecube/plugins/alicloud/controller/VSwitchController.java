@@ -1,12 +1,13 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreDeleteVSwitchRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreDeleteVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.service.vpc.vswitch.VSwitchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,24 +30,15 @@ public class VSwitchController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDtoBkp<?> createVSwitch(@RequestBody CoreRequestDtoBkp<CoreCreateVSwitchRequestDto> coreCreateVSwitchDtoCoreResponseDto) {
-        List<CoreCreateVSwitchResponseDto> result;
-        try {
-            result = this.vSwitchService.createVSwitch(coreCreateVSwitchDtoCoreResponseDto.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreCreateVSwitchResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreCreateVSwitchResponseDto> createVSwitch(@RequestBody CoreRequestDto<CoreCreateVSwitchRequestDto> coreCreateVSwitchDtoCoreResponseDto) {
+        List<CoreCreateVSwitchResponseDto> result = this.vSwitchService.createVSwitch(coreCreateVSwitchDtoCoreResponseDto.getInputs());
+        return new CoreResponseDto<CoreCreateVSwitchResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "delete")
     @ResponseBody
-    public CoreResponseDtoBkp<?> deleteVSwitch(@RequestBody CoreRequestDtoBkp<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
-        try {
-            this.vSwitchService.deleteVSwitch(coreDeleteVSwitchRequestDto.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return CoreResponseDtoBkp.okay();
+    public CoreResponseDto<CoreDeleteVSwitchResponseDto> deleteVSwitch(@RequestBody CoreRequestDtoBkp<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
+        List<CoreDeleteVSwitchResponseDto> result = this.vSwitchService.deleteVSwitch(coreDeleteVSwitchRequestDto.getInputs());
+        return new CoreResponseDto<CoreDeleteVSwitchResponseDto>().withErrorCheck(result);
     }
 }

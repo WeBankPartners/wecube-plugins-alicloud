@@ -1,55 +1,62 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.vswitch;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteVSwitchRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteVSwitchRequestDto extends DeleteVSwitchRequest {
-    private String identityParams;
-    private String cloudParams;
+public class CoreDeleteVSwitchRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreDeleteVSwitchRequestDto, DeleteVSwitchRequest> {
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    public CoreDeleteVSwitchRequestDto(String vSwitchId, String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
-    }
+    private Long resourceOwnerId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private Long ownerId;
+    @JsonProperty(value = "vSwitchId")
+    private String vSwitchId;
 
     public CoreDeleteVSwitchRequestDto() {
     }
 
-    public static DeleteVSwitchRequest toSdk(CoreDeleteVSwitchRequestDto coreCreateVSwitchRequestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateVSwitchRequestDto, DeleteVSwitchRequest.class);
+    public Long getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getVSwitchId() {
+        return vSwitchId;
+    }
+
+    public void setVSwitchId(String vSwitchId) {
+        this.vSwitchId = vSwitchId;
     }
 }
