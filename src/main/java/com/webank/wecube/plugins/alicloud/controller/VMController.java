@@ -1,9 +1,8 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.service.ecs.vm.VMService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,60 +26,36 @@ public class VMController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDtoBkp<?> createVM(@RequestBody CoreRequestDtoBkp<CoreCreateVMRequestDto> request) {
-        List<CoreCreateVMResponseDto> result;
-        try {
-            result = this.vmService.createVM(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreCreateVMResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreCreateVMResponseDto> createVM(@RequestBody CoreRequestDto<CoreCreateVMRequestDto> request) {
+        List<CoreCreateVMResponseDto> result = this.vmService.createVM(request.getInputs());
+        return new CoreResponseDto<CoreCreateVMResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDtoBkp<?> deleteVM(@RequestBody CoreRequestDtoBkp<CoreDeleteVMRequestDto> request) {
-        try {
-            this.vmService.deleteVM(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return CoreResponseDtoBkp.okay();
+    public CoreResponseDto<CoreDeleteVMResponseDto> deleteVM(@RequestBody CoreRequestDto<CoreDeleteVMRequestDto> request) {
+        List<CoreDeleteVMResponseDto> result = this.vmService.deleteVM(request.getInputs());
+        return new CoreResponseDto<CoreDeleteVMResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/start")
     @ResponseBody
-    public CoreResponseDtoBkp<?> startVM(@RequestBody CoreRequestDtoBkp<CoreStartVMRequestDto> request) {
-        List<CoreStartVMResponseDto> result;
-        try {
-            result = this.vmService.startVM(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreStartVMResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreStartVMResponseDto> startVM(@RequestBody CoreRequestDto<CoreStartVMRequestDto> request) {
+        List<CoreStartVMResponseDto> result = this.vmService.startVM(request.getInputs());
+        return new CoreResponseDto<CoreStartVMResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/stop")
     @ResponseBody
-    public CoreResponseDtoBkp<?> stopVM(@RequestBody CoreRequestDtoBkp<CoreStopVMRequestDto> request) {
-        List<CoreStopVMResponseDto> result;
-        try {
-            result = this.vmService.stopVM(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreStopVMResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreStopVMResponseDto> stopVM(@RequestBody CoreRequestDto<CoreStopVMRequestDto> request) {
+        List<CoreStopVMResponseDto> result = this.vmService.stopVM(request.getInputs());
+        return new CoreResponseDto<CoreStopVMResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/security-group/bind")
     @ResponseBody
-    public CoreResponseDtoBkp<?> bindSecurityGroup(@RequestBody CoreRequestDtoBkp<CoreBindSecurityGroupRequestDto> request) {
-        List<CoreBindSecurityGroupResponseDto> result;
-        try {
-            result = this.vmService.bindSecurityGroup(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreBindSecurityGroupResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreBindSecurityGroupResponseDto> bindSecurityGroup(@RequestBody CoreRequestDto<CoreBindSecurityGroupRequestDto> request) {
+        List<CoreBindSecurityGroupResponseDto> result = this.vmService.bindSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreBindSecurityGroupResponseDto>().withErrorCheck(result);
     }
 }

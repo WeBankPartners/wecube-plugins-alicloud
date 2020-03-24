@@ -1,78 +1,87 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 
 import com.aliyuncs.ecs.model.v20140526.StartInstanceRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreStartVMRequestDto extends StartInstanceRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+public class CoreStartVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreStartVMRequestDto, StartInstanceRequest> {
+    private String resourceOwnerId;
+    private String sourceRegionId;
+    private String initLocalDisk;
+    private String dryRun;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String instanceId;
 
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setInitLocalDisk(Boolean initLocalDisk) {
-        super.setInitLocalDisk(initLocalDisk);
-    }
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setDryRun(Boolean dryRun) {
-        super.setDryRun(dryRun);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    public CoreStartVMRequestDto(String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
-    }
 
     public CoreStartVMRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getSourceRegionId() {
+        return sourceRegionId;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setSourceRegionId(String sourceRegionId) {
+        this.sourceRegionId = sourceRegionId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getInitLocalDisk() {
+        return initLocalDisk;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setInitLocalDisk(String initLocalDisk) {
+        this.initLocalDisk = initLocalDisk;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getDryRun() {
+        return dryRun;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setDryRun(String dryRun) {
+        this.dryRun = dryRun;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 }

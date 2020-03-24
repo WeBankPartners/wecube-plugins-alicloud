@@ -1,38 +1,23 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 
 import com.aliyuncs.ecs.model.v20140526.DeleteInstanceResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteVMResponseDto extends DeleteInstanceResponse {
-    private String guid;
-    private String callbackParameter;
-
+public class CoreDeleteVMResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDeleteVMResponseDto, DeleteInstanceResponse> {
+    private String requestId;
 
     public CoreDeleteVMResponseDto() {
     }
 
-    public static CoreDeleteVMResponseDto fromSdk(DeleteInstanceResponse response) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(response, CoreDeleteVMResponseDto.class);
+    public String getRequestId() {
+        return requestId;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

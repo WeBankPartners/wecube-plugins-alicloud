@@ -1,85 +1,77 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 
 import com.aliyuncs.ecs.model.v20140526.DeleteInstanceRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteVMRequestDto extends DeleteInstanceRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setTerminateSubscription(Boolean terminateSubscription) {
-        super.setTerminateSubscription(terminateSubscription);
-    }
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setForce(Boolean force) {
-        super.setForce(force);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    public CoreDeleteVMRequestDto(String instanceId, String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
-    }
+public class CoreDeleteVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreDeleteVMRequestDto, DeleteInstanceRequest> {
+    private String resourceOwnerId;
+    private String terminateSubscription;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String instanceId;
+    private String force;
 
     public CoreDeleteVMRequestDto() {
     }
 
-    public static DeleteInstanceRequest toSdk(CoreDeleteVMRequestDto coreCreateVMRequestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateVMRequestDto, DeleteInstanceRequest.class);
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getTerminateSubscription() {
+        return terminateSubscription;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setTerminateSubscription(String terminateSubscription) {
+        this.terminateSubscription = terminateSubscription;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public String getGuid() {
-        return guid;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public String getOwnerAccount() {
+        return ownerAccount;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public String getForce() {
+        return force;
+    }
+
+    public void setForce(String force) {
+        this.force = force;
     }
 }

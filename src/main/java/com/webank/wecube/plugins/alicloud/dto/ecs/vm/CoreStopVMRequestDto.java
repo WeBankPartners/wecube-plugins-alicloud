@@ -1,84 +1,96 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 
 import com.aliyuncs.ecs.model.v20140526.StopInstanceRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreStopVMRequestDto extends StopInstanceRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setForceStop(Boolean forceStop) {
-        super.setForceStop(forceStop);
-    }
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setConfirmStop(Boolean confirmStop) {
-        super.setConfirmStop(confirmStop);
-    }
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setDryRun(Boolean dryRun) {
-        super.setDryRun(dryRun);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    public CoreStopVMRequestDto(String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
-    }
+public class CoreStopVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreStopVMRequestDto, StopInstanceRequest> {
+    private String resourceOwnerId;
+    private String stoppedMode;
+    private String forceStop;
+    private String confirmStop;
+    private String dryRun;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String instanceId;
 
     public CoreStopVMRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getStoppedMode() {
+        return stoppedMode;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setStoppedMode(String stoppedMode) {
+        this.stoppedMode = stoppedMode;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getForceStop() {
+        return forceStop;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setForceStop(String forceStop) {
+        this.forceStop = forceStop;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getConfirmStop() {
+        return confirmStop;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setConfirmStop(String confirmStop) {
+        this.confirmStop = confirmStop;
+    }
+
+    public String getDryRun() {
+        return dryRun;
+    }
+
+    public void setDryRun(String dryRun) {
+        this.dryRun = dryRun;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 }
