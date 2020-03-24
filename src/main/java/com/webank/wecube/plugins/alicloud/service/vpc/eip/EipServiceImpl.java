@@ -4,7 +4,7 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.eip.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
@@ -70,7 +70,7 @@ public class EipServiceImpl implements EipService {
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -114,7 +114,7 @@ public class EipServiceImpl implements EipService {
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -175,7 +175,7 @@ public class EipServiceImpl implements EipService {
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -207,7 +207,7 @@ public class EipServiceImpl implements EipService {
                 UnassociateEipAddressResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
