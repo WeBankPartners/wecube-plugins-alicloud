@@ -189,7 +189,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                         // check VSwtich status until it's available
                         final String routeTableId = associatedRouteTable.getRouteTableId();
 
-                        Function<?, Boolean> func = o -> this.routeTableService.checkIfRouteTableAvailable(client, regionId, routeTableId);
+                        Function<?, Boolean> func = this.ifBothRouteTableAndVSwitchAvailable(client, regionId, routeTableId, foundVSwitchId);
                         final PluginTimerTask checkRouteTableStatusTask = new PluginTimerTask(func);
                         PluginTimer.runTask(checkRouteTableStatusTask);
 
@@ -251,5 +251,13 @@ public class VSwitchServiceImpl implements VSwitchService {
         response = this.acsClientStub.request(client, request);
 
         return StringUtils.equals(AliCloudConstant.RESOURCE_AVAILABLE_STATUS, response.getVSwitches().get(0).getStatus());
+    }
+
+    private Function<?, Boolean> ifBothRouteTableAndVSwitchAvailable(IAcsClient client, String regionId, String routeTableId, String vSwitchId) {
+        return o -> {
+            boolean ifRouteTableAvailable = this.routeTableService.checkIfRouteTableAvailable(client, regionId, routeTableId);
+            boolean ifVSwitchAvailable = this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
+            return ifRouteTableAvailable && ifVSwitchAvailable;
+        };
     }
 }
