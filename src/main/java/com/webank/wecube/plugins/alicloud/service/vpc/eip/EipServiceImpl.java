@@ -58,14 +58,14 @@ public class EipServiceImpl implements EipService {
                     retrieveEipAddressRequest.setRegionId(regionId);
                     final DescribeEipAddressesResponse.EipAddress foundEip = this.retrieveEipAddress(client, retrieveEipAddressRequest);
                     if (null != foundEip) {
-                        result = result.fromSdk(foundEip);
+                        result = result.fromSdkCrossLineage(foundEip);
                         continue;
                     }
                 }
 
                 logger.info("Allocating EIP address...");
 
-                AllocateEipAddressRequest allocateEipAddressRequest = requestDto.toSdk(requestDto, AllocateEipAddressRequest.class);
+                AllocateEipAddressRequest allocateEipAddressRequest = requestDto.toSdk(requestDto);
                 AllocateEipAddressResponse response = this.acsClientStub.request(client, allocateEipAddressRequest);
                 result = result.fromSdk(response);
 
@@ -108,7 +108,7 @@ public class EipServiceImpl implements EipService {
 
                 logger.info("Releasing EIP address...");
 
-                ReleaseEipAddressRequest request = requestDto.toSdk(requestDto, ReleaseEipAddressRequest.class);
+                ReleaseEipAddressRequest request = requestDto.toSdk(requestDto);
                 request.setRegionId(regionId);
                 ReleaseEipAddressResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
@@ -169,7 +169,7 @@ public class EipServiceImpl implements EipService {
 
                 logger.info("Associating EIP address...");
 
-                AssociateEipAddressRequest request = requestDto.toSdk(requestDto, AssociateEipAddressRequest.class);
+                AssociateEipAddressRequest request = requestDto.toSdk(requestDto);
                 request.setRegionId(regionId);
                 AssociateEipAddressResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
@@ -202,7 +202,7 @@ public class EipServiceImpl implements EipService {
 
                 logger.info("Un-associating EIP address...");
 
-                UnassociateEipAddressRequest request = requestDto.toSdk(requestDto, UnassociateEipAddressRequest.class);
+                UnassociateEipAddressRequest request = requestDto.toSdk(requestDto);
                 request.setRegionId(regionId);
                 UnassociateEipAddressResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
