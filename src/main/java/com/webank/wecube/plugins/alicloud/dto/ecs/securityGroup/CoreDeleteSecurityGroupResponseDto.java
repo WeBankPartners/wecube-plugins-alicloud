@@ -1,16 +1,17 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
-import com.aliyuncs.ecs.model.v20140526.RevokeSecurityGroupResponse;
+import com.aliyuncs.ecs.model.v20140526.DeleteSecurityGroupResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreRevokeSecurityGroupResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreRevokeSecurityGroupResponseDto, RevokeSecurityGroupResponse> {
+public class CoreDeleteSecurityGroupResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDeleteSecurityGroupResponseDto, DeleteSecurityGroupResponse> {
+
     private String requestId;
 
-    public CoreRevokeSecurityGroupResponseDto() {
+    public CoreDeleteSecurityGroupResponseDto() {
     }
 
     public String getRequestId() {

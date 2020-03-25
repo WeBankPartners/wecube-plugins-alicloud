@@ -2,107 +2,206 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.RevokeSecurityGroupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreRevokeSecurityGroupRequestDto extends RevokeSecurityGroupRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<RevokeSecurityGroupRequest> {
 
     @JsonProperty(value = "isEgress")
-    @JsonDeserialize(as = Boolean.class)
-    private boolean isEgress;
+    private String isEgress = "false";
 
-    private String destGroupId;
-    private String destGroupOwnerAccount;
-    private Long destGroupOwnerId;
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setSourceGroupOwnerId(Long sourceGroupOwnerId) {
-        super.setSourceGroupOwnerId(sourceGroupOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+    private String nicType;
+    private String resourceOwnerId;
+    private String sourcePortRange;
+    private String clientToken;
+    private String securityGroupId;
+    private String description;
+    private String sourceGroupOwnerId;
+    private String sourceGroupOwnerAccount;
+    private String ipv6DestCidrIp;
+    private String ipv6SourceCidrIp;
+    private String policy;
+    private String portRange;
+    private String resourceOwnerAccount;
+    private String ipProtocol;
+    private String ownerAccount;
+    private String sourceCidrIp;
+    private String ownerId;
+    private String priority;
+    private String destCidrIp;
+    private String sourceGroupId;
 
     public CoreRevokeSecurityGroupRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
-    }
-
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
-    }
-
-    public String getCloudParams() {
-        return cloudParams;
-    }
-
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
-    }
-
-    public String getDestGroupId() {
-        return destGroupId;
-    }
-
-    public void setDestGroupId(String destGroupId) {
-        this.destGroupId = destGroupId;
-    }
-
-    public String getDestGroupOwnerAccount() {
-        return destGroupOwnerAccount;
-    }
-
-    public void setDestGroupOwnerAccount(String destGroupOwnerAccount) {
-        this.destGroupOwnerAccount = destGroupOwnerAccount;
-    }
-
-    public Long getDestGroupOwnerId() {
-        return destGroupOwnerId;
-    }
-
-    public void setDestGroupOwnerId(Long destGroupOwnerId) {
-        this.destGroupOwnerId = destGroupOwnerId;
-    }
-
-    public boolean isEgress() {
+    public String getIsEgress() {
         return isEgress;
     }
 
-    public void setEgress(boolean egress) {
-        isEgress = egress;
+    public void setIsEgress(String isEgress) {
+        this.isEgress = isEgress;
+    }
+
+    public String getNicType() {
+        return nicType;
+    }
+
+    public void setNicType(String nicType) {
+        this.nicType = nicType;
+    }
+
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
+    }
+
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
+    }
+
+    public String getSourcePortRange() {
+        return sourcePortRange;
+    }
+
+    public void setSourcePortRange(String sourcePortRange) {
+        this.sourcePortRange = sourcePortRange;
+    }
+
+    public String getClientToken() {
+        return clientToken;
+    }
+
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSourceGroupOwnerId() {
+        return sourceGroupOwnerId;
+    }
+
+    public void setSourceGroupOwnerId(String sourceGroupOwnerId) {
+        this.sourceGroupOwnerId = sourceGroupOwnerId;
+    }
+
+    public String getSourceGroupOwnerAccount() {
+        return sourceGroupOwnerAccount;
+    }
+
+    public void setSourceGroupOwnerAccount(String sourceGroupOwnerAccount) {
+        this.sourceGroupOwnerAccount = sourceGroupOwnerAccount;
+    }
+
+    public String getIpv6DestCidrIp() {
+        return ipv6DestCidrIp;
+    }
+
+    public void setIpv6DestCidrIp(String ipv6DestCidrIp) {
+        this.ipv6DestCidrIp = ipv6DestCidrIp;
+    }
+
+    public String getIpv6SourceCidrIp() {
+        return ipv6SourceCidrIp;
+    }
+
+    public void setIpv6SourceCidrIp(String ipv6SourceCidrIp) {
+        this.ipv6SourceCidrIp = ipv6SourceCidrIp;
+    }
+
+    public String getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
+
+    public String getPortRange() {
+        return portRange;
+    }
+
+    public void setPortRange(String portRange) {
+        this.portRange = portRange;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getIpProtocol() {
+        return ipProtocol;
+    }
+
+    public void setIpProtocol(String ipProtocol) {
+        this.ipProtocol = ipProtocol;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getSourceCidrIp() {
+        return sourceCidrIp;
+    }
+
+    public void setSourceCidrIp(String sourceCidrIp) {
+        this.sourceCidrIp = sourceCidrIp;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public String getDestCidrIp() {
+        return destCidrIp;
+    }
+
+    public void setDestCidrIp(String destCidrIp) {
+        this.destCidrIp = destCidrIp;
+    }
+
+    public String getSourceGroupId() {
+        return sourceGroupId;
+    }
+
+    public void setSourceGroupId(String sourceGroupId) {
+        this.sourceGroupId = sourceGroupId;
     }
 }

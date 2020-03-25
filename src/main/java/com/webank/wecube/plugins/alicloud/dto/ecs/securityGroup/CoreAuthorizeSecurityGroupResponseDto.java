@@ -1,30 +1,23 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupResponse;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreAuthorizeSecurityGroupResponseDto extends AuthorizeSecurityGroupResponse {
-    private String guid;
-    private String callbackParameter;
+public class CoreAuthorizeSecurityGroupResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreAuthorizeSecurityGroupResponseDto, AuthorizeSecurityGroupResponse> {
+    private String requestId;
 
     public CoreAuthorizeSecurityGroupResponseDto() {
     }
 
-    public String getGuid() {
-        return guid;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

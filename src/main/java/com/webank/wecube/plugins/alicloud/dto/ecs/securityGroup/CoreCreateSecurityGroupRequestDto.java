@@ -1,42 +1,30 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.CreateSecurityGroupRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+
+import java.util.List;
 
 /**
  * @author howechen
  */
-public class CoreCreateSecurityGroupRequestDto extends CreateSecurityGroupRequest {
+public class CoreCreateSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateSecurityGroupRequest> {
     private String securityGroupId;
-    private String identityParams;
-    private String cloudParams;
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+    private String resourceOwnerId;
+    private String clientToken;
+    private String description;
+    private String securityGroupName;
+    private String resourceGroupId;
+    private List<CreateSecurityGroupRequest.Tag> tags;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String securityGroupType;
+    private String vpcId;
 
     public CoreCreateSecurityGroupRequestDto() {
-    }
-
-    public CoreCreateSecurityGroupRequestDto(String securityGroupId, String identityParams, String cloudParams) {
-        this.securityGroupId = securityGroupId;
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
-    }
-
-    public static CreateSecurityGroupRequest toSdk(CoreCreateSecurityGroupRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, CreateSecurityGroupRequest.class);
     }
 
     public String getSecurityGroupId() {
@@ -47,19 +35,91 @@ public class CoreCreateSecurityGroupRequestDto extends CreateSecurityGroupReques
         this.securityGroupId = securityGroupId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getClientToken() {
+        return clientToken;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSecurityGroupName() {
+        return securityGroupName;
+    }
+
+    public void setSecurityGroupName(String securityGroupName) {
+        this.securityGroupName = securityGroupName;
+    }
+
+    public String getResourceGroupId() {
+        return resourceGroupId;
+    }
+
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
+    }
+
+    public List<CreateSecurityGroupRequest.Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<CreateSecurityGroupRequest.Tag> tags) {
+        this.tags = tags;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getSecurityGroupType() {
+        return securityGroupType;
+    }
+
+    public void setSecurityGroupType(String securityGroupType) {
+        this.securityGroupType = securityGroupType;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setVpcId(String vpcId) {
+        this.vpcId = vpcId;
     }
 }

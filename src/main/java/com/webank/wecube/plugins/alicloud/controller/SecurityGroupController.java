@@ -1,9 +1,8 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.*;
 import com.webank.wecube.plugins.alicloud.service.ecs.securityGroup.SecurityGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,48 +26,29 @@ public class SecurityGroupController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDtoBkp<?> createSecurityGroup(@RequestBody CoreRequestDtoBkp<CoreCreateSecurityGroupRequestDto> request) {
-        List<CoreCreateSecurityGroupResponseDto> result;
-        try {
-            result = this.securityGroupService.createSecurityGroup(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreCreateSecurityGroupResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreCreateSecurityGroupResponseDto> createSecurityGroup(@RequestBody CoreRequestDto<CoreCreateSecurityGroupRequestDto> request) {
+        List<CoreCreateSecurityGroupResponseDto> result = this.securityGroupService.createSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreCreateSecurityGroupResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDtoBkp<?> deleteSecurityGroup(@RequestBody CoreRequestDtoBkp<CoreDeleteSecurityGroupRequestDto> request) {
-        try {
-            this.securityGroupService.deleteSecurityGroup(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return CoreResponseDtoBkp.okay();
+    public CoreResponseDto<CoreDeleteSecurityGroupResponseDto> deleteSecurityGroup(@RequestBody CoreRequestDto<CoreDeleteSecurityGroupRequestDto> request) {
+        List<CoreDeleteSecurityGroupResponseDto> result = this.securityGroupService.deleteSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreDeleteSecurityGroupResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/authorize")
     @ResponseBody
-    public CoreResponseDtoBkp<?> authorizeSecurityGroup(@RequestBody CoreRequestDtoBkp<CoreAuthorizeSecurityGroupRequestDto> request) {
-        List<CoreAuthorizeSecurityGroupResponseDto> result;
-        try {
-            result = this.securityGroupService.authorizeSecurityGroup(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreAuthorizeSecurityGroupResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreAuthorizeSecurityGroupResponseDto> authorizeSecurityGroup(@RequestBody CoreRequestDto<CoreAuthorizeSecurityGroupRequestDto> request) {
+        List<CoreAuthorizeSecurityGroupResponseDto> result = this.securityGroupService.authorizeSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreAuthorizeSecurityGroupResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/revoke")
     @ResponseBody
-    public CoreResponseDtoBkp<?> revokeSecurityGroup(@RequestBody CoreRequestDtoBkp<CoreRevokeSecurityGroupRequestDto> request) {
-        List<CoreRevokeSecurityGroupResponseDto> result;
-        try {
-            result = this.securityGroupService.revokeSecurityGroup(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreRevokeSecurityGroupResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreRevokeSecurityGroupResponseDto> revokeSecurityGroup(@RequestBody CoreRequestDto<CoreRevokeSecurityGroupRequestDto> request) {
+        List<CoreRevokeSecurityGroupResponseDto> result = this.securityGroupService.revokeSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreRevokeSecurityGroupResponseDto>().withErrorCheck(result);
     }
 }
