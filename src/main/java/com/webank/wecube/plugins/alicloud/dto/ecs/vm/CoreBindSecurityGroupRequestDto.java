@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author howechen
  */
-public class CoreBindSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreBindSecurityGroupRequestDto, ModifyInstanceAttributeRequest> {
+public class CoreBindSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<ModifyInstanceAttributeRequest> {
     private String securityGroupId;
 
     private String resourceOwnerId;

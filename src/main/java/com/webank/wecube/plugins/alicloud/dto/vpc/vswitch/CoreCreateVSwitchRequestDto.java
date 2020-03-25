@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreCreateVSwitchRequestDto, CreateVSwitchRequest> {
+public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateVSwitchRequest> {
     private String vSwitchId;
 
     private String resourceOwnerId;

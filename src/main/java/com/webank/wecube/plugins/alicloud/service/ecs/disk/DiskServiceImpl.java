@@ -64,7 +64,7 @@ public class DiskServiceImpl implements DiskService {
 
 
                 // if disk id is empty, create disk
-                final CreateDiskRequest createDiskRequest = requestDto.toSdk(requestDto);
+                final CreateDiskRequest createDiskRequest = requestDto.toSdk();
                 createDiskRequest.setRegionId(regionId);
                 CreateDiskResponse response;
                 response = this.acsClientStub.request(client, createDiskRequest);
@@ -111,7 +111,7 @@ public class DiskServiceImpl implements DiskService {
 
                 // delete disk
                 logger.info("Deleting disk, disk ID: [{}], disk region:[{}]", diskId, regionId);
-                DeleteDiskRequest request = requestDto.toSdk(requestDto);
+                DeleteDiskRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 final DeleteDiskResponse response = this.acsClientStub.request(client, request);
 
@@ -149,7 +149,7 @@ public class DiskServiceImpl implements DiskService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                final AttachDiskRequest request = requestDto.toSdk(requestDto);
+                final AttachDiskRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
                     throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
@@ -188,7 +188,7 @@ public class DiskServiceImpl implements DiskService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                final DetachDiskRequest request = requestDto.toSdk(requestDto);
+                final DetachDiskRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
 
                 if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {

@@ -65,7 +65,7 @@ public class VpcServiceImpl implements VpcService {
                 }
 
                 // if vpc id is empty or cannot find VPC by given vpcId, create vpc
-                final CreateVpcRequest request = requestDto.toSdk(requestDto);
+                final CreateVpcRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 CreateVpcResponse response;
                 response = this.acsClientStub.request(client, request);
@@ -124,7 +124,7 @@ public class VpcServiceImpl implements VpcService {
 
                 // delete VPC
                 logger.info("Deleting VPC, VPC ID: [{}], VPC region:[{}]", requestDto.getVpcId(), regionId);
-                final DeleteVpcRequest deleteVpcRequest = requestDto.toSdk(requestDto);
+                final DeleteVpcRequest deleteVpcRequest = requestDto.toSdk();
                 this.acsClientStub.request(client, deleteVpcRequest);
 
                 // re-check if VPC has already been deleted

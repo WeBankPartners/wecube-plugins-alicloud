@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author howechen
  */
-public class CoreCreateDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreCreateDiskRequestDto, CreateDiskRequest> {
+public class CoreCreateDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateDiskRequest> {
     private String diskId;
 
     private String resourceOwnerId;

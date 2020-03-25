@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreUnAssociateEipRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreUnAssociateEipRequestDto, UnassociateEipAddressRequest> {
+public class CoreUnAssociateEipRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<UnassociateEipAddressRequest> {
     private String resourceOwnerId;
     private String allocationId;
     private String instanceType;

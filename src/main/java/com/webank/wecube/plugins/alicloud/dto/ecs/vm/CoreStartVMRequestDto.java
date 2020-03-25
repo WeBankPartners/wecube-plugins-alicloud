@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreStartVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreStartVMRequestDto, StartInstanceRequest> {
+public class CoreStartVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<StartInstanceRequest> {
     private String resourceOwnerId;
     private String sourceRegionId;
     private String initLocalDisk;

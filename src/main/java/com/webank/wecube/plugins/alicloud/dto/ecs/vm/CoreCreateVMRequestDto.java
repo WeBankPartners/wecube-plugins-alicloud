@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author howechen
  */
-public class CoreCreateVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreCreateVMRequestDto, CreateInstanceRequest> {
+public class CoreCreateVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateInstanceRequest> {
     private String instanceId;
 
     private String resourceOwnerId;

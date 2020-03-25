@@ -78,7 +78,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 }
 
                 // create VSwitch
-                final CreateVSwitchRequest aliCloudRequest = requestDto.toSdk(requestDto);
+                final CreateVSwitchRequest aliCloudRequest = requestDto.toSdk();
                 aliCloudRequest.setRegionId(regionId);
 
                 CreateVSwitchResponse createVSwitchResponse;
@@ -206,7 +206,7 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                 // delete VSwitch
                 logger.info("Deleting VSwitch: [{}]", foundVSwitchId);
-                final DeleteVSwitchRequest deleteVSwitchRequest = requestDto.toSdk(requestDto);
+                final DeleteVSwitchRequest deleteVSwitchRequest = requestDto.toSdk();
                 deleteVSwitchRequest.setRegionId(regionId);
                 this.acsClientStub.request(client, deleteVSwitchRequest);
 

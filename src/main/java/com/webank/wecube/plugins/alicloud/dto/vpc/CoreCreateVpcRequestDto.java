@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreCreateVpcRequestDto, CreateVpcRequest> {
+public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateVpcRequest> {
 
     private String vpcId;
 

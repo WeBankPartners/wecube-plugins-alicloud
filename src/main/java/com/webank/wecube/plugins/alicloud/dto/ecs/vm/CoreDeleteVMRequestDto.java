@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreDeleteVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreDeleteVMRequestDto, DeleteInstanceRequest> {
+public class CoreDeleteVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteInstanceRequest> {
     private String resourceOwnerId;
     private String terminateSubscription;
     private String resourceOwnerAccount;

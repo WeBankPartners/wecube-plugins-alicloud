@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreStopVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreStopVMRequestDto, StopInstanceRequest> {
+public class CoreStopVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<StopInstanceRequest> {
     private String resourceOwnerId;
     private String stoppedMode;
     private String forceStop;

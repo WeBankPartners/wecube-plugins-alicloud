@@ -64,7 +64,7 @@ public class VMServiceImpl implements VMService {
                 }
 
                 // create VM instance
-                final CreateInstanceRequest request = requestDto.toSdk(requestDto);
+                final CreateInstanceRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
 
                 CreateInstanceResponse response;
@@ -131,7 +131,7 @@ public class VMServiceImpl implements VMService {
 
 
                 // delete VM instance
-                DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk(requestDto);
+                DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk();
                 deleteInstanceRequest.setRegionId(regionId);
                 DeleteInstanceResponse response;
                 response = this.acsClientStub.request(client, deleteInstanceRequest);
@@ -174,7 +174,7 @@ public class VMServiceImpl implements VMService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                final StartInstanceRequest startInstanceRequest = requestDto.toSdk(requestDto);
+                final StartInstanceRequest startInstanceRequest = requestDto.toSdk();
                 startInstanceRequest.setRegionId(regionId);
                 StartInstanceResponse response;
                 response = this.acsClientStub.request(client, startInstanceRequest);
@@ -204,7 +204,7 @@ public class VMServiceImpl implements VMService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                final StopInstanceRequest stopInstanceRequest = requestDto.toSdk(requestDto);
+                final StopInstanceRequest stopInstanceRequest = requestDto.toSdk();
                 stopInstanceRequest.setRegionId(regionId);
 
                 StopInstanceResponse response;
@@ -249,7 +249,7 @@ public class VMServiceImpl implements VMService {
                 currentSecurityGroupIdList.add(securityGroupId);
                 currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
 
-                ModifyInstanceAttributeRequest request = requestDto.toSdk(requestDto);
+                ModifyInstanceAttributeRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 request.setSecurityGroupIdss(currentSecurityGroupIdList);
 

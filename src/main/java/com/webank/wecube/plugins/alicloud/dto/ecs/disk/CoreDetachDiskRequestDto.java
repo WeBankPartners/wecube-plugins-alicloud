@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreDetachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreDetachDiskRequestDto, DetachDiskRequest> {
+public class CoreDetachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DetachDiskRequest> {
     private String resourceOwnerId;
     private String diskId;
     private String deleteWithInstance;

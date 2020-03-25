@@ -7,7 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 /**
  * @author howechen
  */
-public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreAttachDiskRequestDto, AttachDiskRequest> {
+public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AttachDiskRequest> {
 
     private Long resourceOwnerId;
     private String keyPairName;
