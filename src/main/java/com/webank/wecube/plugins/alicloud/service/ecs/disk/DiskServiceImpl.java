@@ -58,6 +58,7 @@ public class DiskServiceImpl implements DiskService {
                     if (retrieveDiskResponse.getDisks().size() == 1) {
                         final DescribeDisksResponse.Disk foundDisk = retrieveDiskResponse.getDisks().get(0);
                         result.fromSdkCrossLineage(foundDisk);
+                        result.setRequestId(retrieveDiskResponse.getRequestId());
                         continue;
                     }
                 }
