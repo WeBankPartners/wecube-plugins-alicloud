@@ -1,38 +1,24 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.disk;
 
 import com.aliyuncs.ecs.model.v20140526.DetachDiskResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDetachDiskResponseDto extends DetachDiskResponse {
+public class CoreDetachDiskResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDetachDiskResponseDto, DetachDiskResponse> {
 
-    private String guid;
-    private String callbackParameter;
+    private String requestId;
 
     public CoreDetachDiskResponseDto() {
     }
 
-    public static CoreDetachDiskResponseDto fromSdk(DetachDiskResponse response) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(response, CoreDetachDiskResponseDto.class);
+    public String getRequestId() {
+        return requestId;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

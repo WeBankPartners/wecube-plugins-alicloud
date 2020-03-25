@@ -1,43 +1,32 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.disk;
 
 import com.aliyuncs.ecs.model.v20140526.CreateDiskResponse;
-import com.aliyuncs.ecs.model.v20140526.DescribeDisksResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateDiskResponseDto extends CreateDiskResponse {
-    private String guid;
-    private String callbackParameter;
+public class CoreCreateDiskResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateDiskResponseDto, CreateDiskResponse> {
+    private String requestId;
+    private String diskId;
 
     public CoreCreateDiskResponseDto() {
     }
 
-    public static CoreCreateDiskResponseDto fromSdk(DescribeDisksResponse.Disk diskResponse) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(diskResponse, CoreCreateDiskResponseDto.class);
+    public String getRequestId() {
+        return requestId;
     }
 
-    public static CoreCreateDiskResponseDto fromSdk(CreateDiskResponse diskResponse) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(diskResponse, CoreCreateDiskResponseDto.class);
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getDiskId() {
+        return diskId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setDiskId(String diskId) {
+        this.diskId = diskId;
     }
 }

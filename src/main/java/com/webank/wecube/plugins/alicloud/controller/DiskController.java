@@ -1,9 +1,8 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.disk.*;
 import com.webank.wecube.plugins.alicloud.service.ecs.disk.DiskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,49 +26,29 @@ public class DiskController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDtoBkp<?> createDisk(@RequestBody CoreRequestDtoBkp<CoreCreateDiskRequestDto> request) {
-        List<CoreCreateDiskResponseDto> result;
-        try {
-            result = this.diskService.createDisk(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreCreateDiskResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreCreateDiskResponseDto> createDisk(@RequestBody CoreRequestDto<CoreCreateDiskRequestDto> request) {
+        List<CoreCreateDiskResponseDto> result = this.diskService.createDisk(request.getInputs());
+        return new CoreResponseDto<CoreCreateDiskResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDtoBkp<?> deleteDisk(@RequestBody CoreRequestDtoBkp<CoreDeleteDiskRequestDto> request) {
-        List<CoreDeleteDiskResponseDto> result;
-        try {
-            result = this.diskService.deleteDisk(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreDeleteDiskResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreDeleteDiskResponseDto> deleteDisk(@RequestBody CoreRequestDto<CoreDeleteDiskRequestDto> request) {
+        List<CoreDeleteDiskResponseDto> result = this.diskService.deleteDisk(request.getInputs());
+        return new CoreResponseDto<CoreDeleteDiskResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/attach")
     @ResponseBody
-    public CoreResponseDtoBkp<?> attachDisk(@RequestBody CoreRequestDtoBkp<CoreAttachDiskRequestDto> request) {
-        List<CoreAttachDiskResponseDto> result;
-        try {
-            result = this.diskService.attachDisk(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreAttachDiskResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreAttachDiskResponseDto> attachDisk(@RequestBody CoreRequestDto<CoreAttachDiskRequestDto> request) {
+        List<CoreAttachDiskResponseDto> result = this.diskService.attachDisk(request.getInputs());
+        return new CoreResponseDto<CoreAttachDiskResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/detach")
     @ResponseBody
-    public CoreResponseDtoBkp<?> detachDisk(@RequestBody CoreRequestDtoBkp<CoreDetachDiskRequestDto> request) {
-        List<CoreDetachDiskResponseDto> result;
-        try {
-            result = this.diskService.detachDisk(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreDetachDiskResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreDetachDiskResponseDto> detachDisk(@RequestBody CoreRequestDto<CoreDetachDiskRequestDto> request) {
+        List<CoreDetachDiskResponseDto> result = this.diskService.detachDisk(request.getInputs());
+        return new CoreResponseDto<CoreDetachDiskResponseDto>().withErrorCheck(result);
     }
 }

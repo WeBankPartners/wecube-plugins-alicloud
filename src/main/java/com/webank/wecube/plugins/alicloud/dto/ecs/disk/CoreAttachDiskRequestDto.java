@@ -1,81 +1,114 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.disk;
 
 import com.aliyuncs.ecs.model.v20140526.AttachDiskRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreAttachDiskRequestDto extends AttachDiskRequest {
+public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreAttachDiskRequestDto, AttachDiskRequest> {
 
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setBootable(Boolean bootable) {
-        super.setBootable(bootable);
-    }
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setDeleteWithInstance(Boolean deleteWithInstance) {
-        super.setDeleteWithInstance(deleteWithInstance);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+    private Long resourceOwnerId;
+    private String keyPairName;
+    private Boolean bootable;
+    private String password;
+    private String diskId;
+    private Boolean deleteWithInstance;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private Long ownerId;
+    private String instanceId;
+    private String device;
 
     public CoreAttachDiskRequestDto() {
     }
 
-    public static AttachDiskRequest toSdk(CoreAttachDiskRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, AttachDiskRequest.class);
+    public Long getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getKeyPairName() {
+        return keyPairName;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setKeyPairName(String keyPairName) {
+        this.keyPairName = keyPairName;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public Boolean getBootable() {
+        return bootable;
     }
 
-    public String getGuid() {
-        return guid;
+    public void setBootable(Boolean bootable) {
+        this.bootable = bootable;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public String getPassword() {
+        return password;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public String getDiskId() {
+        return diskId;
+    }
+
+    public void setDiskId(String diskId) {
+        this.diskId = diskId;
+    }
+
+    public Boolean getDeleteWithInstance() {
+        return deleteWithInstance;
+    }
+
+    public void setDeleteWithInstance(Boolean deleteWithInstance) {
+        this.deleteWithInstance = deleteWithInstance;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 }

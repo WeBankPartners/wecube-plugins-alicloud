@@ -1,74 +1,78 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.disk;
 
 import com.aliyuncs.ecs.model.v20140526.DetachDiskRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDetachDiskRequestDto extends DetachDiskRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+public class CoreDetachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CoreDetachDiskRequestDto, DetachDiskRequest> {
+    private String resourceOwnerId;
+    private String diskId;
+    private String deleteWithInstance;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String instanceId;
 
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setDeleteWithInstance(Boolean deleteWithInstance) {
-        super.setDeleteWithInstance(deleteWithInstance);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
 
     public CoreDetachDiskRequestDto() {
     }
 
-    public static DetachDiskRequest toSdk(CoreDetachDiskRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, DetachDiskRequest.class);
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getDiskId() {
+        return diskId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setDiskId(String diskId) {
+        this.diskId = diskId;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public String getDeleteWithInstance() {
+        return deleteWithInstance;
     }
 
-    public String getGuid() {
-        return guid;
+    public void setDeleteWithInstance(String deleteWithInstance) {
+        this.deleteWithInstance = deleteWithInstance;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 }
