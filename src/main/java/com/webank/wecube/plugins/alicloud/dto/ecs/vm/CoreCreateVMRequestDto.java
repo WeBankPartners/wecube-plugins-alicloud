@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 
 import com.aliyuncs.ecs.model.v20140526.CreateInstanceRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
@@ -28,6 +29,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     private String period;
     private String dryRun;
     private String ownerId;
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
     private String privateIpAddress;
     private String spotStrategy;
@@ -209,11 +211,11 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
         this.ownerId = ownerId;
     }
 
-    public String getvSwitchId() {
+    public String getVSwitchId() {
         return vSwitchId;
     }
 
-    public void setvSwitchId(String vSwitchId) {
+    public void setVSwitchId(String vSwitchId) {
         this.vSwitchId = vSwitchId;
     }
 

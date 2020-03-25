@@ -53,6 +53,7 @@ public class VMServiceImpl implements VMService {
                     if (response.getTotalCount() == 1) {
                         final DescribeInstancesResponse.Instance foundInstance = response.getInstances().get(0);
                         result = result.fromSdkCrossLineage(foundInstance);
+                        result.setRequestId(response.getRequestId());
                         continue;
                     }
                 }
