@@ -60,6 +60,7 @@ public class VpcServiceImpl implements VpcService {
                     if (retrieveVpcResponse.getVpcs().size() == 1) {
                         final DescribeVpcsResponse.Vpc foundVpc = retrieveVpcResponse.getVpcs().get(0);
                         result = result.fromSdkCrossLineage(foundVpc);
+                        result.setRequestId(retrieveVpcResponse.getRequestId());
                         continue;
                     }
                 }
