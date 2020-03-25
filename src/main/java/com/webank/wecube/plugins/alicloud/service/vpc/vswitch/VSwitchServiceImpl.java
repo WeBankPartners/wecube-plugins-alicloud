@@ -67,6 +67,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                     if (response.getTotalCount() == 1) {
                         final DescribeVSwitchesResponse.VSwitch foundVSwitch = response.getVSwitches().get(0);
                         result = result.fromSdkCrossLineage(foundVSwitch);
+                        result.setRequestId(response.getRequestId());
                         continue;
                     }
                 }
