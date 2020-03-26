@@ -53,11 +53,11 @@ public class CoreAllocateEipRequestDto extends CoreRequestInputDto implements Pl
         this.clientToken = clientToken;
     }
 
-    public String getiSP() {
+    public String getISP() {
         return iSP;
     }
 
-    public void setiSP(String iSP) {
+    public void setISP(String iSP) {
         this.iSP = iSP;
     }
 
