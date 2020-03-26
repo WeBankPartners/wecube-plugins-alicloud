@@ -1,38 +1,24 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.DeleteLoadBalancerResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteLoadBalancerResponseDto extends DeleteLoadBalancerResponse {
+public class CoreDeleteLoadBalancerResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDeleteLoadBalancerResponseDto, DeleteLoadBalancerResponse> {
 
-    private String guid;
-    private String callbackParameter;
+    private String requestId;
 
     public CoreDeleteLoadBalancerResponseDto() {
     }
 
-    public static CoreDeleteLoadBalancerResponseDto fromSdk(DeleteLoadBalancerResponse response) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(response, CoreDeleteLoadBalancerResponseDto.class);
+    public String getRequestId() {
+        return requestId;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

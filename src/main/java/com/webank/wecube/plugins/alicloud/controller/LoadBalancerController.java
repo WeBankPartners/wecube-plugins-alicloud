@@ -1,9 +1,8 @@
 package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerRequestDto;
@@ -29,49 +28,29 @@ public class LoadBalancerController {
 
     @PostMapping(path = "/create")
     @ResponseBody
-    public CoreResponseDtoBkp<?> createLoadBalancer(@RequestBody CoreRequestDtoBkp<CoreCreateLoadBalancerRequestDto> request) {
-        List<CoreCreateLoadBalancerResponseDto> result;
-        try {
-            result = this.loadBalancerService.createLoadBalancer(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreCreateLoadBalancerResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreCreateLoadBalancerResponseDto> createLoadBalancer(@RequestBody CoreRequestDto<CoreCreateLoadBalancerRequestDto> request) {
+        List<CoreCreateLoadBalancerResponseDto> result = this.loadBalancerService.createLoadBalancer(request.getInputs());
+        return new CoreResponseDto<CoreCreateLoadBalancerResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/delete")
     @ResponseBody
-    public CoreResponseDtoBkp<?> deleteLoadBalancer(@RequestBody CoreRequestDtoBkp<CoreDeleteLoadBalancerRequestDto> request) {
-        List<CoreDeleteLoadBalancerResponseDto> result;
-        try {
-            result = this.loadBalancerService.deleteLoadBalancer(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreDeleteLoadBalancerResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreDeleteLoadBalancerResponseDto> deleteLoadBalancer(@RequestBody CoreRequestDto<CoreDeleteLoadBalancerRequestDto> request) {
+        List<CoreDeleteLoadBalancerResponseDto> result = this.loadBalancerService.deleteLoadBalancer(request.getInputs());
+        return new CoreResponseDto<CoreDeleteLoadBalancerResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/backend_server/add")
     @ResponseBody
-    public CoreResponseDtoBkp<?> createListener(@RequestBody CoreRequestDtoBkp<CoreAddBackendServerRequestDto> request) {
-        List<CoreAddBackendServerResponseDto> result;
-        try {
-            result = this.loadBalancerService.addBackendServer(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreAddBackendServerResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreAddBackendServerResponseDto> addBackendServer(@RequestBody CoreRequestDto<CoreAddBackendServerRequestDto> request) {
+        List<CoreAddBackendServerResponseDto> result = this.loadBalancerService.addBackendServer(request.getInputs());
+        return new CoreResponseDto<CoreAddBackendServerResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/backend_server/remove")
     @ResponseBody
-    public CoreResponseDtoBkp<?> deleteListener(@RequestBody CoreRequestDtoBkp<CoreRemoveBackendServerRequestDto> request) {
-        List<CoreRemoveBackendServerResponseDto> result;
-        try {
-            result = this.loadBalancerService.removeBackendServer(request.getInputs());
-        } catch (PluginException ex) {
-            return CoreResponseDtoBkp.error(ex.getMessage());
-        }
-        return new CoreResponseDtoBkp<CoreRemoveBackendServerResponseDto>().okayWithData(result);
+    public CoreResponseDto<CoreRemoveBackendServerResponseDto> removeBackendServer(@RequestBody CoreRequestDto<CoreRemoveBackendServerRequestDto> request) {
+        List<CoreRemoveBackendServerResponseDto> result = this.loadBalancerService.removeBackendServer(request.getInputs());
+        return new CoreResponseDto<CoreRemoveBackendServerResponseDto>().withErrorCheck(result);
     }
 }

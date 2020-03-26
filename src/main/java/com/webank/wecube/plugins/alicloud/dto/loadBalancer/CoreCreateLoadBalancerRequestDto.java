@@ -1,82 +1,40 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateLoadBalancerRequestDto extends CreateLoadBalancerRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateLoadBalancerRequest> {
     private String loadBalancerId;
     private String loadBalancerProtocol;
 
-    @JsonDeserialize(as = Integer.class)
-    @Override
-    public void setDuration(Integer duration) {
-        super.setDuration(duration);
-    }
-
-    @JsonDeserialize(as = Integer.class)
-    @Override
-    public void setBandwidth(Integer bandwidth) {
-        super.setBandwidth(bandwidth);
-    }
-
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setAutoPay(Boolean autoPay) {
-        super.setAutoPay(autoPay);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    public CoreCreateLoadBalancerRequestDto(String identityParams, String cloudParams, String loadBalancerId, String guid, String callbackParameter, String loadBalancerProtocol) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
-        this.loadBalancerId = loadBalancerId;
-        this.guid = guid;
-        this.callbackParameter = callbackParameter;
-        this.loadBalancerProtocol = loadBalancerProtocol;
-    }
+    private String resourceOwnerId;
+    private String clientToken;
+    private String addressIPVersion;
+    private String masterZoneId;
+    private String duration;
+    private String resourceGroupId;
+    private String loadBalancerName;
+    private String addressType;
+    private String slaveZoneId;
+    private String deleteProtection;
+    private String loadBalancerSpec;
+    private String autoPay;
+    private String address;
+    private String resourceOwnerAccount;
+    private String bandwidth;
+    private String ownerAccount;
+    private String ownerId;
+    private String vSwitchId;
+    private String internetChargeType;
+    private String vpcId;
+    private String payType;
+    private String pricingCycle;
 
     public CoreCreateLoadBalancerRequestDto() {
-    }
-
-    public static CreateLoadBalancerRequest toSdk(CoreCreateLoadBalancerRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, CreateLoadBalancerRequest.class);
-    }
-
-    public String getIdentityParams() {
-        return identityParams;
-    }
-
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
-    }
-
-    public String getCloudParams() {
-        return cloudParams;
-    }
-
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
     }
 
     public String getLoadBalancerId() {
@@ -87,27 +45,187 @@ public class CoreCreateLoadBalancerRequestDto extends CreateLoadBalancerRequest 
         this.loadBalancerId = loadBalancerId;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
-    }
-
     public String getLoadBalancerProtocol() {
         return loadBalancerProtocol;
     }
 
     public void setLoadBalancerProtocol(String loadBalancerProtocol) {
         this.loadBalancerProtocol = loadBalancerProtocol;
+    }
+
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
+    }
+
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
+    }
+
+    public String getClientToken() {
+        return clientToken;
+    }
+
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public String getAddressIPVersion() {
+        return addressIPVersion;
+    }
+
+    public void setAddressIPVersion(String addressIPVersion) {
+        this.addressIPVersion = addressIPVersion;
+    }
+
+    public String getMasterZoneId() {
+        return masterZoneId;
+    }
+
+    public void setMasterZoneId(String masterZoneId) {
+        this.masterZoneId = masterZoneId;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getResourceGroupId() {
+        return resourceGroupId;
+    }
+
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
+    }
+
+    public String getLoadBalancerName() {
+        return loadBalancerName;
+    }
+
+    public void setLoadBalancerName(String loadBalancerName) {
+        this.loadBalancerName = loadBalancerName;
+    }
+
+    public String getAddressType() {
+        return addressType;
+    }
+
+    public void setAddressType(String addressType) {
+        this.addressType = addressType;
+    }
+
+    public String getSlaveZoneId() {
+        return slaveZoneId;
+    }
+
+    public void setSlaveZoneId(String slaveZoneId) {
+        this.slaveZoneId = slaveZoneId;
+    }
+
+    public String getDeleteProtection() {
+        return deleteProtection;
+    }
+
+    public void setDeleteProtection(String deleteProtection) {
+        this.deleteProtection = deleteProtection;
+    }
+
+    public String getLoadBalancerSpec() {
+        return loadBalancerSpec;
+    }
+
+    public void setLoadBalancerSpec(String loadBalancerSpec) {
+        this.loadBalancerSpec = loadBalancerSpec;
+    }
+
+    public String getAutoPay() {
+        return autoPay;
+    }
+
+    public void setAutoPay(String autoPay) {
+        this.autoPay = autoPay;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getBandwidth() {
+        return bandwidth;
+    }
+
+    public void setBandwidth(String bandwidth) {
+        this.bandwidth = bandwidth;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getvSwitchId() {
+        return vSwitchId;
+    }
+
+    public void setvSwitchId(String vSwitchId) {
+        this.vSwitchId = vSwitchId;
+    }
+
+    public String getInternetChargeType() {
+        return internetChargeType;
+    }
+
+    public void setInternetChargeType(String internetChargeType) {
+        this.internetChargeType = internetChargeType;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setVpcId(String vpcId) {
+        this.vpcId = vpcId;
+    }
+
+    public String getPayType() {
+        return payType;
+    }
+
+    public void setPayType(String payType) {
+        this.payType = payType;
+    }
+
+    public String getPricingCycle() {
+        return pricingCycle;
+    }
+
+    public void setPricingCycle(String pricingCycle) {
+        this.pricingCycle = pricingCycle;
     }
 }

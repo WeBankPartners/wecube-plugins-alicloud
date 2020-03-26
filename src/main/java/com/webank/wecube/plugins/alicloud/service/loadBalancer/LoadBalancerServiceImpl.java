@@ -5,6 +5,7 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.slb.model.v20140515.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerResponseDto;
@@ -43,49 +44,57 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     }
 
     @Override
-    public List<CoreCreateLoadBalancerResponseDto> createLoadBalancer(List<CoreCreateLoadBalancerRequestDto> coreCreateLoadBalancerRequestDtoList) throws PluginException {
+    public List<CoreCreateLoadBalancerResponseDto> createLoadBalancer(List<CoreCreateLoadBalancerRequestDto> coreCreateLoadBalancerRequestDtoList) {
         List<CoreCreateLoadBalancerResponseDto> resultList = new ArrayList<>();
         for (CoreCreateLoadBalancerRequestDto requestDto : coreCreateLoadBalancerRequestDtoList) {
-            // check region id
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final String regionId = cloudParamDto.getRegionId();
 
-            if (StringUtils.isEmpty(regionId)) {
-                throw new PluginException("The region id cannot be NULL or empty.");
-            }
-            requestDto.setRegionId(regionId);
-
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String loadBalancerId = requestDto.getLoadBalancerId();
             CoreCreateLoadBalancerResponseDto result = new CoreCreateLoadBalancerResponseDto();
 
+            try {
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
 
-            if (StringUtils.isNotEmpty(loadBalancerId)) {
-                // if load balancer id is not empty, retrieve load balancer info
-                final DescribeLoadBalancersResponse foundLoadBalancerResponse = this.retrieveLoadBalancer(client, regionId, loadBalancerId);
-                if (foundLoadBalancerResponse.getLoadBalancers().size() == 1) {
-                    final DescribeLoadBalancersResponse.LoadBalancer foundLoadBalancer = foundLoadBalancerResponse.getLoadBalancers().get(0);
-                    result = CoreCreateLoadBalancerResponseDto.fromSdk(foundLoadBalancer);
+                // check region id
+                if (StringUtils.isEmpty(regionId)) {
+                    throw new PluginException("The region id cannot be NULL or empty.");
                 }
-            } else {
+
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String loadBalancerId = requestDto.getLoadBalancerId();
+
+
+                if (StringUtils.isNotEmpty(loadBalancerId)) {
+                    // if load balancer id is not empty, retrieve load balancer info
+                    final DescribeLoadBalancersResponse foundLoadBalancerResponse = this.retrieveLoadBalancer(client, regionId, loadBalancerId);
+                    if (foundLoadBalancerResponse.getLoadBalancers().size() == 1) {
+                        final DescribeLoadBalancersResponse.LoadBalancer foundLoadBalancer = foundLoadBalancerResponse.getLoadBalancers().get(0);
+                        result = result.fromSdkCrossLineage(foundLoadBalancer);
+                        result.setRequestId(foundLoadBalancerResponse.getRequestId());
+                    }
+                }
+
                 // if load balancer id is empty, create load balancer
-                final CreateLoadBalancerRequest createLoadBalancerRequest = CoreCreateLoadBalancerRequestDto.toSdk(requestDto);
+                final CreateLoadBalancerRequest createLoadBalancerRequest = requestDto.toSdk();
+                createLoadBalancerRequest.setRegionId(regionId);
                 CreateLoadBalancerResponse response;
-                try {
-                    response = this.acsClientStub.request(client, createLoadBalancerRequest);
-                } catch (AliCloudException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
-                result = CoreCreateLoadBalancerResponseDto.fromSdk(response);
+                response = this.acsClientStub.request(client, createLoadBalancerRequest);
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
             }
-            resultList.add(result);
 
         }
         return resultList;
     }
 
-    private DescribeLoadBalancersResponse retrieveLoadBalancer(IAcsClient client, String regionId, String loadBalancerId) throws PluginException {
+    private DescribeLoadBalancersResponse retrieveLoadBalancer(IAcsClient client, String regionId, String loadBalancerId) throws PluginException, AliCloudException {
 
         if (StringUtils.isAnyEmpty(regionId, loadBalancerId)) {
             String msg = "Either regionId or loadBalancerId cannot be empty or null";
@@ -100,179 +109,198 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         request.setLoadBalancerId(loadBalancerId);
 
         DescribeLoadBalancersResponse response;
-        try {
-            response = this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
-
+        response = this.acsClientStub.request(client, request);
         return response;
     }
 
     @Override
-    public List<CoreDeleteLoadBalancerResponseDto> deleteLoadBalancer(List<CoreDeleteLoadBalancerRequestDto> coreDeleteLoadBalancerRequestDtoList) throws PluginException {
+    public List<CoreDeleteLoadBalancerResponseDto> deleteLoadBalancer(List<CoreDeleteLoadBalancerRequestDto> coreDeleteLoadBalancerRequestDtoList) {
         List<CoreDeleteLoadBalancerResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteLoadBalancerRequestDto requestDto : coreDeleteLoadBalancerRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+            CoreDeleteLoadBalancerResponseDto result = new CoreDeleteLoadBalancerResponseDto();
+            try {
 
-            final String loadBalancerId = requestDto.getLoadBalancerId();
-            if (StringUtils.isEmpty(loadBalancerId)) {
-                throw new PluginException("The load balancer id cannot be empty or null.");
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String loadBalancerId = requestDto.getLoadBalancerId();
+
+                if (StringUtils.isEmpty(loadBalancerId)) {
+                    throw new PluginException("The load balancer id cannot be empty or null.");
+                }
+
+                final DescribeLoadBalancersResponse foundLoadBalancerInfo = this.retrieveLoadBalancer(client, regionId, loadBalancerId);
+
+                // check if load balancer already deleted
+                if (0 == foundLoadBalancerInfo.getTotalCount()) {
+                    result.setRequestId(foundLoadBalancerInfo.getRequestId());
+                    continue;
+                }
+
+                // delete VPC
+                logger.info("Deleting load balancer, load balancer ID: [{}], regionID" +
+                        ":[{}]", requestDto.getLoadBalancerId(), regionId);
+                final DeleteLoadBalancerRequest deleteLoadBalancerRequest = requestDto.toSdk();
+                deleteLoadBalancerRequest.setRegionId(regionId);
+                final DeleteLoadBalancerResponse response = this.acsClientStub.request(client, deleteLoadBalancerRequest);
+
+                // re-check if VPC has already been deleted
+                if (0 != this.retrieveLoadBalancer(client, regionId, loadBalancerId).getTotalCount()) {
+                    String msg = String.format("The VPC: [%s] from region: [%s] hasn't been deleted", loadBalancerId, regionId);
+                    logger.error(msg);
+                    throw new PluginException(msg);
+                }
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
             }
 
-            final DescribeLoadBalancersResponse foundLoadBalancerInfo = this.retrieveLoadBalancer(client, regionId, loadBalancerId);
 
-            // check if load balancer already deleted
-            if (0 == foundLoadBalancerInfo.getTotalCount()) {
-                continue;
-            }
-
-            // delete VPC
-            logger.info("Deleting load balancer, load balancer ID: [{}], regionID" +
-                    ":[{}]", requestDto.getLoadBalancerId(), regionId);
-            final DeleteLoadBalancerRequest deleteLoadBalancerRequest = CoreDeleteLoadBalancerRequestDto.toSdk(requestDto);
-            final DeleteLoadBalancerResponse response = this.acsClientStub.request(client, deleteLoadBalancerRequest);
-
-            // re-check if VPC has already been deleted
-            if (0 != this.retrieveLoadBalancer(client, regionId, loadBalancerId).getTotalCount()) {
-                String msg = String.format("The VPC: [%s] from region: [%s] hasn't been deleted", loadBalancerId, regionId);
-                logger.error(msg);
-                throw new PluginException(msg);
-            }
-
-            final CoreDeleteLoadBalancerResponseDto result = CoreDeleteLoadBalancerResponseDto.fromSdk(response);
-            result.setGuid(requestDto.getGuid());
-            result.setCallbackParameter(requestDto.getCallbackParameter());
-            resultList.add(result);
         }
         return resultList;
     }
 
     @Override
-    public List<CoreAddBackendServerResponseDto> addBackendServer(List<CoreAddBackendServerRequestDto> coreAddBackendServerRequestDtoList) throws PluginException {
+    public List<CoreAddBackendServerResponseDto> addBackendServer(List<CoreAddBackendServerRequestDto> coreAddBackendServerRequestDtoList) {
         List<CoreAddBackendServerResponseDto> resultList = new ArrayList<>();
         for (CoreAddBackendServerRequestDto requestDto : coreAddBackendServerRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final Integer listenerPort = requestDto.getListenerPort();
-            final String loadBalancerId = requestDto.getLoadBalancerId();
-            final String listenerProtocol = requestDto.getListenerProtocol();
-
-            if (!EnumUtils.isValidEnumIgnoreCase(listenerProtocolType.class, listenerProtocol.toUpperCase())) {
-                throw new PluginException("The listenerProtocol is an invalid type.");
-            }
-
-            // check if there is a listener exists
-            boolean ifListenerExists = checkIfListenerExists(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
 
             CoreAddBackendServerResponseDto result = new CoreAddBackendServerResponseDto();
-            if (ifListenerExists) {
-                // check if listener is already bind the VServerGroup
-                String listenerBondVServerGroupId = retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
-                if (StringUtils.isNotEmpty(listenerBondVServerGroupId)) {
-                    // VServerGroup already bound with that listener
-                    // add backendServer on that VServerGroup
-                    logger.info("Adding backend server on existed VServerGroup");
-                    final AddVServerGroupBackendServersResponse modifyResponse = this.addBackendServerOnVServerGroup(client, regionId, requestDto.getBackendServers(), listenerBondVServerGroupId);
 
-                    result.setRequestId(modifyResponse.getRequestId());
-                    result.setVServerGroupId(listenerBondVServerGroupId);
-                    result.setBackendServers(PluginSdkBridge.fromSdkList(modifyResponse.getBackendServers(), CoreAddBackendServerResponseDto.BackendServer.class));
+            try {
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final Integer listenerPort = Integer.parseInt(requestDto.getListenerPort());
+                final String loadBalancerId = requestDto.getLoadBalancerId();
+                final String listenerProtocol = requestDto.getListenerProtocol();
+
+                if (!EnumUtils.isValidEnumIgnoreCase(listenerProtocolType.class, listenerProtocol.toUpperCase())) {
+                    throw new PluginException("The listenerProtocol is an invalid type.");
+                }
+
+                // check if there is a listener exists
+                boolean ifListenerExists = checkIfListenerExists(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
+
+                if (ifListenerExists) {
+                    // check if listener is already bind the VServerGroup
+                    String listenerBondVServerGroupId = retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
+                    if (StringUtils.isNotEmpty(listenerBondVServerGroupId)) {
+                        // VServerGroup already bound with that listener
+                        // add backendServer on that VServerGroup
+                        logger.info("Adding backend server on existed VServerGroup");
+                        final AddVServerGroupBackendServersResponse modifyResponse = this.addBackendServerOnVServerGroup(client, regionId, requestDto.getBackendServers(), listenerBondVServerGroupId);
+
+                        result.setRequestId(modifyResponse.getRequestId());
+                        result.setVServerGroupId(listenerBondVServerGroupId);
+                        result.setBackendServers(PluginSdkBridge.fromSdkList(modifyResponse.getBackendServers(), CreateVServerGroupResponse.BackendServer.class));
+                    } else {
+                        // create VServerGroup with backendServer info
+                        logger.info("Creating new VServerGroup...");
+                        final CreateVServerGroupResponse createdVServerGroup = createVServerGroup(requestDto, client, regionId);
+
+                        // bind VServerGroup to that listener
+                        logger.info("Binding created VServerGroup to the existed listener...");
+                        final String createdVServerGroupId = createdVServerGroup.getVServerGroupId();
+                        this.bindVServerGroupToListener(client, regionId, requestDto, createdVServerGroupId);
+
+                        result = result.fromSdk(createdVServerGroup);
+                    }
                 } else {
+                    // listener doesn't exist
+
                     // create VServerGroup with backendServer info
                     logger.info("Creating new VServerGroup...");
-                    final CreateVServerGroupResponse createdVServerGroup = createVServerGroup(requestDto, client);
+                    final CreateVServerGroupResponse createdVServerGroup = createVServerGroup(requestDto, client, regionId);
 
-                    // bind VServerGroup to that listener
-                    logger.info("Binding created VServerGroup to the existed listener...");
-                    final String createdVServerGroupId = createdVServerGroup.getVServerGroupId();
-                    this.bindVServerGroupToListener(client, regionId, requestDto, createdVServerGroupId);
+                    // add the new listener with created VServerGroupId
+                    logger.info("Creating new listener with just created new VServerGroup...");
+                    this.createNewListener(client, regionId, requestDto, createdVServerGroup.getVServerGroupId());
 
-                    result = PluginSdkBridge.fromSdk(createdVServerGroup, CoreAddBackendServerResponseDto.class);
+                    result = result.fromSdk(createdVServerGroup);
                 }
-            } else {
-                // listener doesn't exist
 
-                // create VServerGroup with backendServer info
-                logger.info("Creating new VServerGroup...");
-                final CreateVServerGroupResponse createdVServerGroup = createVServerGroup(requestDto, client);
+                // start the created listener
+                this.startListener(client, listenerPort, loadBalancerId, regionId);
 
-                // add the new listener with created VServerGroupId
-                logger.info("Creating new listener with just created new VServerGroup...");
-                this.createNewListener(client, regionId, requestDto, createdVServerGroup.getVServerGroupId());
-
-                result = PluginSdkBridge.fromSdk(createdVServerGroup, CoreAddBackendServerResponseDto.class);
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
             }
 
-            // start the created listener
-            this.startListener(client, listenerPort, loadBalancerId, regionId);
 
-            result.setGuid(requestDto.getGuid());
-            result.setCallbackParameter(requestDto.getCallbackParameter());
-            resultList.add(result);
         }
         return resultList;
     }
 
     @Override
-    public List<CoreRemoveBackendServerResponseDto> removeBackendServer(List<CoreRemoveBackendServerRequestDto> coreRemoveBackendServerRequestDtoList) throws PluginException {
+    public List<CoreRemoveBackendServerResponseDto> removeBackendServer(List<CoreRemoveBackendServerRequestDto> coreRemoveBackendServerRequestDtoList) {
         List<CoreRemoveBackendServerResponseDto> resultList = new ArrayList<>();
         for (CoreRemoveBackendServerRequestDto requestDto : coreRemoveBackendServerRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
-            final Integer listenerPort = requestDto.getListenerPort();
-            final String listenerProtocol = requestDto.getListenerProtocol();
-            final String loadBalancerId = requestDto.getLoadBalancerId();
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
             CoreRemoveBackendServerResponseDto result = new CoreRemoveBackendServerResponseDto();
 
-            if (null == listenerPort) {
-                throw new PluginException("Listener port cannot be null.");
-            }
-
-            if (StringUtils.isAnyEmpty(listenerProtocol, loadBalancerId)) {
-                throw new PluginException("Either the  listener protocol or loadBalancerId can not be empty or null");
-            }
-
-            logger.info("Retrieving the vServerGroupId bound on listener port: [{}] with protocol: [{}] from load balancer ID: [{}]", listenerPort, listenerProtocol, loadBalancerId);
-
-            final String vServerGroupId = this.retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
-
-            if (StringUtils.isEmpty(vServerGroupId)) {
-                throw new PluginException("Cannot find vServerGroup ID by the given info.");
-            }
-
-            logger.info("The vServerGroupId found: [{}], removing backendServers from that vServerGroup", vServerGroupId);
-
-            RemoveVServerGroupBackendServersRequest request = PluginSdkBridge.toSdk(requestDto, RemoveVServerGroupBackendServersRequest.class);
-            request.setVServerGroupId(vServerGroupId);
-            RemoveVServerGroupBackendServersResponse response;
             try {
-                response = this.acsClientStub.request(client, request);
-            } catch (AliCloudException ex) {
-                throw new PluginException(ex.getMessage());
-            }
 
-            result = PluginSdkBridge.fromSdk(response, CoreRemoveBackendServerResponseDto.class);
-            result.setGuid(requestDto.getGuid());
-            result.setCallbackParameter(requestDto.getCallbackParameter());
-            resultList.add(result);
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final Integer listenerPort = Integer.parseInt(requestDto.getListenerPort());
+                final String listenerProtocol = requestDto.getListenerProtocol();
+                final String loadBalancerId = requestDto.getLoadBalancerId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+
+
+                if (StringUtils.isAnyEmpty(listenerProtocol, loadBalancerId)) {
+                    throw new PluginException("Either the listener protocol or loadBalancerId cannot be empty or null");
+                }
+
+                logger.info("Retrieving the vServerGroupId bound on listener port: [{}] with protocol: [{}] from load balancer ID: [{}]", listenerPort, listenerProtocol, loadBalancerId);
+
+                final String vServerGroupId = this.retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
+
+                if (StringUtils.isEmpty(vServerGroupId)) {
+                    throw new PluginException("Cannot find vServerGroup ID by the given info.");
+                }
+
+                logger.info("The vServerGroupId found: [{}], removing backendServers from that vServerGroup", vServerGroupId);
+
+                RemoveVServerGroupBackendServersRequest request = requestDto.toSdk();
+                request.setRegionId(regionId);
+                request.setVServerGroupId(vServerGroupId);
+                RemoveVServerGroupBackendServersResponse response;
+                response = this.acsClientStub.request(client, request);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
+            }
         }
         return resultList;
     }
 
-    private AddVServerGroupBackendServersResponse addBackendServerOnVServerGroup(IAcsClient client, String regionId, String backendServers, String vServerGroupId) {
+    private AddVServerGroupBackendServersResponse addBackendServerOnVServerGroup(IAcsClient client, String regionId, String backendServers, String vServerGroupId) throws PluginException, AliCloudException {
         if (StringUtils.isAnyEmpty(regionId, backendServers, vServerGroupId)) {
             throw new PluginException("The regionId, backendServers or vServerGroupId cannot be empty or null");
         }
@@ -283,16 +311,12 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         request.setVServerGroupId(vServerGroupId);
 
         AddVServerGroupBackendServersResponse response;
-        try {
-            response = this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
+        response = this.acsClientStub.request(client, request);
         return response;
 
     }
 
-    private String retrieveVServerGroupId(IAcsClient client, String regionId, Integer listenerPort, String loadBalancerId, String listenerProtocol) {
+    private String retrieveVServerGroupId(IAcsClient client, String regionId, Integer listenerPort, String loadBalancerId, String listenerProtocol) throws AliCloudException {
         String vServerGroupId = StringUtils.EMPTY;
         switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, listenerProtocol)) {
             case HTTP:
@@ -305,11 +329,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 tcpListenerAttributeRequest.setListenerPort(listenerPort);
                 tcpListenerAttributeRequest.setRegionId(regionId);
                 DescribeLoadBalancerTCPListenerAttributeResponse describeLoadBalancerTCPListenerAttributeResponse;
-                try {
-                    describeLoadBalancerTCPListenerAttributeResponse = this.acsClientStub.request(client, tcpListenerAttributeRequest);
-                } catch (AliCloudException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
+                describeLoadBalancerTCPListenerAttributeResponse = this.acsClientStub.request(client, tcpListenerAttributeRequest);
                 vServerGroupId = describeLoadBalancerTCPListenerAttributeResponse.getVServerGroupId();
                 break;
             case HTTPS:
@@ -320,40 +340,45 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         return vServerGroupId;
     }
 
-    private CreateVServerGroupResponse createVServerGroup(CoreAddBackendServerRequestDto requestDto, IAcsClient client) {
-        CreateVServerGroupRequest createVServerGroupRequest = PluginSdkBridge.toSdk(requestDto, CreateVServerGroupRequest.class);
+    private CreateVServerGroupResponse createVServerGroup(CoreAddBackendServerRequestDto requestDto, IAcsClient client, String regionId) throws AliCloudException {
+        CreateVServerGroupRequest createVServerGroupRequest = requestDto.toSdk();
+        createVServerGroupRequest.setRegionId(regionId);
+
         CreateVServerGroupResponse createVServerGroupResponse;
-        try {
-            createVServerGroupResponse = this.acsClientStub.request(client, createVServerGroupRequest);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
+        createVServerGroupResponse = this.acsClientStub.request(client, createVServerGroupRequest);
+
         return createVServerGroupResponse;
     }
 
-    private void createNewListener(IAcsClient client, String regionId, CoreAddBackendServerRequestDto requestDto, String vServerGroupId) throws PluginException {
+    private void createNewListener(IAcsClient client, String regionId, CoreAddBackendServerRequestDto requestDto, String vServerGroupId) throws PluginException, AliCloudException {
         AcsRequest<?> request = null;
-        switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, requestDto.getListenerProtocol())) {
-            case HTTP:
-                request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPListenerRequest.class);
-                break;
-            case UDP:
-                request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerUDPListenerRequest.class);
-                break;
-            case TCP:
-                CreateLoadBalancerTCPListenerRequest createLoadBalancerTCPListenerRequest = new CreateLoadBalancerTCPListenerRequest();
-                createLoadBalancerTCPListenerRequest.setBandwidth(requestDto.getBandwidth());
-                createLoadBalancerTCPListenerRequest.setListenerPort(requestDto.getListenerPort());
-                createLoadBalancerTCPListenerRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
-                createLoadBalancerTCPListenerRequest.setVServerGroupId(vServerGroupId);
-                request = createLoadBalancerTCPListenerRequest;
-                break;
-            case HTTPS:
-                request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPSListenerRequest.class);
-                break;
-            default:
-                break;
+
+        try {
+            switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, requestDto.getListenerProtocol())) {
+                case HTTP:
+                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPListenerRequest.class);
+                    break;
+                case UDP:
+                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerUDPListenerRequest.class);
+                    break;
+                case TCP:
+                    CreateLoadBalancerTCPListenerRequest createLoadBalancerTCPListenerRequest = new CreateLoadBalancerTCPListenerRequest();
+                    createLoadBalancerTCPListenerRequest.setBandwidth(Integer.parseInt(requestDto.getBandwidth()));
+                    createLoadBalancerTCPListenerRequest.setListenerPort(Integer.parseInt(requestDto.getListenerPort()));
+                    createLoadBalancerTCPListenerRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
+                    createLoadBalancerTCPListenerRequest.setVServerGroupId(vServerGroupId);
+                    request = createLoadBalancerTCPListenerRequest;
+                    break;
+                case HTTPS:
+                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPSListenerRequest.class);
+                    break;
+                default:
+                    break;
+            }
+        } catch (NumberFormatException ex) {
+            throw new PluginException("Either bandwidth or listenerPort should be valid integer value.");
         }
+
 
         if (null == request) {
             throw new PluginException("Cannot create new listener, the request is null.");
@@ -361,36 +386,37 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
         request.setRegionId(regionId);
 
-        try {
-            this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
-
+        this.acsClientStub.request(client, request);
     }
 
-    private void bindVServerGroupToListener(IAcsClient client, String regionId, CoreAddBackendServerRequestDto requestDto, String vServerGroupId) throws PluginException {
+    private void bindVServerGroupToListener(IAcsClient client, String regionId, CoreAddBackendServerRequestDto requestDto, String vServerGroupId) throws PluginException, AliCloudException {
         AcsRequest<?> request = null;
-        switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, requestDto.getListenerProtocol())) {
-            case HTTP:
-                request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPListenerRequest.class);
-                break;
-            case UDP:
-                request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerUDPListenerRequest.class);
-                break;
-            case TCP:
-                SetLoadBalancerTCPListenerAttributeRequest setLoadBalancerTCPListenerAttributeRequest = new SetLoadBalancerTCPListenerAttributeRequest();
-                setLoadBalancerTCPListenerAttributeRequest.setListenerPort(requestDto.getListenerPort());
-                setLoadBalancerTCPListenerAttributeRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
-                setLoadBalancerTCPListenerAttributeRequest.setVServerGroupId(vServerGroupId);
-                request = setLoadBalancerTCPListenerAttributeRequest;
-                break;
-            case HTTPS:
-                request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPSListenerRequest.class);
-                break;
-            default:
-                break;
+
+        try {
+            switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, requestDto.getListenerProtocol())) {
+                case HTTP:
+                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPListenerRequest.class);
+                    break;
+                case UDP:
+                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerUDPListenerRequest.class);
+                    break;
+                case TCP:
+                    SetLoadBalancerTCPListenerAttributeRequest setLoadBalancerTCPListenerAttributeRequest = new SetLoadBalancerTCPListenerAttributeRequest();
+                    setLoadBalancerTCPListenerAttributeRequest.setListenerPort(Integer.parseInt(requestDto.getListenerPort()));
+                    setLoadBalancerTCPListenerAttributeRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
+                    setLoadBalancerTCPListenerAttributeRequest.setVServerGroupId(vServerGroupId);
+                    request = setLoadBalancerTCPListenerAttributeRequest;
+                    break;
+                case HTTPS:
+                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPSListenerRequest.class);
+                    break;
+                default:
+                    break;
+            }
+        } catch (NumberFormatException ex) {
+            throw new PluginException("The listenerPort should be valid integer value.");
         }
+
 
         if (null == request) {
             throw new PluginException("Cannot create new listener, the request is null.");
@@ -398,45 +424,42 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
         request.setRegionId(regionId);
 
-        try {
-            this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
+        this.acsClientStub.request(client, request);
     }
 
-    private boolean checkIfListenerExists(IAcsClient client, String regionId, Integer listenerPort, String loadBalancerId, String listenerProtocol) {
+    private boolean checkIfListenerExists(IAcsClient client, String regionId, Integer listenerPort, String loadBalancerId, String listenerProtocol) throws AliCloudException {
         boolean ifListenerExists = true;
-        switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, listenerProtocol)) {
-            case HTTP:
-                break;
-            case UDP:
-                break;
-            case TCP:
-                DescribeLoadBalancerTCPListenerAttributeRequest tcpListenerAttributeRequest = new DescribeLoadBalancerTCPListenerAttributeRequest();
-                tcpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
-                tcpListenerAttributeRequest.setListenerPort(listenerPort);
-                tcpListenerAttributeRequest.setRegionId(regionId);
-                try {
+        try {
+            switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, listenerProtocol)) {
+                case HTTP:
+                    break;
+                case UDP:
+                    break;
+                case TCP:
+                    DescribeLoadBalancerTCPListenerAttributeRequest tcpListenerAttributeRequest = new DescribeLoadBalancerTCPListenerAttributeRequest();
+                    tcpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
+                    tcpListenerAttributeRequest.setListenerPort(listenerPort);
+                    tcpListenerAttributeRequest.setRegionId(regionId);
                     this.acsClientStub.request(client, tcpListenerAttributeRequest);
-                } catch (AliCloudException ex) {
-                    if (ex.getMessage().contains("The specified resource does not exist.")) {
-                        ifListenerExists = false;
-                    } else {
-                        throw new PluginException(ex.getMessage());
-                    }
-                }
-                break;
-            case HTTPS:
-                break;
-            default:
-                break;
+                    break;
+                case HTTPS:
+                    break;
+                default:
+                    break;
+            }
+        } catch (AliCloudException ex) {
+            if (ex.getMessage().contains("The specified resource does not exist.")) {
+                ifListenerExists = false;
+            } else {
+                throw ex;
+            }
         }
+
         return ifListenerExists;
     }
 
 
-    private void startListener(IAcsClient client, Integer listenerPort, String loadBalancerId, String regionId) throws PluginException {
+    private void startListener(IAcsClient client, Integer listenerPort, String loadBalancerId, String regionId) throws PluginException, AliCloudException {
         if (null == listenerPort) {
             throw new PluginException("The listener port cannot be empty.");
         }
@@ -451,11 +474,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         request.setListenerPort(listenerPort);
         request.setLoadBalancerId(loadBalancerId);
 
-        try {
-            this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
+        this.acsClientStub.request(client, request);
     }
 
     public enum listenerProtocolType {TCP, UDP, HTTP, HTTPS}

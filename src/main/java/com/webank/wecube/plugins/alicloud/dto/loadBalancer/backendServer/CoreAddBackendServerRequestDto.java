@@ -1,75 +1,35 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.CreateVServerGroupRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreAddBackendServerRequestDto extends CreateVServerGroupRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+public class CoreAddBackendServerRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateVServerGroupRequest> {
 
-
-    private Integer listenerPort;
+    private String listenerPort;
     private String listenerProtocol;
-    private Integer bandwidth;
+    private String bandwidth;
     private String serverId;
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+    private String resourceOwnerId;
+    private String backendServers;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String vServerGroupName;
+    private String loadBalancerId;
 
     public CoreAddBackendServerRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
-    }
-
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
-    }
-
-    public String getCloudParams() {
-        return cloudParams;
-    }
-
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
-    }
-
-    public Integer getListenerPort() {
+    public String getListenerPort() {
         return listenerPort;
     }
 
-    public void setListenerPort(Integer listenerPort) {
+    public void setListenerPort(String listenerPort) {
         this.listenerPort = listenerPort;
     }
 
@@ -81,6 +41,14 @@ public class CoreAddBackendServerRequestDto extends CreateVServerGroupRequest {
         this.listenerProtocol = listenerProtocol;
     }
 
+    public String getBandwidth() {
+        return bandwidth;
+    }
+
+    public void setBandwidth(String bandwidth) {
+        this.bandwidth = bandwidth;
+    }
+
     public String getServerId() {
         return serverId;
     }
@@ -89,11 +57,59 @@ public class CoreAddBackendServerRequestDto extends CreateVServerGroupRequest {
         this.serverId = serverId;
     }
 
-    public Integer getBandwidth() {
-        return bandwidth;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setBandwidth(Integer bandwidth) {
-        this.bandwidth = bandwidth;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
+    }
+
+    public String getBackendServers() {
+        return backendServers;
+    }
+
+    public void setBackendServers(String backendServers) {
+        this.backendServers = backendServers;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getvServerGroupName() {
+        return vServerGroupName;
+    }
+
+    public void setvServerGroupName(String vServerGroupName) {
+        this.vServerGroupName = vServerGroupName;
+    }
+
+    public String getLoadBalancerId() {
+        return loadBalancerId;
+    }
+
+    public void setLoadBalancerId(String loadBalancerId) {
+        this.loadBalancerId = loadBalancerId;
     }
 }
