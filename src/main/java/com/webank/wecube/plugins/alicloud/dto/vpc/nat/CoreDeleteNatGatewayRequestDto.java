@@ -1,72 +1,69 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteNatGatewayRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.constraints.NotEmpty;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteNatGatewayRequestDto extends DeleteNatGatewayRequest {
-    @NotEmpty(message = "identityParams cannot be null or empty")
-    private String identityParams;
-    @NotEmpty(message = "cloudParams cannot be null or empty")
-    private String cloudParams;
-    private String guid = StringUtils.EMPTY;
-    private String callbackParameter = StringUtils.EMPTY;
+public class CoreDeleteNatGatewayRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteNatGatewayRequest> {
 
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setForce(Boolean force) {
-        super.setForce(force);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+    private String resourceOwnerId;
+    private String natGatewayId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String force;
 
     public CoreDeleteNatGatewayRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getNatGatewayId() {
+        return natGatewayId;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setNatGatewayId(String natGatewayId) {
+        this.natGatewayId = natGatewayId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getOwnerAccount() {
+        return ownerAccount;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getForce() {
+        return force;
+    }
+
+    public void setForce(String force) {
+        this.force = force;
     }
 }

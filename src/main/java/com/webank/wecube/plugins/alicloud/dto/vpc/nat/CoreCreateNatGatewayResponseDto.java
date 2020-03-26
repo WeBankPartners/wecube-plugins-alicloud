@@ -1,48 +1,61 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 
 import com.aliyuncs.vpc.model.v20160428.CreateNatGatewayResponse;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+
+import java.util.List;
 
 /**
  * @author howechen
  */
-public class CoreCreateNatGatewayResponseDto extends CreateNatGatewayResponse {
-    private String errorCode;
-    private String errorMessage;
-    private String guid;
-    private String callbackParameter;
+public class CoreCreateNatGatewayResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateNatGatewayResponseDto, CreateNatGatewayResponse> {
+    private String requestId;
+    private String natGatewayId;
+    private List<String> forwardTableIds;
+    private List<String> snatTableIds;
+    private List<String> bandwidthPackageIds;
 
     public CoreCreateNatGatewayResponseDto() {
     }
 
-    public String getErrorCode() {
-        return errorCode;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getNatGatewayId() {
+        return natGatewayId;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setNatGatewayId(String natGatewayId) {
+        this.natGatewayId = natGatewayId;
     }
 
-    public String getGuid() {
-        return guid;
+    public List<String> getForwardTableIds() {
+        return forwardTableIds;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setForwardTableIds(List<String> forwardTableIds) {
+        this.forwardTableIds = forwardTableIds;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public List<String> getSnatTableIds() {
+        return snatTableIds;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setSnatTableIds(List<String> snatTableIds) {
+        this.snatTableIds = snatTableIds;
+    }
+
+    public List<String> getBandwidthPackageIds() {
+        return bandwidthPackageIds;
+    }
+
+    public void setBandwidthPackageIds(List<String> bandwidthPackageIds) {
+        this.bandwidthPackageIds = bandwidthPackageIds;
     }
 }

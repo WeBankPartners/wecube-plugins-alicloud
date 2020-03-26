@@ -1,75 +1,36 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 
 import com.aliyuncs.vpc.model.v20160428.CreateNatGatewayRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.commons.lang3.StringUtils;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
-import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 /**
  * @author howechen
  */
-public class CoreCreateNatGatewayRequestDto extends CreateNatGatewayRequest {
-    @NotEmpty(message = "identityParams cannot be null or empty")
-    private String identityParams;
-    @NotEmpty(message = "cloudParams cannot be null or empty")
-    private String cloudParams;
-    private String guid = StringUtils.EMPTY;
-    private String callbackParameter = StringUtils.EMPTY;
-
+public class CoreCreateNatGatewayRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateNatGatewayRequest> {
     private String natGatewayId;
 
-    @JsonDeserialize(as = Boolean.class)
-    @Override
-    public void setAutoPay(Boolean autoPay) {
-        super.setAutoPay(autoPay);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+    private String resourceOwnerId;
+    private String clientToken;
+    private String description;
+    private String spec;
+    private String duration;
+    private String natType;
+    private List<CreateNatGatewayRequest.BandwidthPackage> bandwidthPackages;
+    private String instanceChargeType;
+    private String autoPay;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String vSwitchId;
+    private String internetChargeType;
+    private String vpcId;
+    private String name;
+    private String pricingCycle;
 
     public CoreCreateNatGatewayRequestDto() {
-    }
-
-    public String getIdentityParams() {
-        return identityParams;
-    }
-
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
-    }
-
-    public String getCloudParams() {
-        return cloudParams;
-    }
-
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
     }
 
     public String getNatGatewayId() {
@@ -78,5 +39,141 @@ public class CoreCreateNatGatewayRequestDto extends CreateNatGatewayRequest {
 
     public void setNatGatewayId(String natGatewayId) {
         this.natGatewayId = natGatewayId;
+    }
+
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
+    }
+
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
+    }
+
+    public String getClientToken() {
+        return clientToken;
+    }
+
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSpec() {
+        return spec;
+    }
+
+    public void setSpec(String spec) {
+        this.spec = spec;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getNatType() {
+        return natType;
+    }
+
+    public void setNatType(String natType) {
+        this.natType = natType;
+    }
+
+    public List<CreateNatGatewayRequest.BandwidthPackage> getBandwidthPackages() {
+        return bandwidthPackages;
+    }
+
+    public void setBandwidthPackages(List<CreateNatGatewayRequest.BandwidthPackage> bandwidthPackages) {
+        this.bandwidthPackages = bandwidthPackages;
+    }
+
+    public String getInstanceChargeType() {
+        return instanceChargeType;
+    }
+
+    public void setInstanceChargeType(String instanceChargeType) {
+        this.instanceChargeType = instanceChargeType;
+    }
+
+    public String getAutoPay() {
+        return autoPay;
+    }
+
+    public void setAutoPay(String autoPay) {
+        this.autoPay = autoPay;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getvSwitchId() {
+        return vSwitchId;
+    }
+
+    public void setvSwitchId(String vSwitchId) {
+        this.vSwitchId = vSwitchId;
+    }
+
+    public String getInternetChargeType() {
+        return internetChargeType;
+    }
+
+    public void setInternetChargeType(String internetChargeType) {
+        this.internetChargeType = internetChargeType;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setVpcId(String vpcId) {
+        this.vpcId = vpcId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPricingCycle() {
+        return pricingCycle;
+    }
+
+    public void setPricingCycle(String pricingCycle) {
+        this.pricingCycle = pricingCycle;
     }
 }
