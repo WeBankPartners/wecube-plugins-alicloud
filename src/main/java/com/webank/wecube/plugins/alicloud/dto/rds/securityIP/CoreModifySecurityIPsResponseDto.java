@@ -1,30 +1,32 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.securityIP;
 
 import com.aliyuncs.rds.model.v20140815.ModifySecurityIpsResponse;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreModifySecurityIPsResponseDto extends ModifySecurityIpsResponse {
-    private String guid;
-    private String callbackParameter;
+public class CoreModifySecurityIPsResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreModifySecurityIPsResponseDto, ModifySecurityIpsResponse> {
+    private String requestId;
+    private String taskId;
 
     public CoreModifySecurityIPsResponseDto() {
     }
 
-    public String getGuid() {
-        return guid;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getTaskId() {
+        return taskId;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 }

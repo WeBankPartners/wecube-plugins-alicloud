@@ -1,14 +1,15 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 
 import com.aliyuncs.rds.model.v20140815.CreateBackupResponse;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateBackupResponseDto extends CreateBackupResponse {
-    private String guid;
-    private String callbackParameter;
-
+public class CoreCreateBackupResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateBackupResponseDto, CreateBackupResponse> {
+    private String requestId;
+    private String backupJobId;
     /**
      * found backup from backupJobId
      */
@@ -22,20 +23,20 @@ public class CoreCreateBackupResponseDto extends CreateBackupResponse {
     public CoreCreateBackupResponseDto() {
     }
 
-    public String getGuid() {
-        return guid;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getBackupJobId() {
+        return backupJobId;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setBackupJobId(String backupJobId) {
+        this.backupJobId = backupJobId;
     }
 
     public String getBackupProgressStatus() {

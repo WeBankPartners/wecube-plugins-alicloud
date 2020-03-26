@@ -1,71 +1,86 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.securityIP;
 
 import com.aliyuncs.rds.model.v20140815.ModifySecurityIpsRequest;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreModifySecurityIPsRequestDto extends ModifySecurityIpsRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+public class CoreModifySecurityIPsRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<ModifySecurityIpsRequest> {
+    private String dBInstanceIPArrayName;
+    private String resourceOwnerId;
+    private String securityIps;
+    private String whitelistNetworkType;
+    private String securityIPType;
+    private String dBInstanceId;
+    private String modifyMode;
+    private String dBInstanceIPArrayAttribute;
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
+    public CoreModifySecurityIPsRequestDto() {
     }
 
-    @JsonProperty(value = "dBInstanceId")
-    @Override
-    public void setDBInstanceId(String dBInstanceId) {
-        super.setDBInstanceId(dBInstanceId);
+    public String getdBInstanceIPArrayName() {
+        return dBInstanceIPArrayName;
     }
 
-    @JsonProperty(value = "dBInstanceIPArrayName")
-    @Override
-    public void setDBInstanceIPArrayName(String dBInstanceIPArrayName) {
-        super.setDBInstanceIPArrayName(dBInstanceIPArrayName);
+    public void setdBInstanceIPArrayName(String dBInstanceIPArrayName) {
+        this.dBInstanceIPArrayName = dBInstanceIPArrayName;
     }
 
-    @JsonProperty(value = "dBInstanceIPArrayAttribute")
-    @Override
-    public void setDBInstanceIPArrayAttribute(String dBInstanceIPArrayAttribute) {
-        super.setDBInstanceIPArrayAttribute(dBInstanceIPArrayAttribute);
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getSecurityIps() {
+        return securityIps;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setSecurityIps(String securityIps) {
+        this.securityIps = securityIps;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public String getWhitelistNetworkType() {
+        return whitelistNetworkType;
     }
 
-    public String getGuid() {
-        return guid;
+    public void setWhitelistNetworkType(String whitelistNetworkType) {
+        this.whitelistNetworkType = whitelistNetworkType;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public String getSecurityIPType() {
+        return securityIPType;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public void setSecurityIPType(String securityIPType) {
+        this.securityIPType = securityIPType;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public String getdBInstanceId() {
+        return dBInstanceId;
+    }
+
+    public void setdBInstanceId(String dBInstanceId) {
+        this.dBInstanceId = dBInstanceId;
+    }
+
+    public String getModifyMode() {
+        return modifyMode;
+    }
+
+    public void setModifyMode(String modifyMode) {
+        this.modifyMode = modifyMode;
+    }
+
+    public String getdBInstanceIPArrayAttribute() {
+        return dBInstanceIPArrayAttribute;
+    }
+
+    public void setdBInstanceIPArrayAttribute(String dBInstanceIPArrayAttribute) {
+        this.dBInstanceIPArrayAttribute = dBInstanceIPArrayAttribute;
     }
 }
