@@ -1,62 +1,205 @@
 package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.CreateInstanceResponse;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateInstanceResponseDto extends CreateInstanceResponse {
-    private String guid;
-    private String callbackParameter;
+public class CoreCreateInstanceResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateInstanceResponseDto, CreateInstanceResponse> {
 
-    @JsonSerialize(using = ToStringSerializer.class)
-    @Override
-    public void setPort(Integer port) {
-        super.setPort(port);
-    }
+    private String requestId;
+    private String instanceId;
+    private String instanceName;
+    private String connectionDomain;
+    private String port;
+    private String userName;
+    private String instanceStatus;
+    private String regionId;
+    private String capacity;
+    private String qPS;
+    private String bandwidth;
+    private String connections;
+    private String zoneId;
+    private String config;
+    private String chargeType;
+    private String endTime;
+    private String nodeType;
+    private String networkType;
+    private String vpcId;
+    private String vSwitchId;
+    private String privateIpAddr;
 
-    @JsonSerialize(using = ToStringSerializer.class)
-    @Override
-    public void setCapacity(Long capacity) {
-        super.setCapacity(capacity);
-    }
-
-    @JsonSerialize(using = ToStringSerializer.class)
-    @Override
-    public void setQPS(Long qPS) {
-        super.setQPS(qPS);
-    }
-
-    @JsonSerialize(using = ToStringSerializer.class)
-    @Override
-    public void setBandwidth(Long bandwidth) {
-        super.setBandwidth(bandwidth);
-    }
-
-    @JsonSerialize(using = ToStringSerializer.class)
-    @Override
-    public void setConnections(Long connections) {
-        super.setConnections(connections);
-    }
 
     public CoreCreateInstanceResponseDto() {
     }
 
-    public String getGuid() {
-        return guid;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getInstanceId() {
+        return instanceId;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
+    }
+
+    public String getConnectionDomain() {
+        return connectionDomain;
+    }
+
+    public void setConnectionDomain(String connectionDomain) {
+        this.connectionDomain = connectionDomain;
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getInstanceStatus() {
+        return instanceStatus;
+    }
+
+    public void setInstanceStatus(String instanceStatus) {
+        this.instanceStatus = instanceStatus;
+    }
+
+    public String getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(String regionId) {
+        this.regionId = regionId;
+    }
+
+    public String getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(String capacity) {
+        this.capacity = capacity;
+    }
+
+    public String getqPS() {
+        return qPS;
+    }
+
+    public void setqPS(String qPS) {
+        this.qPS = qPS;
+    }
+
+    public String getBandwidth() {
+        return bandwidth;
+    }
+
+    public void setBandwidth(String bandwidth) {
+        this.bandwidth = bandwidth;
+    }
+
+    public String getConnections() {
+        return connections;
+    }
+
+    public void setConnections(String connections) {
+        this.connections = connections;
+    }
+
+    public String getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(String zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    public String getConfig() {
+        return config;
+    }
+
+    public void setConfig(String config) {
+        this.config = config;
+    }
+
+    public String getChargeType() {
+        return chargeType;
+    }
+
+    public void setChargeType(String chargeType) {
+        this.chargeType = chargeType;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getNodeType() {
+        return nodeType;
+    }
+
+    public void setNodeType(String nodeType) {
+        this.nodeType = nodeType;
+    }
+
+    public String getNetworkType() {
+        return networkType;
+    }
+
+    public void setNetworkType(String networkType) {
+        this.networkType = networkType;
+    }
+
+    public String getVpcId() {
+        return vpcId;
+    }
+
+    public void setVpcId(String vpcId) {
+        this.vpcId = vpcId;
+    }
+
+    public String getVSwitchId() {
+        return this.vSwitchId;
+    }
+
+    public void setVSwitchId(String vSwitchId) {
+        this.vSwitchId = vSwitchId;
+    }
+
+    public String getPrivateIpAddr() {
+        return privateIpAddr;
+    }
+
+    public void setPrivateIpAddr(String privateIpAddr) {
+        this.privateIpAddr = privateIpAddr;
     }
 }

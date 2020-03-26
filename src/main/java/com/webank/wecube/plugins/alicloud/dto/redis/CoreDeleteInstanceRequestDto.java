@@ -1,61 +1,68 @@
 package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.DeleteInstanceRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteInstanceRequestDto extends DeleteInstanceRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+public class CoreDeleteInstanceRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteInstanceRequest> {
+    private String resourceOwnerId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String instanceId;
+    private String securityToken;
 
     public CoreDeleteInstanceRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getOwnerAccount() {
+        return ownerAccount;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getOwnerId() {
+        return ownerId;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public String getSecurityToken() {
+        return securityToken;
+    }
+
+    public void setSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
     }
 }

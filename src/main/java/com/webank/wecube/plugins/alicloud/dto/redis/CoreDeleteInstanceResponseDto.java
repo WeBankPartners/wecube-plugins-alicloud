@@ -1,30 +1,23 @@
 package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.DeleteInstanceResponse;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteInstanceResponseDto extends DeleteInstanceResponse {
-    private String guid;
-    private String callbackParameter;
+public class CoreDeleteInstanceResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDeleteInstanceResponseDto, DeleteInstanceResponse> {
+    private String requestId;
 
     public CoreDeleteInstanceResponseDto() {
     }
 
-    public String getGuid() {
-        return guid;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

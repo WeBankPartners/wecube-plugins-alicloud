@@ -4,6 +4,7 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.r_kvstore.model.v20150101.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceResponseDto;
@@ -37,43 +38,49 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public List<CoreCreateInstanceResponseDto> createInstance(List<CoreCreateInstanceRequestDto> coreCreateInstanceRequestDtoList) throws PluginException {
+    public List<CoreCreateInstanceResponseDto> createInstance(List<CoreCreateInstanceRequestDto> coreCreateInstanceRequestDtoList) {
         List<CoreCreateInstanceResponseDto> resultList = new ArrayList<>();
         for (CoreCreateInstanceRequestDto requestDto : coreCreateInstanceRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String regionId = cloudParamDto.getRegionId();
-            requestDto.setRegionId(regionId);
-            final String instanceId = requestDto.getInstanceId();
-
             CoreCreateInstanceResponseDto result = new CoreCreateInstanceResponseDto();
-            if (StringUtils.isNotEmpty(instanceId)) {
-                // retrieve InstanceInfo as result;
-                DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
-                describeInstancesRequest.setRegionId(regionId);
-                describeInstancesRequest.setInstanceIds(instanceId);
-                final DescribeInstancesResponse describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
-                if (describeInstancesResponse.getTotalCount() == 1) {
-                    final DescribeInstancesResponse.KVStoreInstance foundRedisInstance = describeInstancesResponse.getInstances().get(0);
-                    result = PluginSdkBridge.fromSdk(foundRedisInstance, CoreCreateInstanceResponseDto.class);
-                    result.setRequestId(describeInstancesResponse.getRequestId());
+
+            try {
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                final String instanceId = requestDto.getInstanceId();
+
+                if (StringUtils.isNotEmpty(instanceId)) {
+                    // retrieve InstanceInfo as result;
+                    DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
+                    describeInstancesRequest.setRegionId(regionId);
+                    describeInstancesRequest.setInstanceIds(instanceId);
+                    final DescribeInstancesResponse describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
+                    if (describeInstancesResponse.getTotalCount() == 1) {
+                        final DescribeInstancesResponse.KVStoreInstance foundRedisInstance = describeInstancesResponse.getInstances().get(0);
+                        result = result.fromSdkCrossLineage(foundRedisInstance);
+                        result.setRequestId(describeInstancesResponse.getRequestId());
+                        continue;
+                    }
                 }
 
-            } else {
                 // create redis instance
-                final CreateInstanceRequest createInstanceRequest = PluginSdkBridge.toSdk(requestDto, CreateInstanceRequest.class);
+                final CreateInstanceRequest createInstanceRequest = requestDto.toSdk();
+                createInstanceRequest.setRegionId(regionId);
                 CreateInstanceResponse response;
-                try {
-                    response = this.acsClientStub.request(client, createInstanceRequest);
-                } catch (AliCloudException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
-                result = PluginSdkBridge.fromSdk(response, CoreCreateInstanceResponseDto.class);
+                response = this.acsClientStub.request(client, createInstanceRequest);
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
             }
-            result.setGuid(requestDto.getGuid());
-            result.setCallbackParameter(requestDto.getCallbackParameter());
-            resultList.add(result);
+
         }
         return resultList;
     }
@@ -82,57 +89,59 @@ public class RedisServiceImpl implements RedisService {
     public List<CoreDeleteInstanceResponseDto> deleteInstance(List<CoreDeleteInstanceRequestDto> coreDeleteInstanceRequestDtoList) throws PluginException {
         List<CoreDeleteInstanceResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteInstanceRequestDto requestDto : coreDeleteInstanceRequestDtoList) {
-            final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-            final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-            final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-            final String regionId = cloudParamDto.getRegionId();
-            final String instanceId = requestDto.getInstanceId();
-            requestDto.setRegionId(regionId);
+            CoreDeleteInstanceResponseDto result = new CoreDeleteInstanceResponseDto();
 
-            DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
-            describeInstancesRequest.setRegionId(regionId);
-            describeInstancesRequest.setInstanceIds(instanceId);
-            DescribeInstancesResponse describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
-            if (0 == describeInstancesResponse.getTotalCount()) {
-                String msg = String.format("The given redis instanceID: [%s] has already been deleted.", instanceId);
-                logger.error(msg);
-                throw new PluginException(msg);
-            }
-
-            final DeleteInstanceRequest createInstanceRequest = PluginSdkBridge.toSdk(requestDto, DeleteInstanceRequest.class);
-            DeleteInstanceResponse response;
             try {
-                response = this.acsClientStub.request(client, createInstanceRequest);
-            } catch (AliCloudException ex) {
-                throw new PluginException(ex.getMessage());
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                final String instanceId = requestDto.getInstanceId();
+
+                DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
+                describeInstancesRequest.setRegionId(regionId);
+                describeInstancesRequest.setInstanceIds(instanceId);
+                DescribeInstancesResponse describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
+                if (0 == describeInstancesResponse.getTotalCount()) {
+                    String msg = String.format("The given redis instanceID: [%s] has already been deleted.", instanceId);
+                    logger.error(msg);
+                    throw new PluginException(msg);
+                }
+
+                final DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk();
+                deleteInstanceRequest.setRegionId(regionId);
+                DeleteInstanceResponse response;
+                response = this.acsClientStub.request(client, deleteInstanceRequest);
+
+                describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
+                if (0 != describeInstancesResponse.getTotalCount()) {
+                    String msg = String.format("The given redis instanceID: [%s] hasn't been deleted.", instanceId);
+                    logger.error(msg);
+                    throw new PluginException(msg);
+                }
+
+                result = PluginSdkBridge.fromSdk(response, CoreDeleteInstanceResponseDto.class);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                resultList.add(result);
             }
 
-            describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
-            if (0 != describeInstancesResponse.getTotalCount()) {
-                String msg = String.format("The given redis instanceID: [%s] hasn't been deleted.", instanceId);
-                logger.error(msg);
-                throw new PluginException(msg);
-            }
-
-            CoreDeleteInstanceResponseDto result = PluginSdkBridge.fromSdk(response, CoreDeleteInstanceResponseDto.class);
-            result.setGuid(requestDto.getGuid());
-            result.setCallbackParameter(requestDto.getCallbackParameter());
-            resultList.add(result);
         }
         return resultList;
     }
 
-    private DescribeInstancesResponse retrieveInstance(IAcsClient client, DescribeInstancesRequest request) throws PluginException {
+    private DescribeInstancesResponse retrieveInstance(IAcsClient client, DescribeInstancesRequest request) throws PluginException, AliCloudException {
         if (StringUtils.isEmpty(request.getRegionId())) {
             logger.error("Cannot retrieve redis instance while regionId is null or empty");
         }
 
         DescribeInstancesResponse response;
-        try {
-            response = this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
-        }
+        response = this.acsClientStub.request(client, request);
         return response;
     }
 }
