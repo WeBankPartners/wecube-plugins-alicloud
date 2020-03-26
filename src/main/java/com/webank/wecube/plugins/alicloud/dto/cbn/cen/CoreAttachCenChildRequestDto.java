@@ -1,74 +1,95 @@
 package com.webank.wecube.plugins.alicloud.dto.cbn.cen;
 
 import com.aliyuncs.cbn.model.v20170912.AttachCenChildInstanceRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.constraints.NotEmpty;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreAttachCenChildRequestDto extends AttachCenChildInstanceRequest {
-    @NotEmpty(message = "identityParams cannot be null or empty")
-    private String identityParams;
-    @NotEmpty(message = "cloudParams cannot be null or empty")
-    private String cloudParams;
-    private String guid = StringUtils.EMPTY;
-    private String callbackParameter = StringUtils.EMPTY;
-
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setChildInstanceOwnerId(Long childInstanceOwnerId) {
-        super.setChildInstanceOwnerId(childInstanceOwnerId);
-    }
+public class CoreAttachCenChildRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AttachCenChildInstanceRequest> {
+    private String resourceOwnerId;
+    private String cenId;
+    private String childInstanceRegionId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String childInstanceType;
+    private String childInstanceOwnerId;
+    private String childInstanceId;
 
     public CoreAttachCenChildRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getCenId() {
+        return cenId;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setCenId(String cenId) {
+        this.cenId = cenId;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getChildInstanceRegionId() {
+        return childInstanceRegionId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setChildInstanceRegionId(String childInstanceRegionId) {
+        this.childInstanceRegionId = childInstanceRegionId;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getChildInstanceType() {
+        return childInstanceType;
+    }
+
+    public void setChildInstanceType(String childInstanceType) {
+        this.childInstanceType = childInstanceType;
+    }
+
+    public String getChildInstanceOwnerId() {
+        return childInstanceOwnerId;
+    }
+
+    public void setChildInstanceOwnerId(String childInstanceOwnerId) {
+        this.childInstanceOwnerId = childInstanceOwnerId;
+    }
+
+    public String getChildInstanceId() {
+        return childInstanceId;
+    }
+
+    public void setChildInstanceId(String childInstanceId) {
+        this.childInstanceId = childInstanceId;
+    }
 }

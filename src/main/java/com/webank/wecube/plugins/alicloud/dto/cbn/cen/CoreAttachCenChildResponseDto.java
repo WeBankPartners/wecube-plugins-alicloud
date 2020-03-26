@@ -1,49 +1,24 @@
 package com.webank.wecube.plugins.alicloud.dto.cbn.cen;
 
 import com.aliyuncs.cbn.model.v20170912.AttachCenChildInstanceResponse;
-import org.apache.commons.lang3.StringUtils;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreAttachCenChildResponseDto extends AttachCenChildInstanceResponse {
-    private String errorCode = StringUtils.EMPTY;
-    private String errorMessage = StringUtils.EMPTY;
-    private String guid;
-    private String callbackParameter;
+public class CoreAttachCenChildResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreAttachCenChildResponseDto, AttachCenChildInstanceResponse> {
+
+    private String requestId;
 
     public CoreAttachCenChildResponseDto() {
     }
 
-    public String getErrorCode() {
-        return errorCode;
+    public String getRequestId() {
+        return requestId;
     }
 
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

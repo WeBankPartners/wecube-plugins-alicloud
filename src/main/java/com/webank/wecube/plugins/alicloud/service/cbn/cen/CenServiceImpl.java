@@ -54,22 +54,27 @@ public class CenServiceImpl implements CenService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
 
                 final String cenId = requestDto.getCenId();
                 if (StringUtils.isNotEmpty(cenId)) {
-                    final DescribeCensResponse.Cen foundCen = this.retrieveCen(client, cenId);
-                    if (null != foundCen) {
-                        result = PluginSdkBridge.fromSdk(foundCen, CoreCreateCenResponseDto.class);
+                    final DescribeCensResponse describeCensResponse = this.retrieveCen(client);
+                    final List<DescribeCensResponse.Cen> foundCenList = describeCensResponse.getCens().stream().filter(cen -> cenId.equals(cen.getCenId())).collect(Collectors.toList());
+
+                    if (foundCenList.size() == 1) {
+                        final DescribeCensResponse.Cen cen = foundCenList.get(0);
+                        result = result.fromSdkCrossLineage(cen);
+                        result.setRequestId(describeCensResponse.getRequestId());
                         continue;
                     }
+
                 }
 
                 logger.info("Creating Cen...");
 
-                CreateCenRequest request = PluginSdkBridge.toSdk(requestDto, CreateCenRequest.class);
+                CreateCenRequest request = requestDto.toSdk();
+                request.setRegionId(regionId);
                 CreateCenResponse response = this.acsClientStub.request(client, request);
-                result = PluginSdkBridge.fromSdk(response, CoreCreateCenResponseDto.class);
+                result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
@@ -97,14 +102,16 @@ public class CenServiceImpl implements CenService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
 
                 final String cenId = requestDto.getCenId();
-                final DescribeCensResponse.Cen foundCen;
                 if (StringUtils.isNotEmpty(cenId)) {
-                    foundCen = this.retrieveCen(client, cenId);
-                    if (null == foundCen) {
-                        throw new PluginException(String.format("Cannot find Cen by ID: %s", cenId));
+                    final DescribeCensResponse describeCensResponse = this.retrieveCen(client);
+                    final List<DescribeCensResponse.Cen> foundCenList = describeCensResponse.getCens().stream().filter(cen -> cenId.equals(cen.getCenId())).collect(Collectors.toList());
+
+                    if (foundCenList.isEmpty()) {
+                        logger.info("The cen given by ID: [{}] has already been deleted.", cenId);
+                        result.setRequestId(describeCensResponse.getRequestId());
+                        continue;
                     }
                 }
 
@@ -118,9 +125,9 @@ public class CenServiceImpl implements CenService {
 
                 logger.info("Deleting Cen...");
 
-                CreateCenRequest request = PluginSdkBridge.toSdk(requestDto, CreateCenRequest.class);
-                CreateCenResponse response = this.acsClientStub.request(client, request);
-                result = PluginSdkBridge.fromSdk(response, CoreDeleteCenResponseDto.class);
+                final DeleteCenRequest deleteCenRequest = requestDto.toSdk();
+                final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest);
+                result = result.fromSdk(response);
 
                 // TODO: need to optimize the timer
                 // check if cen has already been deleted
@@ -199,13 +206,13 @@ public class CenServiceImpl implements CenService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
 
                 logger.info("Attaching Cen child instance...");
 
-                AttachCenChildInstanceRequest request = PluginSdkBridge.toSdk(requestDto, AttachCenChildInstanceRequest.class);
+                AttachCenChildInstanceRequest request = requestDto.toSdk();
+                request.setRegionId(regionId);
                 AttachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
-                result = PluginSdkBridge.fromSdk(response, CoreAttachCenChildResponseDto.class);
+                result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
@@ -233,13 +240,14 @@ public class CenServiceImpl implements CenService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-                requestDto.setRegionId(regionId);
+
 
                 logger.info("Detaching Cen child instance...");
 
-                DetachCenChildInstanceRequest request = PluginSdkBridge.toSdk(requestDto, DetachCenChildInstanceRequest.class);
+                DetachCenChildInstanceRequest request = requestDto.toSdk();
+                request.setRegionId(regionId);
                 DetachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
-                result = PluginSdkBridge.fromSdk(response, CoreDetachCenChildResponseDto.class);
+                result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
@@ -254,20 +262,12 @@ public class CenServiceImpl implements CenService {
     }
 
 
-    private DescribeCensResponse.Cen retrieveCen(IAcsClient client, String cenId) throws AliCloudException, PluginException {
-
-        logger.info("Retrieving Cen. CenId: [{}]", cenId);
+    private DescribeCensResponse retrieveCen(IAcsClient client) throws AliCloudException, PluginException {
 
         DescribeCensRequest request = new DescribeCensRequest();
         DescribeCensResponse response;
         response = this.acsClientStub.request(client, request);
-        final List<DescribeCensResponse.Cen> foundCenList = response.getCens().stream().filter(cen -> cenId.equals(cen.getCenId())).collect(Collectors.toList());
-
-        if (foundCenList.size() == 1) {
-            return foundCenList.get(0);
-        } else {
-            return null;
-        }
+        return response;
     }
 
     private DescribeCenAttachedChildInstancesResponse retrieveCenAttachedChildInstance(IAcsClient client, String cenId) throws PluginException, AliCloudException {
@@ -289,8 +289,10 @@ public class CenServiceImpl implements CenService {
 
     private boolean checkIfCenHasBeenDeleted(IAcsClient client, String cenId) {
         boolean ifCenDeleted = false;
-        final DescribeCensResponse.Cen cen = this.retrieveCen(client, cenId);
-        if (null == cen) {
+        final DescribeCensResponse describeCensResponse = this.retrieveCen(client);
+        final List<DescribeCensResponse.Cen> foundCenList = describeCensResponse.getCens().stream().filter(cen -> cenId.equals(cen.getCenId())).collect(Collectors.toList());
+
+        if (foundCenList.isEmpty()) {
             ifCenDeleted = true;
         }
         return ifCenDeleted;

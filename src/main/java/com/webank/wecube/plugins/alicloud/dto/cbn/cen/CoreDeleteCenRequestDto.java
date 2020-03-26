@@ -1,66 +1,59 @@
 package com.webank.wecube.plugins.alicloud.dto.cbn.cen;
 
 import com.aliyuncs.cbn.model.v20170912.DeleteCenRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.constraints.NotEmpty;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteCenRequestDto extends DeleteCenRequest {
-    @NotEmpty(message = "identityParams cannot be null or empty")
-    private String identityParams;
-    @NotEmpty(message = "cloudParams cannot be null or empty")
-    private String cloudParams;
-    private String guid = StringUtils.EMPTY;
-    private String callbackParameter = StringUtils.EMPTY;
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+public class CoreDeleteCenRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteCenRequest> {
+    private String resourceOwnerId;
+    private String resourceOwnerAccount;
+    private String cenId;
+    private String ownerAccount;
+    private String ownerId;
 
     public CoreDeleteCenRequestDto() {
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getCenId() {
+        return cenId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setCenId(String cenId) {
+        this.cenId = cenId;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public String getOwnerAccount() {
+        return ownerAccount;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 }
