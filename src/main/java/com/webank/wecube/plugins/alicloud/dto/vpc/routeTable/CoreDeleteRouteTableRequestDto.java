@@ -1,55 +1,60 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteRouteTableRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteRouteTableRequestDto extends DeleteRouteTableRequest {
-    private String identityParams;
-    private String cloudParams;
+public class CoreDeleteRouteTableRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteRouteTableRequest> {
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+    private String resourceOwnerId;
+    private String routeTableId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
 
     public CoreDeleteRouteTableRequestDto() {
     }
 
-    public CoreDeleteRouteTableRequestDto(String routeTableId, String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public static DeleteRouteTableRequest toSdk(CoreDeleteRouteTableRequestDto coreCreateRouteTableRequestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateRouteTableRequestDto, DeleteRouteTableRequest.class);
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getRouteTableId() {
+        return routeTableId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setRouteTableId(String routeTableId) {
+        this.routeTableId = routeTableId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 }

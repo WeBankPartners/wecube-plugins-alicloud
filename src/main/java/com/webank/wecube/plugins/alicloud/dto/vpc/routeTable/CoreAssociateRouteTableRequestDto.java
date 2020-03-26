@@ -1,55 +1,78 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 
 import com.aliyuncs.vpc.model.v20160428.AssociateRouteTableRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
 /**
  * @author howechen
  */
-public class CoreAssociateRouteTableRequestDto extends AssociateRouteTableRequest {
-    private String identityParams;
-    private String cloudParams;
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+public class CoreAssociateRouteTableRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AssociateRouteTableRequest> {
+    private String resourceOwnerId;
+    private String clientToken;
+    private String routeTableId;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String vSwitchId;
 
     public CoreAssociateRouteTableRequestDto() {
     }
 
-    public CoreAssociateRouteTableRequestDto(String routeTableId, String identityParams, String cloudParams) {
-        this.identityParams = identityParams;
-        this.cloudParams = cloudParams;
+
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public static AssociateRouteTableRequest toSdk(AssociateRouteTableRequest coreCreateRouteTableRequestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(coreCreateRouteTableRequestDto, AssociateRouteTableRequest.class);
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public String getClientToken() {
+        return clientToken;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public String getRouteTableId() {
+        return routeTableId;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public void setRouteTableId(String routeTableId) {
+        this.routeTableId = routeTableId;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getVSwitchId() {
+        return vSwitchId;
+    }
+
+    public void setVSwitchId(String vSwitchId) {
+        this.vSwitchId = vSwitchId;
     }
 }

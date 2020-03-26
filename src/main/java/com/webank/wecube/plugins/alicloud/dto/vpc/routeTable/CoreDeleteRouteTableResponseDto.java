@@ -1,17 +1,16 @@
-package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry;
+package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 
-import com.aliyuncs.vpc.model.v20160428.CreateRouteEntryResponse;
+import com.aliyuncs.vpc.model.v20160428.DeleteRouteTableResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreCreateRouteEntryResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateRouteEntryResponseDto, CreateRouteEntryResponse> {
-
+public class CoreDeleteRouteTableResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDeleteRouteTableResponseDto, DeleteRouteTableResponse> {
     private String requestId;
 
-    public CoreCreateRouteEntryResponseDto() {
+    public CoreDeleteRouteTableResponseDto() {
     }
 
     public String getRequestId() {

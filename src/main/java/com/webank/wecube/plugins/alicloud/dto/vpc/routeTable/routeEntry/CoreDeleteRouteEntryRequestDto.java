@@ -1,68 +1,99 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteRouteEntryRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+
+import java.util.List;
 
 /**
  * @author howechen
  */
-public class CoreDeleteRouteEntryRequestDto extends DeleteRouteEntryRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
+public class CoreDeleteRouteEntryRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteRouteEntryRequest> {
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
+    private String resourceOwnerId;
+    private String nextHopId;
+    private String routeTableId;
+    private String resourceOwnerAccount;
+    private String destinationCidrBlock;
+    private String ownerAccount;
+    private String ownerId;
+    private String routeEntryId;
+    private List<DeleteRouteEntryRequest.NextHopList> nextHopLists;
 
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
 
     public CoreDeleteRouteEntryRequestDto() {
     }
 
-    public static DeleteRouteEntryRequest toSdk(CoreDeleteRouteEntryRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, DeleteRouteEntryRequest.class);
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getNextHopId() {
+        return nextHopId;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setNextHopId(String nextHopId) {
+        this.nextHopId = nextHopId;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public String getRouteTableId() {
+        return routeTableId;
     }
 
-    public String getGuid() {
-        return guid;
+    public void setRouteTableId(String routeTableId) {
+        this.routeTableId = routeTableId;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public String getDestinationCidrBlock() {
+        return destinationCidrBlock;
+    }
+
+    public void setDestinationCidrBlock(String destinationCidrBlock) {
+        this.destinationCidrBlock = destinationCidrBlock;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getRouteEntryId() {
+        return routeEntryId;
+    }
+
+    public void setRouteEntryId(String routeEntryId) {
+        this.routeEntryId = routeEntryId;
+    }
+
+    public List<DeleteRouteEntryRequest.NextHopList> getNextHopLists() {
+        return nextHopLists;
+    }
+
+    public void setNextHopLists(List<DeleteRouteEntryRequest.NextHopList> nextHopLists) {
+        this.nextHopLists = nextHopLists;
     }
 }

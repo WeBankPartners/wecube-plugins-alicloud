@@ -1,68 +1,116 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry;
 
 import com.aliyuncs.vpc.model.v20160428.CreateRouteEntryRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+
+import java.util.List;
 
 /**
  * @author howechen
  */
-public class CoreCreateRouteEntryRequestDto extends CreateRouteEntryRequest {
-    private String identityParams;
-    private String cloudParams;
-    private String guid;
-    private String callbackParameter;
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setResourceOwnerId(Long resourceOwnerId) {
-        super.setResourceOwnerId(resourceOwnerId);
-    }
-
-    @JsonDeserialize(as = Long.class)
-    @Override
-    public void setOwnerId(Long ownerId) {
-        super.setOwnerId(ownerId);
-    }
+public class CoreCreateRouteEntryRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateRouteEntryRequest> {
+    private String resourceOwnerId;
+    private String routeEntryName;
+    private String clientToken;
+    private String nextHopId;
+    private String nextHopType;
+    private String routeTableId;
+    private String resourceOwnerAccount;
+    private String destinationCidrBlock;
+    private String ownerAccount;
+    private String ownerId;
+    private List<CreateRouteEntryRequest.NextHopList> nextHopLists;
 
     public CoreCreateRouteEntryRequestDto() {
     }
 
-    public static CreateRouteEntryRequest toSdk(CoreCreateRouteEntryRequestDto requestDto) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, CreateRouteEntryRequest.class);
+
+    public String getResourceOwnerId() {
+        return resourceOwnerId;
     }
 
-    public String getIdentityParams() {
-        return identityParams;
+    public void setResourceOwnerId(String resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
     }
 
-    public void setIdentityParams(String identityParams) {
-        this.identityParams = identityParams;
+    public String getRouteEntryName() {
+        return routeEntryName;
     }
 
-    public String getCloudParams() {
-        return cloudParams;
+    public void setRouteEntryName(String routeEntryName) {
+        this.routeEntryName = routeEntryName;
     }
 
-    public void setCloudParams(String cloudParams) {
-        this.cloudParams = cloudParams;
+    public String getClientToken() {
+        return clientToken;
     }
 
-    public String getGuid() {
-        return guid;
+    public void setClientToken(String clientToken) {
+        this.clientToken = clientToken;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public String getNextHopId() {
+        return nextHopId;
     }
 
-    public String getCallbackParameter() {
-        return callbackParameter;
+    public void setNextHopId(String nextHopId) {
+        this.nextHopId = nextHopId;
     }
 
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public String getNextHopType() {
+        return nextHopType;
+    }
+
+    public void setNextHopType(String nextHopType) {
+        this.nextHopType = nextHopType;
+    }
+
+    public String getRouteTableId() {
+        return routeTableId;
+    }
+
+    public void setRouteTableId(String routeTableId) {
+        this.routeTableId = routeTableId;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getDestinationCidrBlock() {
+        return destinationCidrBlock;
+    }
+
+    public void setDestinationCidrBlock(String destinationCidrBlock) {
+        this.destinationCidrBlock = destinationCidrBlock;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public List<CreateRouteEntryRequest.NextHopList> getNextHopLists() {
+        return nextHopLists;
+    }
+
+    public void setNextHopLists(List<CreateRouteEntryRequest.NextHopList> nextHopLists) {
+        this.nextHopLists = nextHopLists;
     }
 }

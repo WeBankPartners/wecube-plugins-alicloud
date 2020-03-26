@@ -1,38 +1,23 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteRouteEntryResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
+import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
 /**
  * @author howechen
  */
-public class CoreDeleteRouteEntryResponseDto extends DeleteRouteEntryResponse {
-
-    private String guid;
-    private String callbackParameter;
+public class CoreDeleteRouteEntryResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDeleteRouteEntryResponseDto, DeleteRouteEntryResponse> {
+    private String requestId;
 
     public CoreDeleteRouteEntryResponseDto() {
     }
 
-    public static CoreDeleteRouteEntryResponseDto fromSdk(DeleteRouteEntryResponse response) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(response, CoreDeleteRouteEntryResponseDto.class);
+    public String getRequestId() {
+        return requestId;
     }
 
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public String getCallbackParameter() {
-        return callbackParameter;
-    }
-
-    public void setCallbackParameter(String callbackParameter) {
-        this.callbackParameter = callbackParameter;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }
