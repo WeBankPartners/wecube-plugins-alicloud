@@ -6,10 +6,6 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreAssociateRouteTableRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreCreateRouteTableRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreCreateRouteTableResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.CoreDeleteRouteTableRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreDeleteVSwitchRequestDto;
@@ -27,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -37,7 +32,6 @@ import java.util.function.Function;
 @Service
 public class VSwitchServiceImpl implements VSwitchService {
 
-    public static int COUNT_DOWN_TIME = 5;
     private static Logger logger = LoggerFactory.getLogger(VSwitchService.class);
 
     private AcsClientStub acsClientStub;
@@ -87,28 +81,25 @@ public class VSwitchServiceImpl implements VSwitchService {
 
 
                 // create route table
-                CoreCreateRouteTableRequestDto routeTableRequestDto = new CoreCreateRouteTableRequestDto();
-                routeTableRequestDto.setIdentityParams(requestDto.getIdentityParams());
-                routeTableRequestDto.setCloudParams(requestDto.getCloudParams());
-                routeTableRequestDto.setRegionId(regionId);
-                routeTableRequestDto.setVpcId(requestDto.getVpcId());
-                final List<CoreCreateRouteTableResponseDto> createRouteTableResponseDtoList = this.routeTableService.createRouteTable(Collections.singletonList(routeTableRequestDto));
-                final String createdRouteTableId = createRouteTableResponseDtoList.get(0).getRouteTableId();
+                CreateRouteTableRequest createRouteTableRequest = new CreateRouteTableRequest();
+                createRouteTableRequest.setRegionId(regionId);
+                createRouteTableRequest.setVpcId(requestDto.getVpcId());
+                final CreateRouteTableResponse createRouteTableResponse = this.routeTableService.createRouteTable(client, createRouteTableRequest);
+                final String createdRouteTableId = createRouteTableResponse.getRouteTableId();
 
-                // associate route table with VSwitch
+
                 // wait till both route table and vSwitch are available to be configured
                 Function<?, Boolean> func = this.ifBothRouteTableAndVSwitchAvailable(client, regionId, createdRouteTableId, vSwitchId);
                 final PluginTimerTask checkRouteTableStatusTask = new PluginTimerTask(func);
                 PluginTimer.runTask(checkRouteTableStatusTask);
 
-                if (!createRouteTableResponseDtoList.isEmpty()) {
-                    CoreAssociateRouteTableRequestDto associateRouteTableRequest = new CoreAssociateRouteTableRequestDto();
-                    associateRouteTableRequest.setRegionId(regionId);
-                    associateRouteTableRequest.setRouteTableId(createdRouteTableId);
-                    associateRouteTableRequest.setVSwitchId(createVSwitchResponse.getVSwitchId());
+                // associate route table with VSwitch
+                AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest();
+                associateRouteTableRequest.setRegionId(regionId);
+                associateRouteTableRequest.setRouteTableId(createdRouteTableId);
+                associateRouteTableRequest.setVSwitchId(createVSwitchResponse.getVSwitchId());
 
-                    this.routeTableService.associateRouteTable(client, Collections.singletonList(associateRouteTableRequest));
-                }
+                this.routeTableService.associateRouteTable(client, associateRouteTableRequest);
 
                 result = result.fromSdk(createVSwitchResponse);
                 result.setRouteTableId(createdRouteTableId);
@@ -196,12 +187,10 @@ public class VSwitchServiceImpl implements VSwitchService {
                         PluginTimer.runTask(checkRouteTableStatusTask);
 
                         // delete route table
-                        CoreDeleteRouteTableRequestDto deleteRouteTableRequest = new CoreDeleteRouteTableRequestDto();
-                        deleteRouteTableRequest.setIdentityParams(requestDto.getIdentityParams());
-                        deleteRouteTableRequest.setCloudParams(requestDto.getCloudParams());
+                        DeleteRouteTableRequest deleteRouteTableRequest = new DeleteRouteTableRequest();
                         deleteRouteTableRequest.setRegionId(regionId);
                         deleteRouteTableRequest.setRouteTableId(routeTableId);
-                        this.routeTableService.deleteRouteTable(Collections.singletonList(deleteRouteTableRequest));
+                        this.routeTableService.deleteRouteTable(client, deleteRouteTableRequest);
                     }
                 }
 
