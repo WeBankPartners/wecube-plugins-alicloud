@@ -59,6 +59,7 @@ public class RouteTableServiceImpl implements RouteTableService {
                         final DescribeRouteTablesResponse.RouteTable foundRouteTable = retrieveRouteTableResponse.getRouteTables().get(0);
                         result = result.fromSdkCrossLineage(foundRouteTable);
                         result.setRequestId(retrieveRouteTableResponse.getRequestId());
+                        continue;
                     }
 
                 }
