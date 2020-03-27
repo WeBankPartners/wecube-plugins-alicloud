@@ -5,7 +5,6 @@ import com.aliyuncs.rds.model.v20140815.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupResponseDto;
@@ -281,7 +280,7 @@ public class RDSServiceImpl implements RDSService {
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());

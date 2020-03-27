@@ -4,6 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 
+/**
+ * @author howechen
+ */
 public class CoreRequestInputDto {
     @NotEmpty(message = "identityParams cannot be null or empty")
     private String identityParams;

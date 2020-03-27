@@ -1,5 +1,8 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
+/**
+ * @author howechen
+ */
 public class CoreResponseOutputDto {
     private String errorCode;
     private String errorMessage;

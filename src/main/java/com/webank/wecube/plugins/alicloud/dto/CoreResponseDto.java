@@ -77,9 +77,5 @@ public class CoreResponseDto<E extends CoreResponseOutputDto> {
         return okay().withData(data);
     }
 
-    public CoreResponseDto<E> okayWithData(List<E> data) {
-        return okay().withData(data);
-    }
-
 
 }

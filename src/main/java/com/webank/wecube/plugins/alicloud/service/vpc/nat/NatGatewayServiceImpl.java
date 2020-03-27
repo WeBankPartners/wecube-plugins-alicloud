@@ -4,7 +4,7 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreResponseDtoBkp;
+import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayResponseDto;
@@ -81,7 +81,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
@@ -136,7 +136,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDtoBkp.STATUS_ERROR);
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());

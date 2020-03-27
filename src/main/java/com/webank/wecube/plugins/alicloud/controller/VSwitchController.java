@@ -2,7 +2,6 @@ package com.webank.wecube.plugins.alicloud.controller;
 
 import com.webank.wecube.plugins.alicloud.common.ApplicationConstants;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.CoreRequestDtoBkp;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
@@ -37,7 +36,7 @@ public class VSwitchController {
 
     @PostMapping(path = "delete")
     @ResponseBody
-    public CoreResponseDto<CoreDeleteVSwitchResponseDto> deleteVSwitch(@RequestBody CoreRequestDtoBkp<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
+    public CoreResponseDto<CoreDeleteVSwitchResponseDto> deleteVSwitch(@RequestBody CoreRequestDto<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
         List<CoreDeleteVSwitchResponseDto> result = this.vSwitchService.deleteVSwitch(coreDeleteVSwitchRequestDto.getInputs());
         return new CoreResponseDto<CoreDeleteVSwitchResponseDto>().withErrorCheck(result);
     }
