@@ -56,9 +56,11 @@ public class EipServiceImpl implements EipService {
                     DescribeEipAddressesRequest retrieveEipAddressRequest = new DescribeEipAddressesRequest();
                     retrieveEipAddressRequest.setAllocationId(requestDto.getAllocationId());
                     retrieveEipAddressRequest.setRegionId(regionId);
-                    final DescribeEipAddressesResponse.EipAddress foundEip = this.retrieveEipAddress(client, retrieveEipAddressRequest);
-                    if (null != foundEip) {
-                        result = result.fromSdkCrossLineage(foundEip);
+                    final DescribeEipAddressesResponse describeEipAddressesResponse = this.retrieveEipAddress(client, retrieveEipAddressRequest);
+                    if (!describeEipAddressesResponse.getEipAddresses().isEmpty()) {
+                        final DescribeEipAddressesResponse.EipAddress eipAddress = describeEipAddressesResponse.getEipAddresses().get(0);
+                        result = result.fromSdkCrossLineage(eipAddress);
+                        result.setRequestId(describeEipAddressesResponse.getRequestId());
                         continue;
                     }
                 }
@@ -98,11 +100,11 @@ public class EipServiceImpl implements EipService {
                 DescribeEipAddressesRequest retrieveEipAddressRequest = new DescribeEipAddressesRequest();
                 retrieveEipAddressRequest.setAllocationId(requestDto.getAllocationId());
                 retrieveEipAddressRequest.setRegionId(regionId);
-                final DescribeEipAddressesResponse.EipAddress foundEip = this.retrieveEipAddress(client, retrieveEipAddressRequest);
-                if (null == foundEip) {
-                    String msg = String.format("Cannot find EIp address info by allocationId: [%s]", requestDto.getAllocationId());
-                    logger.error(msg);
-                    throw new PluginException(msg);
+                final DescribeEipAddressesResponse describeEipAddressesResponse = this.retrieveEipAddress(client, retrieveEipAddressRequest);
+                if (describeEipAddressesResponse.getEipAddresses().isEmpty()) {
+                    result.setRequestId(describeEipAddressesResponse.getRequestId());
+                    logger.info("The Eip address doesn't exist or has been released already.");
+                    continue;
                 }
 
 
@@ -242,14 +244,9 @@ public class EipServiceImpl implements EipService {
         return response.getTotalCount().equals(0);
     }
 
-    private DescribeEipAddressesResponse.EipAddress retrieveEipAddress(IAcsClient client, DescribeEipAddressesRequest request) throws AliCloudException, PluginException {
+    private DescribeEipAddressesResponse retrieveEipAddress(IAcsClient client, DescribeEipAddressesRequest request) throws AliCloudException, PluginException {
         logger.info("Retrieving EIP address...");
         DescribeEipAddressesResponse response = this.acsClientStub.request(client, request);
-        final List<DescribeEipAddressesResponse.EipAddress> foundEipAddressList = response.getEipAddresses();
-        if (foundEipAddressList.isEmpty()) {
-            return null;
-        } else {
-            return foundEipAddressList.get(0);
-        }
+        return response;
     }
 }
