@@ -9,6 +9,7 @@ import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,10 +28,12 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final static Logger logger = LoggerFactory.getLogger(SecurityGroupService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
 
     @Autowired
-    public SecurityGroupServiceImpl(AcsClientStub acsClientStub) {
+    public SecurityGroupServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -40,6 +43,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             CoreCreateSecurityGroupResponseDto result = new CoreCreateSecurityGroupResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -83,6 +89,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             CoreDeleteSecurityGroupResponseDto result = new CoreDeleteSecurityGroupResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -116,6 +125,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         for (CoreAuthorizeSecurityGroupRequestDto requestDto : coreAuthorizeSecurityGroupRequestDtoList) {
             CoreAuthorizeSecurityGroupResponseDto result = new CoreAuthorizeSecurityGroupResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -160,6 +171,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             CoreRevokeSecurityGroupResponseDto result = new CoreRevokeSecurityGroupResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();

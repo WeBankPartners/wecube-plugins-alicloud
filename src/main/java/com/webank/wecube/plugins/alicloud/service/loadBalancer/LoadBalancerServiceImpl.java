@@ -17,6 +17,7 @@ import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreRem
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreRemoveBackendServerResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,10 +38,12 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     private static Logger logger = LoggerFactory.getLogger(LoadBalancerService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
 
     @Autowired
-    public LoadBalancerServiceImpl(AcsClientStub acsClientStub) {
+    public LoadBalancerServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -51,6 +54,9 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             CoreCreateLoadBalancerResponseDto result = new CoreCreateLoadBalancerResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -121,6 +127,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             CoreDeleteLoadBalancerResponseDto result = new CoreDeleteLoadBalancerResponseDto();
             try {
 
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -177,6 +185,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             CoreAddBackendServerResponseDto result = new CoreAddBackendServerResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -256,6 +266,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             CoreRemoveBackendServerResponseDto result = new CoreRemoveBackendServerResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());

@@ -18,6 +18,7 @@ import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityI
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +37,13 @@ public class RDSServiceImpl implements RDSService {
     private static Logger logger = LoggerFactory.getLogger(RDSService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
+
 
     @Autowired
-    public RDSServiceImpl(AcsClientStub acsClientStub) {
+    public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -50,6 +54,8 @@ public class RDSServiceImpl implements RDSService {
             CoreCreateDBInstanceResponseDto result = new CoreCreateDBInstanceResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -100,6 +106,8 @@ public class RDSServiceImpl implements RDSService {
             CoreDeleteDBInstanceResponseDto result = new CoreDeleteDBInstanceResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -153,6 +161,8 @@ public class RDSServiceImpl implements RDSService {
             CoreModifySecurityIPsResponseDto result = new CoreModifySecurityIPsResponseDto();
             try {
 
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
@@ -190,6 +200,8 @@ public class RDSServiceImpl implements RDSService {
             CoreCreateBackupResponseDto result = new CoreCreateBackupResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -240,6 +252,8 @@ public class RDSServiceImpl implements RDSService {
 
             CoreDeleteBackupResponseDto result = new CoreDeleteBackupResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());

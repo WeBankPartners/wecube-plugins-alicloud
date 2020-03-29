@@ -14,6 +14,7 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreDele
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudConstant;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,13 @@ import java.util.List;
 public class RouteTableServiceImpl implements RouteTableService {
     private static Logger logger = LoggerFactory.getLogger(RouteTableService.class);
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
+
 
     @Autowired
-    public RouteTableServiceImpl(AcsClientStub acsClientStub) {
+    public RouteTableServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -44,6 +48,8 @@ public class RouteTableServiceImpl implements RouteTableService {
             CoreCreateRouteTableResponseDto result = new CoreCreateRouteTableResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -133,6 +139,8 @@ public class RouteTableServiceImpl implements RouteTableService {
 
             try {
 
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String routeTableId = requestDto.getRouteTableId();
@@ -216,6 +224,8 @@ public class RouteTableServiceImpl implements RouteTableService {
             CoreAssociateRouteTableResponseDto result = new CoreAssociateRouteTableResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -314,6 +324,8 @@ public class RouteTableServiceImpl implements RouteTableService {
             CoreCreateRouteEntryResponseDto result = new CoreCreateRouteEntryResponseDto();
             try {
 
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -347,6 +359,8 @@ public class RouteTableServiceImpl implements RouteTableService {
             CoreDeleteRouteEntryResponseDto result = new CoreDeleteRouteEntryResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());

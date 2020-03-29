@@ -12,6 +12,7 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.CoreDeleteVpcRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.CoreDeleteVpcResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,12 @@ public class VpcServiceImpl implements VpcService {
     private static Logger logger = LoggerFactory.getLogger(VpcService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
 
     @Autowired
-    public VpcServiceImpl(AcsClientStub acsClientStub) {
+    public VpcServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -42,6 +45,9 @@ public class VpcServiceImpl implements VpcService {
         for (CoreCreateVpcRequestDto requestDto : coreCreateVpcRequestDtoList) {
             CoreCreateVpcResponseDto result = new CoreCreateVpcResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
+
                 logger.info("Sending create VPC request: {} to AliCloud.", requestDto.toString());
                 // check region id
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
@@ -107,6 +113,9 @@ public class VpcServiceImpl implements VpcService {
         for (CoreDeleteVpcRequestDto requestDto : coreDeleteVpcRequestDtoList) {
             CoreDeleteVpcResponseDto result = new CoreDeleteVpcResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();

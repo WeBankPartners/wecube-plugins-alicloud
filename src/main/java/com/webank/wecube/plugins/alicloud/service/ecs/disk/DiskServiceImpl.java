@@ -9,6 +9,7 @@ import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.disk.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,10 +29,12 @@ public class DiskServiceImpl implements DiskService {
     private static Logger logger = LoggerFactory.getLogger(DiskService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
 
     @Autowired
-    public DiskServiceImpl(AcsClientStub acsClientStub) {
+    public DiskServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -41,6 +44,9 @@ public class DiskServiceImpl implements DiskService {
 
             CoreCreateDiskResponseDto result = new CoreCreateDiskResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
+
                 // check region id
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -91,6 +97,8 @@ public class DiskServiceImpl implements DiskService {
             CoreDeleteDiskResponseDto result = new CoreDeleteDiskResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -145,6 +153,8 @@ public class DiskServiceImpl implements DiskService {
 
             try {
 
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -183,6 +193,8 @@ public class DiskServiceImpl implements DiskService {
             CoreDetachDiskResponseDto result = new CoreDetachDiskResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());

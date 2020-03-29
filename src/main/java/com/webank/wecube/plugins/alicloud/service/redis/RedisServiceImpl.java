@@ -12,6 +12,7 @@ import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceRequestDto
 import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,10 +32,12 @@ public class RedisServiceImpl implements RedisService {
     private static Logger logger = LoggerFactory.getLogger(RedisService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
 
     @Autowired
-    public RedisServiceImpl(AcsClientStub acsClientStub) {
+    public RedisServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -44,6 +47,8 @@ public class RedisServiceImpl implements RedisService {
             CoreCreateInstanceResponseDto result = new CoreCreateInstanceResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -92,6 +97,9 @@ public class RedisServiceImpl implements RedisService {
             CoreDeleteInstanceResponseDto result = new CoreDeleteInstanceResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);

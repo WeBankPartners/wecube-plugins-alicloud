@@ -9,6 +9,7 @@ import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,10 +31,13 @@ public class VMServiceImpl implements VMService {
     private static final Logger logger = LoggerFactory.getLogger(VMService.class);
 
     private AcsClientStub acsClientStub;
+    private DtoValidator dtoValidator;
+
 
     @Autowired
-    public VMServiceImpl(AcsClientStub acsClientStub) {
+    public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
+        this.dtoValidator = dtoValidator;
     }
 
     @Override
@@ -42,6 +46,9 @@ public class VMServiceImpl implements VMService {
         for (CoreCreateVMRequestDto requestDto : coreCreateVMRequestDtoList) {
             CoreCreateVMResponseDto result = new CoreCreateVMResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -112,6 +119,8 @@ public class VMServiceImpl implements VMService {
             CoreDeleteVMResponseDto result = new CoreDeleteVMResponseDto();
             try {
 
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -170,6 +179,8 @@ public class VMServiceImpl implements VMService {
 
             try {
 
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -200,6 +211,9 @@ public class VMServiceImpl implements VMService {
         for (CoreStopVMRequestDto requestDto : coreStopVMRequestDtoList) {
             CoreStopVMResponseDto result = new CoreStopVMResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -231,6 +245,9 @@ public class VMServiceImpl implements VMService {
             CoreBindSecurityGroupResponseDto result = new CoreBindSecurityGroupResponseDto();
 
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();

@@ -14,6 +14,7 @@ import com.webank.wecube.plugins.alicloud.service.vpc.routeTable.RouteTableServi
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudConstant;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
+import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
@@ -36,12 +37,15 @@ public class VSwitchServiceImpl implements VSwitchService {
 
     private AcsClientStub acsClientStub;
     private RouteTableService routeTableService;
+    private DtoValidator dtoValidator;
 
     @Autowired
-    public VSwitchServiceImpl(AcsClientStub acsClientStub, RouteTableService routeTableService) {
+    public VSwitchServiceImpl(AcsClientStub acsClientStub, RouteTableService routeTableService, DtoValidator dtoValidator) {
         this.acsClientStub = acsClientStub;
         this.routeTableService = routeTableService;
+        this.dtoValidator = dtoValidator;
     }
+
 
     @Override
     public List<CoreCreateVSwitchResponseDto> createVSwitch(List<CoreCreateVSwitchRequestDto> requestDtoList) {
@@ -49,6 +53,9 @@ public class VSwitchServiceImpl implements VSwitchService {
         for (CoreCreateVSwitchRequestDto requestDto : requestDtoList) {
             CoreCreateVSwitchResponseDto result = new CoreCreateVSwitchResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -141,6 +148,9 @@ public class VSwitchServiceImpl implements VSwitchService {
         for (CoreDeleteVSwitchRequestDto requestDto : requestDtoList) {
             CoreDeleteVSwitchResponseDto result = new CoreDeleteVSwitchResponseDto();
             try {
+
+                dtoValidator.validate(requestDto);
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
