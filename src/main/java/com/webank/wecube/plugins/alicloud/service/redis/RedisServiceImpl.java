@@ -14,6 +14,8 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author howechen
@@ -75,6 +79,12 @@ public class RedisServiceImpl implements RedisService {
                 createInstanceRequest.setRegionId(regionId);
                 CreateInstanceResponse response;
                 response = this.acsClientStub.request(client, createInstanceRequest);
+
+                logger.info("Retrieving created redis until it's available to be used.");
+
+                Function<?, Boolean> func = o -> ifRedisInStatus(client, regionId, response.getInstanceId(), InstanceStatus.NORMAL);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -128,6 +138,11 @@ public class RedisServiceImpl implements RedisService {
                     throw new PluginException(msg);
                 }
 
+                logger.info("Retrieving created redis until it has been successfully released.");
+
+                Function<?, Boolean> func = o -> ifRedisIsDeleted(client, regionId, requestDto.getInstanceId());
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = PluginSdkBridge.fromSdk(response, CoreDeleteInstanceResponseDto.class);
 
             } catch (PluginException | AliCloudException ex) {
@@ -141,6 +156,44 @@ public class RedisServiceImpl implements RedisService {
 
         }
         return resultList;
+    }
+
+    @Override
+    public Boolean ifRedisInStatus(IAcsClient client, String regionId, String instanceId, InstanceStatus status) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, instanceId)) {
+            throw new PluginException("Either regionId or instanceId cannot be null or empty.");
+        }
+
+        DescribeInstancesRequest request = new DescribeInstancesRequest();
+        request.setRegionId(regionId);
+        request.setInstanceIds(instanceId);
+
+
+        final DescribeInstancesResponse response = this.acsClientStub.request(client, request);
+
+        final Optional<DescribeInstancesResponse.KVStoreInstance> foundRedisOpt = response.getInstances().stream().filter(instance -> StringUtils.equals(instanceId, instance.getInstanceId())).findFirst();
+
+        foundRedisOpt.orElseThrow(() -> new PluginException(String.format("Cannot found instance by instanceId: [%s]", instanceId)));
+
+        final DescribeInstancesResponse.KVStoreInstance foundInstance = foundRedisOpt.get();
+
+        return StringUtils.equals(status.getStatus(), foundInstance.getInstanceStatus());
+    }
+
+    public Boolean ifRedisIsDeleted(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, instanceId)) {
+            throw new PluginException("Either regionId or instanceId cannot be null or empty.");
+        }
+
+        DescribeInstancesRequest request = new DescribeInstancesRequest();
+        request.setRegionId(regionId);
+        request.setInstanceIds(instanceId);
+
+
+        final DescribeInstancesResponse response = this.acsClientStub.request(client, request);
+
+        return response.getTotalCount() == 0;
+
     }
 
     private DescribeInstancesResponse retrieveInstance(IAcsClient client, DescribeInstancesRequest request) throws PluginException, AliCloudException {
