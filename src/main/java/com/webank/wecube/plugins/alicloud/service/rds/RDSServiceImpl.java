@@ -16,9 +16,12 @@ import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceRequest
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
+import com.webank.wecube.plugins.alicloud.service.redis.InstanceStatus;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author howechen
@@ -81,6 +86,10 @@ public class RDSServiceImpl implements RDSService {
                 CreateDBInstanceResponse response;
                 response = this.acsClientStub.request(client, createDBInstanceRequest);
 
+                // set up Plugin Timer to check if the resource is not creating any more
+                Function<?, Boolean> func = o -> !ifDBInstanceInStatus(client, regionId, response.getDBInstanceId(), RDSStatus.CREATING);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
 
 
@@ -134,10 +143,10 @@ public class RDSServiceImpl implements RDSService {
                 DeleteDBInstanceResponse response;
                 response = this.acsClientStub.request(client, deleteDBInstanceRequest);
 
-                describeDBInstancesResponse = this.retrieveDBInstance(client, regionId, dbInstanceId);
-                if (1 == describeDBInstancesResponse.getTotalRecordCount()) {
-                    throw new PluginException("The given db instance cannot be released");
-                }
+
+                // set up Plugin Timer to check if the resource has been deleted
+                Function<?, Boolean> func = o -> ifDBInstanceIsDeleted(client, regionId, requestDto.getDBInstanceId());
+                PluginTimer.runTask(new PluginTimerTask(func));
 
                 result = result.fromSdk(response);
 
@@ -305,6 +314,48 @@ public class RDSServiceImpl implements RDSService {
         }
         return resultList;
     }
+
+    @Override
+    public Boolean ifDBInstanceInStatus(IAcsClient client, String regionId, String dbInstanceId, RDSStatus status) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, dbInstanceId)) {
+            throw new PluginException("Either regionId or instanceId cannot be null or empty.");
+        }
+
+        DescribeDBInstancesRequest request = new DescribeDBInstancesRequest();
+        request.setRegionId(regionId);
+        request.setDBInstanceId(dbInstanceId);
+
+
+        final DescribeDBInstancesResponse response = this.acsClientStub.request(client, request);
+
+        final Optional<DescribeDBInstancesResponse.DBInstance> foundDBInstanceOpt = response.getItems().stream().filter(dbInstance -> StringUtils.equals(dbInstanceId, dbInstance.getDBInstanceId())).findFirst();
+
+        foundDBInstanceOpt.orElseThrow(() -> new PluginException(String.format("Cannot found DB instance by instanceId: [%s]", dbInstanceId)));
+
+        final DescribeDBInstancesResponse.DBInstance dbInstance = foundDBInstanceOpt.get();
+
+        return StringUtils.equals(status.getStatus(), dbInstance.getDBInstanceStatus());
+    }
+
+    private Boolean ifDBInstanceIsDeleted(IAcsClient client, String regionId, String dBInstanceId) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, dBInstanceId)) {
+            throw new PluginException("Either regionId or dBInstanceId cannot be null or empty.");
+        }
+
+        DescribeDBInstancesResponse response;
+        try {
+            response = this.retrieveDBInstance(client, regionId, dBInstanceId);
+        } catch (AliCloudException ex) {
+            // AliCloud's RDS will throw error when the resource has been deleted.
+            if (ex.getMessage().contains("The specified instance is not found.")) {
+                return true;
+            } else {
+                throw ex;
+            }
+        }
+        return response.getTotalRecordCount() == 0;
+    }
+
 
     private DescribeBackupTasksResponse.BackupJob retrieveBackupFromJobId(IAcsClient client, String dbInstanceId, String backupJobId) throws PluginException, AliCloudException {
         DescribeBackupTasksRequest retrieveTasksRequest = new DescribeBackupTasksRequest();

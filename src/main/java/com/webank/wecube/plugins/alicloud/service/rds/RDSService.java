@@ -1,5 +1,6 @@
 package com.webank.wecube.plugins.alicloud.service.rds;
 
+import com.aliyuncs.IAcsClient;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupResponseDto;
@@ -11,6 +12,7 @@ import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceRequest
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
+import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 
 import java.util.List;
 
@@ -27,4 +29,6 @@ public interface RDSService {
     List<CoreCreateBackupResponseDto> createBackup(List<CoreCreateBackupRequestDto> requestDtoList) throws PluginException;
 
     List<CoreDeleteBackupResponseDto> deleteBackup(List<CoreDeleteBackupRequestDto> requestDtoList);
+
+    Boolean ifDBInstanceInStatus(IAcsClient client, String regionId, String dbInstanceId, RDSStatus status) throws PluginException, AliCloudException;
 }
