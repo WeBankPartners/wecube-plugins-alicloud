@@ -14,14 +14,17 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String dBInstanceId;
 
     private String resourceOwnerId;
+    @JsonProperty("dBInstanceStorage")
     private String dBInstanceStorage;
     private String systemDBCharset;
     private String engineVersion;
     private String targetDedicatedHostIdForMaster;
+    @JsonProperty("dBInstanceDescription")
     private String dBInstanceDescription;
     private String businessInfo;
     private String period;
     private String encryptionKey;
+    @JsonProperty("dBInstanceClass")
     private String dBInstanceClass;
     private String securityIPList;
     private String vSwitchId;
@@ -35,8 +38,10 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String clientToken;
     private String targetDedicatedHostIdForSlave;
     private String engine;
+    @JsonProperty("dBInstanceStorageType")
     private String dBInstanceStorageType;
     private String dedicatedHostGroupId;
+    @JsonProperty("dBInstanceNetType")
     private String dBInstanceNetType;
     private String usedTime;
     private String vPCId;
@@ -62,11 +67,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         this.resourceOwnerId = resourceOwnerId;
     }
 
-    public String getdBInstanceStorage() {
+    public String getDBInstanceStorage() {
         return dBInstanceStorage;
     }
 
-    public void setdBInstanceStorage(String dBInstanceStorage) {
+    public void setDBInstanceStorage(String dBInstanceStorage) {
         this.dBInstanceStorage = dBInstanceStorage;
     }
 
@@ -94,11 +99,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         this.targetDedicatedHostIdForMaster = targetDedicatedHostIdForMaster;
     }
 
-    public String getdBInstanceDescription() {
+    public String getDBInstanceDescription() {
         return dBInstanceDescription;
     }
 
-    public void setdBInstanceDescription(String dBInstanceDescription) {
+    public void setDBInstanceDescription(String dBInstanceDescription) {
         this.dBInstanceDescription = dBInstanceDescription;
     }
 
@@ -126,11 +131,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         this.encryptionKey = encryptionKey;
     }
 
-    public String getdBInstanceClass() {
+    public String getDBInstanceClass() {
         return dBInstanceClass;
     }
 
-    public void setdBInstanceClass(String dBInstanceClass) {
+    public void setDBInstanceClass(String dBInstanceClass) {
         this.dBInstanceClass = dBInstanceClass;
     }
 
@@ -230,11 +235,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         this.engine = engine;
     }
 
-    public String getdBInstanceStorageType() {
+    public String getDBInstanceStorageType() {
         return dBInstanceStorageType;
     }
 
-    public void setdBInstanceStorageType(String dBInstanceStorageType) {
+    public void setDBInstanceStorageType(String dBInstanceStorageType) {
         this.dBInstanceStorageType = dBInstanceStorageType;
     }
 
@@ -246,11 +251,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         this.dedicatedHostGroupId = dedicatedHostGroupId;
     }
 
-    public String getdBInstanceNetType() {
+    public String getDBInstanceNetType() {
         return dBInstanceNetType;
     }
 
-    public void setdBInstanceNetType(String dBInstanceNetType) {
+    public void setDBInstanceNetType(String dBInstanceNetType) {
         this.dBInstanceNetType = dBInstanceNetType;
     }
 

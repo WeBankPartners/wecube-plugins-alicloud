@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.DeleteDBInstanceRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
@@ -12,6 +13,7 @@ public class CoreDeleteDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @JsonProperty("dBInstanceId")
     private String dBInstanceId;
 
     public CoreDeleteDBInstanceRequestDto() {

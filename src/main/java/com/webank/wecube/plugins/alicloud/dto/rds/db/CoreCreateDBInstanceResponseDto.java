@@ -26,11 +26,11 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
         this.requestId = requestId;
     }
 
-    public String getdBInstanceId() {
+    public String getDBInstanceId() {
         return dBInstanceId;
     }
 
-    public void setdBInstanceId(String dBInstanceId) {
+    public void setDBInstanceId(String dBInstanceId) {
         this.dBInstanceId = dBInstanceId;
     }
 
