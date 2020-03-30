@@ -86,7 +86,7 @@ public class VMServiceImpl implements VMService {
                 response = this.acsClientStub.request(client, request);
 
                 // wait till VM instance finish its create process
-                Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMAvailable(client, regionId, response.getInstanceId());
+                Function<?, Boolean> checkIfVMFinishCreation = o -> !this.checkIfVMInStatus(client, regionId, response.getInstanceId(), InstanceStatus.PENDING);
                 PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
 
                 // start the vm
@@ -202,6 +202,9 @@ public class VMServiceImpl implements VMService {
                 StartInstanceResponse response;
                 response = this.acsClientStub.request(client, startInstanceRequest);
 
+                Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, requestDto.getInstanceId(), InstanceStatus.RUNNING);
+                PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
+
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -235,6 +238,10 @@ public class VMServiceImpl implements VMService {
 
                 StopInstanceResponse response;
                 response = this.acsClientStub.request(client, stopInstanceRequest);
+
+                Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, requestDto.getInstanceId(), InstanceStatus.STOPPED);
+                PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
+
                 result = result.fromSdk(response);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -301,8 +308,7 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public Boolean checkIfVMAvailable(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
-        logger.info("Retrieving if VM instance has already been stopped.");
+    public Boolean checkIfVMInStatus(IAcsClient client, String regionId, String instanceId, InstanceStatus status) throws PluginException, AliCloudException {
 
         if (StringUtils.isAnyEmpty(regionId, instanceId)) {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
@@ -310,21 +316,16 @@ public class VMServiceImpl implements VMService {
 
         DescribeInstanceStatusRequest request = new DescribeInstanceStatusRequest();
         request.setRegionId("cn-shanghai");
-
         request.setInstanceIds(Collections.singletonList(instanceId));
 
         DescribeInstanceStatusResponse foundInstance;
         foundInstance = this.acsClientStub.request(client, request);
 
-        if (null == foundInstance || foundInstance.getTotalCount() == 0) {
-            throw new PluginException(String.format("Cannot found instance info with given regionId: [%s] and instance Id: [%s]", regionId, instanceId));
-        }
-
         final Optional<DescribeInstanceStatusResponse.InstanceStatus> first = foundInstance.getInstanceStatuses().stream().filter(instance -> StringUtils.equals(instanceId, instance.getInstanceId())).findFirst();
 
         first.orElseThrow(() -> new PluginException(String.format("Cannot find instance by given Id: %s", instanceId)));
 
-        return !StringUtils.equals(InstanceStatus.PENDING.getStatus(), first.get().getStatus());
+        return StringUtils.equals(status.getStatus(), first.get().getStatus());
     }
 
     @Override
@@ -338,6 +339,9 @@ public class VMServiceImpl implements VMService {
         request.setInstanceId(instanceId);
 
         this.acsClientStub.request(client, request);
+
+        Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, instanceId, InstanceStatus.RUNNING);
+        PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
     }
 
     private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) {
