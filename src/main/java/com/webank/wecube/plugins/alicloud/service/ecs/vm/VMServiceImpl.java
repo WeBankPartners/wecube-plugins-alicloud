@@ -33,29 +33,6 @@ import java.util.stream.Collectors;
 @Service
 public class VMServiceImpl implements VMService {
 
-    private enum INSTANCE_STATUS {
-        // Pending after create operation
-        PENDING("Pending"),
-        // Starting: the instance type when submitting the request to start the instance
-        STARTING("Starting"),
-        // Running: after the instance starts
-        RUNNING("Running"),
-        // Stopping: the instance type when submitting the request to stop the instance
-        STOPPING("Stopping"),
-        // Stopped: the instance has been stopped
-        STOPPED("Stopped");
-
-        private String instanceStatus;
-
-        INSTANCE_STATUS(String status) {
-            this.instanceStatus = status;
-        }
-
-        public String getStatus() {
-            return instanceStatus;
-        }
-    }
-
     private static final String VM_INSTANCE_PENDING = "Pending";
 
     private static final Logger logger = LoggerFactory.getLogger(VMService.class);
@@ -347,7 +324,7 @@ public class VMServiceImpl implements VMService {
 
         first.orElseThrow(() -> new PluginException(String.format("Cannot find instance by given Id: %s", instanceId)));
 
-        return !StringUtils.equals(INSTANCE_STATUS.PENDING.getStatus(), first.get().getStatus());
+        return !StringUtils.equals(InstanceStatus.PENDING.getStatus(), first.get().getStatus());
     }
 
     @Override
