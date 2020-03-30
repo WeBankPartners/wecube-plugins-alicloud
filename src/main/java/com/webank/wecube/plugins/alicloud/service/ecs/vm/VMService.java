@@ -25,5 +25,7 @@ public interface VMService {
 
     List<CoreBindSecurityGroupResponseDto> bindSecurityGroup(List<CoreBindSecurityGroupRequestDto> coreBindSecurityGroupRequestDtoList);
 
-    boolean checkIfVMStopped(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException;
+    Boolean checkIfVMAvailable(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException;
+
+    void startVM(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException;
 }

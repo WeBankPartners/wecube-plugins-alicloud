@@ -10,6 +10,8 @@ import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,16 +20,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.webank.wecube.plugins.alicloud.support.AliCloudConstant.VM_INSTANCE_STOP_STATUS;
 
 /**
  * @author howechen
  */
 @Service
 public class VMServiceImpl implements VMService {
+
+    private enum INSTANCE_STATUS {
+        // Pending after create operation
+        PENDING("Pending"),
+        // Starting: the instance type when submitting the request to start the instance
+        STARTING("Starting"),
+        // Running: after the instance starts
+        RUNNING("Running"),
+        // Stopping: the instance type when submitting the request to stop the instance
+        STOPPING("Stopping"),
+        // Stopped: the instance has been stopped
+        STOPPED("Stopped");
+
+        private String instanceStatus;
+
+        INSTANCE_STATUS(String status) {
+            this.instanceStatus = status;
+        }
+
+        public String getStatus() {
+            return instanceStatus;
+        }
+    }
+
+    private static final String VM_INSTANCE_PENDING = "Pending";
+
     private static final Logger logger = LoggerFactory.getLogger(VMService.class);
 
     private AcsClientStub acsClientStub;
@@ -77,6 +107,13 @@ public class VMServiceImpl implements VMService {
 
                 CreateInstanceResponse response;
                 response = this.acsClientStub.request(client, request);
+
+                // wait till VM instance finish its create process
+                Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMAvailable(client, regionId, response.getInstanceId());
+                PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
+
+                // start the vm
+                startVM(client, regionId, response.getInstanceId());
 
                 result = result.fromSdk(response);
 
@@ -148,11 +185,8 @@ public class VMServiceImpl implements VMService {
 
 
                 // re-check if VM instance has already been deleted
-                if (0 != this.retrieveVM(client, regionId, instanceId).getTotalCount()) {
-                    String msg = String.format("The VM instance: [%s] from region: [%s] hasn't been deleted", instanceId, regionId);
-                    logger.error(msg);
-                    throw new PluginException(msg);
-                }
+                Function<?, Boolean> func = o -> this.ifVMHasBeenDeleted(client, regionId, instanceId);
+                PluginTimer.runTask(new PluginTimerTask(func));
 
                 result = result.fromSdk(response);
 
@@ -290,25 +324,49 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public boolean checkIfVMStopped(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
+    public Boolean checkIfVMAvailable(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
         logger.info("Retrieving if VM instance has already been stopped.");
 
         if (StringUtils.isAnyEmpty(regionId, instanceId)) {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
 
-        DescribeInstancesRequest request = new DescribeInstancesRequest();
-        request.setRegionId(regionId);
-        request.setInstanceIds(instanceId);
+        DescribeInstanceStatusRequest request = new DescribeInstanceStatusRequest();
+        request.setRegionId("cn-shanghai");
 
-        DescribeInstancesResponse foundInstance;
+        request.setInstanceIds(Collections.singletonList(instanceId));
+
+        DescribeInstanceStatusResponse foundInstance;
         foundInstance = this.acsClientStub.request(client, request);
 
         if (null == foundInstance || foundInstance.getTotalCount() == 0) {
             throw new PluginException(String.format("Cannot found instance info with given regionId: [%s] and instance Id: [%s]", regionId, instanceId));
         }
 
-        return StringUtils.equals(VM_INSTANCE_STOP_STATUS, foundInstance.getInstances().get(0).getStatus());
+        final Optional<DescribeInstanceStatusResponse.InstanceStatus> first = foundInstance.getInstanceStatuses().stream().filter(instance -> StringUtils.equals(instanceId, instance.getInstanceId())).findFirst();
+
+        first.orElseThrow(() -> new PluginException(String.format("Cannot find instance by given Id: %s", instanceId)));
+
+        return !StringUtils.equals(INSTANCE_STATUS.PENDING.getStatus(), first.get().getStatus());
     }
+
+    @Override
+    public void startVM(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, instanceId)) {
+            throw new PluginException("Either regionId or instanceId cannot be null or empty.");
+        }
+
+        StartInstanceRequest request = new StartInstanceRequest();
+        request.setRegionId(regionId);
+        request.setInstanceId(instanceId);
+
+        this.acsClientStub.request(client, request);
+    }
+
+    private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) {
+        final DescribeInstancesResponse describeInstancesResponse = this.retrieveVM(client, regionId, instanceId);
+        return describeInstancesResponse.getTotalCount() == 0;
+    }
+
 
 }
