@@ -103,7 +103,7 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-ecs</artifactId>
-            <version>4.18.3</version>
+            <version>4.19.2</version>
         </dependency>
         <!-- alicloud LoadBalancer -->
         <dependency>
