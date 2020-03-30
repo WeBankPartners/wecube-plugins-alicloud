@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.support;
 
 import com.webank.wecube.plugins.alicloud.common.PluginException;
+import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,9 @@ public class DtoValidator {
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
-    public void validate(Object o) throws PluginException {
+    public <T extends CoreRequestInputDto> void validate(T o) throws PluginException {
         logger.info("Validating input DTO: [{}]", o.getClass().getSimpleName());
-        final Set<ConstraintViolation<Object>> validations = this.validator.validate(o);
+        final Set<ConstraintViolation<T>> validations = this.validator.validate(o);
         final List<String> validationStr = validations.stream().map(ConstraintViolation::getMessage).collect(Collectors.toList());
         if (!validationStr.isEmpty()) {
             final String errorMsg = PluginStringUtils.stringifyList(validationStr);
