@@ -22,4 +22,6 @@ public interface DiskService {
     List<CoreDetachDiskResponseDto> detachDisk(List<CoreDetachDiskRequestDto> coreDetachDiskRequestDtoList);
 
     DescribeDisksResponse retrieveDisk(IAcsClient client, String regionId, String diskId) throws PluginException, AliCloudException;
+
+    Boolean ifDiskInStatus(IAcsClient client, String regionId, String diskId, DiskStatus status) throws PluginException, AliCloudException;
 }

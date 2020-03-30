@@ -10,6 +10,8 @@ import com.webank.wecube.plugins.alicloud.dto.ecs.disk.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author howechen
@@ -76,6 +80,10 @@ public class DiskServiceImpl implements DiskService {
                 CreateDiskResponse response;
                 response = this.acsClientStub.request(client, createDiskRequest);
                 result = result.fromSdk(response);
+
+                // setup a task to poll the the status of created disk until it is available
+                Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, response.getDiskId(), DiskStatus.AVAILABLE);
+                PluginTimer.runTask(new PluginTimerTask(func));
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -168,6 +176,11 @@ public class DiskServiceImpl implements DiskService {
 
                 AttachDiskResponse response;
                 response = this.acsClientStub.request(client, request);
+
+                // check if the disk is in use
+                Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.IN_USE);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -209,6 +222,11 @@ public class DiskServiceImpl implements DiskService {
                 }
 
                 DetachDiskResponse response = this.acsClientStub.request(client, request);
+
+                // wait detaching process to finish
+                Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.AVAILABLE);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -239,4 +257,22 @@ public class DiskServiceImpl implements DiskService {
         // send the request and handle the error, then return the response
         return this.acsClientStub.request(client, retrieveDiskRequest);
     }
+
+    @Override
+    public Boolean ifDiskInStatus(IAcsClient client, String regionId, String diskId, DiskStatus status) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, diskId)) {
+            throw new PluginException("Either regionId or diskId cannot be null or empty.");
+        }
+
+        final DescribeDisksResponse describeDisksResponse = retrieveDisk(client, regionId, diskId);
+        final Optional<DescribeDisksResponse.Disk> matchedDiskOpt = describeDisksResponse.getDisks().stream().filter(disk -> StringUtils.equals(diskId, disk.getDiskId())).findFirst();
+
+        matchedDiskOpt.orElseThrow(() -> new PluginException(String.format("Cannot find disk by given diskId: [%s]", diskId)));
+
+        final DescribeDisksResponse.Disk disk = matchedDiskOpt.get();
+
+        return StringUtils.equals(status.getStatus(), disk.getStatus());
+    }
+
+
 }
