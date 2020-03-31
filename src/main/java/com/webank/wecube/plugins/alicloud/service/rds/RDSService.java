@@ -31,4 +31,7 @@ public interface RDSService {
     List<CoreDeleteBackupResponseDto> deleteBackup(List<CoreDeleteBackupRequestDto> requestDtoList);
 
     Boolean ifDBInstanceInStatus(IAcsClient client, String regionId, String dbInstanceId, RDSStatus status) throws PluginException, AliCloudException;
+
+    Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus status) throws PluginException, AliCloudException;
+
 }

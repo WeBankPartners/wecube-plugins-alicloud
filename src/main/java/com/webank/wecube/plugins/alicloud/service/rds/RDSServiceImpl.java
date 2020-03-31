@@ -237,7 +237,16 @@ public class RDSServiceImpl implements RDSService {
                 createDBInstanceRequest.setRegionId(regionId);
                 CreateBackupResponse response;
                 response = this.acsClientStub.request(client, createDBInstanceRequest);
-                final DescribeBackupTasksResponse.BackupJob backupJob = this.retrieveBackupFromJobId(client, dbInstanceId, response.getBackupJobId());
+
+                final String backupJobId = response.getBackupJobId();
+
+                // wait for the backup job to be finished
+                Function<?, Boolean> func = o -> this.ifBackupTaskInStatus(client, regionId, dbInstanceId, backupJobId, BackupStatus.FINISHED);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
+                // retrieve backup info according to the backup job id from the AliCloud
+                // only will return backup id when backup task status has been set to finished
+                final DescribeBackupTasksResponse.BackupJob backupJob = this.retrieveBackupFromJobId(client, dbInstanceId, backupJobId);
 
                 result = result.fromSdkCrossLineage(backupJob);
                 result.setRequestId(response.getRequestId());
@@ -294,11 +303,10 @@ public class RDSServiceImpl implements RDSService {
                 deleteBackupRequest.setBackupId(backupId);
                 DeleteBackupResponse response = this.acsClientStub.request(client, deleteBackupRequest);
 
-                describeBackupsResponse = this.retrieveBackups(client, regionId, dbInstanceId, backupId);
-
-                if (StringUtils.isNotEmpty(describeBackupsResponse.getTotalRecordCount())) {
-                    throw new PluginException("The DB backup cannot be deleted.");
-                }
+                // setup a timer task to retrieve if the backup has been deleted
+                final String finalBackupId = backupId;
+                Function<?, Boolean> func = o -> this.ifBackupHasBeenDeleted(client, regionId, dbInstanceId, finalBackupId);
+                PluginTimer.runTask(new PluginTimerTask(func));
 
                 result = result.fromSdk(response);
 
@@ -337,6 +345,29 @@ public class RDSServiceImpl implements RDSService {
         return StringUtils.equals(status.getStatus(), dbInstance.getDBInstanceStatus());
     }
 
+    @Override
+    public Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus status) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, backupJobId)) {
+            throw new PluginException("Either regionId or instanceId cannot be null or empty.");
+        }
+
+        DescribeBackupTasksRequest request = new DescribeBackupTasksRequest();
+        request.setRegionId(regionId);
+        request.setDBInstanceId(dbInstanceId);
+        request.setBackupJobId(backupJobId);
+
+
+        final DescribeBackupTasksResponse response = this.acsClientStub.request(client, request);
+
+        final Optional<DescribeBackupTasksResponse.BackupJob> foundBackupJobOpt = response.getItems().stream().filter(backupTask -> StringUtils.equals(backupJobId, backupTask.getBackupJobId())).findFirst();
+
+        foundBackupJobOpt.orElseThrow(() -> new PluginException(String.format("Cannot found backup job by dbInstanceId: [%s] and backupJobId: [%s]", dbInstanceId, backupJobId)));
+
+        final DescribeBackupTasksResponse.BackupJob backupJob = foundBackupJobOpt.get();
+
+        return StringUtils.equals(status.getStatus(), backupJob.getBackupStatus());
+    }
+
     private Boolean ifDBInstanceIsDeleted(IAcsClient client, String regionId, String dBInstanceId) throws PluginException, AliCloudException {
         if (StringUtils.isAnyEmpty(regionId, dBInstanceId)) {
             throw new PluginException("Either regionId or dBInstanceId cannot be null or empty.");
@@ -354,6 +385,25 @@ public class RDSServiceImpl implements RDSService {
             }
         }
         return response.getTotalRecordCount() == 0;
+    }
+
+    private Boolean ifBackupHasBeenDeleted(IAcsClient client, String regionId, String dBInstanceId, String backupId) throws PluginException, AliCloudException {
+        if (StringUtils.isAnyEmpty(regionId, dBInstanceId, backupId)) {
+            throw new PluginException("Either regionId or dBInstanceId cannot be null or empty.");
+        }
+
+        DescribeBackupsResponse response;
+        try {
+            response = this.retrieveBackups(client, regionId, dBInstanceId, backupId);
+        } catch (AliCloudException ex) {
+            // AliCloud's RDS will throw error when the resource has been deleted.
+            if (ex.getMessage().contains("The specified instance is not found.")) {
+                return true;
+            } else {
+                throw ex;
+            }
+        }
+        return 0 == Integer.parseInt(response.getTotalRecordCount());
     }
 
 
@@ -412,4 +462,5 @@ public class RDSServiceImpl implements RDSService {
         response = this.acsClientStub.request(client, request);
         return response;
     }
+
 }
