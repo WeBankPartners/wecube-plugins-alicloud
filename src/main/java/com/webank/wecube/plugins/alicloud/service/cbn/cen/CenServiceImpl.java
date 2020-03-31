@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.cbn.cen;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.cbn.model.v20170912.*;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
@@ -11,6 +12,8 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.webank.wecube.plugins.alicloud.support.PluginConstant.COUNT_DOWN_TIME;
@@ -129,26 +133,9 @@ public class CenServiceImpl implements CenService {
                 final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest);
                 result = result.fromSdk(response);
 
-                // TODO: need to optimize the timer
                 // check if cen has already been deleted
-                boolean hasDeleted = false;
-                try {
-
-                    for (int i = 0; i < COUNT_DOWN_TIME; i++) {
-                        hasDeleted = this.checkIfCenHasBeenDeleted(client, cenId);
-                        if (hasDeleted) {
-                            logger.info("The Cen: [{}] has already been deleted.", cenId);
-                            hasDeleted = true;
-                            break;
-                        }
-                        TimeUnit.SECONDS.sleep(1);
-                    }
-                } catch (InterruptedException e) {
-                    throw new PluginException(e.getMessage());
-                }
-                if (!hasDeleted) {
-                    throw new PluginException("The Cen hasn't been deleted.");
-                }
+                Function<?, Boolean> func = o -> this.checkIfCenHasBeenDeleted(client, cenId);
+                PluginTimer.runTask(new PluginTimerTask(func));
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -172,24 +159,8 @@ public class CenServiceImpl implements CenService {
             this.acsClientStub.request(client, detachCenChildInstanceRequest);
         }
 
-        // TODO: need to optimize the timer
-        boolean ifAllChildInstancesHasBeenDeleted = false;
-        try {
-            for (int i = 0; i < COUNT_DOWN_TIME; i++) {
-                ifAllChildInstancesHasBeenDeleted = this.checkIfCenHasNoChildInstance(client, cenId);
-                if (ifAllChildInstancesHasBeenDeleted) {
-                    logger.info("All child instances has been deleted.");
-                    break;
-                }
-                TimeUnit.SECONDS.sleep(1);
-            }
-        } catch (InterruptedException e) {
-            throw new PluginException(e.getMessage());
-        }
-
-        if (!ifAllChildInstancesHasBeenDeleted) {
-            throw new PluginException("Not all child instances of Cen haven been deleted.");
-        }
+        Function<?, Boolean> func = o -> this.checkIfCenHasNoChildInstance(client, cenId);
+        PluginTimer.runTask(new PluginTimerTask(func));
     }
 
     @Override
@@ -282,12 +253,12 @@ public class CenServiceImpl implements CenService {
         return this.acsClientStub.request(client, retrieveAttachedChildInstanceRequest);
     }
 
-    private boolean checkIfCenHasNoChildInstance(IAcsClient client, String cenId) {
+    private Boolean checkIfCenHasNoChildInstance(IAcsClient client, String cenId) {
         final DescribeCenAttachedChildInstancesResponse describeCenAttachedChildInstancesResponse = this.retrieveCenAttachedChildInstance(client, cenId);
         return describeCenAttachedChildInstancesResponse.getChildInstances().isEmpty();
     }
 
-    private boolean checkIfCenHasBeenDeleted(IAcsClient client, String cenId) {
+    private Boolean checkIfCenHasBeenDeleted(IAcsClient client, String cenId) {
         boolean ifCenDeleted = false;
         final DescribeCensResponse describeCensResponse = this.retrieveCen(client);
         final List<DescribeCensResponse.Cen> foundCenList = describeCensResponse.getCens().stream().filter(cen -> cenId.equals(cen.getCenId())).collect(Collectors.toList());
