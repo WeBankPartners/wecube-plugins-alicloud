@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 
 import com.aliyuncs.rds.model.v20140815.DeleteBackupRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
@@ -13,6 +14,7 @@ public class CoreDeleteBackupRequestDto extends CoreRequestInputDto implements P
     private String backupId;
     private String ownerAccount;
     private String ownerId;
+    @JsonProperty("dBInstanceId")
     private String dBInstanceId;
 
     private String backupJobId;

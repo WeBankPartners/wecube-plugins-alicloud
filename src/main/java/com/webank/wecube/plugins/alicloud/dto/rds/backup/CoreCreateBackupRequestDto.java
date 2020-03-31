@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 
 import com.aliyuncs.rds.model.v20140815.CreateBackupRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
@@ -12,9 +13,11 @@ public class CoreCreateBackupRequestDto extends CoreRequestInputDto implements P
 
     private String resourceOwnerId;
     private String backupStrategy;
+    @JsonProperty("dBInstanceId")
     private String dBInstanceId;
     private String backupType;
     private String backupMethod;
+    @JsonProperty("dBName")
     private String dBName;
 
     public CoreCreateBackupRequestDto() {
@@ -68,11 +71,11 @@ public class CoreCreateBackupRequestDto extends CoreRequestInputDto implements P
         this.backupMethod = backupMethod;
     }
 
-    public String getdBName() {
+    public String getDBName() {
         return dBName;
     }
 
-    public void setdBName(String dBName) {
+    public void setDBName(String dBName) {
         this.dBName = dBName;
     }
 }
