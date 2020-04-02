@@ -10,6 +10,7 @@ import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
@@ -39,12 +40,13 @@ public class VMServiceImpl implements VMService {
 
     private AcsClientStub acsClientStub;
     private DtoValidator dtoValidator;
-
+    private PasswordManager passwordManager;
 
     @Autowired
-    public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
+    public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
+        this.passwordManager = passwordManager;
     }
 
     @Override
@@ -60,6 +62,7 @@ public class VMServiceImpl implements VMService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                String password = requestDto.getPassword();
 
                 final String instanceId = requestDto.getInstanceId();
                 if (StringUtils.isNotEmpty(instanceId)) {
@@ -78,6 +81,13 @@ public class VMServiceImpl implements VMService {
                     throw new PluginException(msg);
                 }
 
+                // check password field, if empty, generate one
+                if (StringUtils.isEmpty(password)) {
+                    password = passwordManager.generatePassword();
+                    requestDto.setPassword(password);
+                }
+
+
                 // create VM instance
                 final CreateInstanceRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
@@ -92,7 +102,12 @@ public class VMServiceImpl implements VMService {
                 // start the vm
                 startVM(client, regionId, response.getInstanceId());
 
-                result = result.fromSdk(response);
+                // encrypt the password then
+                final String guid = requestDto.getGuid();
+                final String seed = requestDto.getSeed();
+                final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
+
+                result = result.fromSdk(response, encryptedPassword);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
