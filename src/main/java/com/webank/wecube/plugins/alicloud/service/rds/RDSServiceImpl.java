@@ -20,6 +20,8 @@ import com.webank.wecube.plugins.alicloud.service.redis.InstanceStatus;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
@@ -43,12 +45,13 @@ public class RDSServiceImpl implements RDSService {
 
     private AcsClientStub acsClientStub;
     private DtoValidator dtoValidator;
-
+    private PasswordManager passwordManager;
 
     @Autowired
-    public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
+    public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
+        this.passwordManager = passwordManager;
     }
 
     @Override
@@ -87,10 +90,29 @@ public class RDSServiceImpl implements RDSService {
                 response = this.acsClientStub.request(client, createDBInstanceRequest);
 
                 // set up Plugin Timer to check if the resource is not creating any more
-                Function<?, Boolean> func = o -> !ifDBInstanceInStatus(client, regionId, response.getDBInstanceId(), RDSStatus.CREATING);
+                final String createdDBInstanceId = response.getDBInstanceId();
+                Function<?, Boolean> func = o -> !ifDBInstanceInStatus(client, regionId, createdDBInstanceId, RDSStatus.CREATING);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
-                result = result.fromSdk(response);
+                // create an RDS account with just created DB instance bound onto
+                logger.info("Creating RDS account and bind it to the just created DB instance");
+
+                final CreateAccountRequest createAccountRequest = PluginSdkBridge.toSdk(requestDto, CreateAccountRequest.class, true);
+
+                String password = createAccountRequest.getAccountPassword();
+                if (StringUtils.isEmpty(password)) {
+                    password = passwordManager.generateRDSPassword();
+                    createAccountRequest.setAccountPassword(password);
+                }
+
+                final String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), password);
+
+                createAccountRequest.setRegionId(regionId);
+                createAccountRequest.setDBInstanceId(createdDBInstanceId);
+                createRDSAccount(client, createAccountRequest);
+
+                // return result
+                result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword);
 
 
             } catch (PluginException | AliCloudException ex) {
@@ -366,6 +388,50 @@ public class RDSServiceImpl implements RDSService {
         final DescribeBackupTasksResponse.BackupJob backupJob = foundBackupJobOpt.get();
 
         return StringUtils.equals(status.getStatus(), backupJob.getBackupStatus());
+    }
+
+    @Override
+    public void createRDSAccount(IAcsClient client, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
+
+        logger.info("Creating RDS account...");
+
+        if (StringUtils.isEmpty(createAccountRequest.getRegionId())) {
+            throw new PluginException("The regionId cannot be null or empty.");
+        }
+
+        this.acsClientStub.request(client, createAccountRequest);
+
+        // check if the account has been created
+        Function<?, Boolean> func = o -> ifRDSAccountCreated(client, createAccountRequest.getRegionId(), createAccountRequest.getAccountName(), createAccountRequest.getDBInstanceId());
+        PluginTimer.runTask(new PluginTimerTask(func));
+    }
+
+    @Override
+    public Boolean ifRDSAccountCreated(IAcsClient client, String regionId, String accountName, String dBInstanceId) throws PluginException, AliCloudException {
+
+        boolean ifAccountCreated = false;
+
+        logger.info("Retrieving RDS account info...");
+
+        if (StringUtils.isAnyEmpty(regionId, accountName)) {
+            throw new PluginException("Either regionId or accountName cannot be null or empty.");
+        }
+
+        DescribeAccountsRequest request = new DescribeAccountsRequest();
+        request.setRegionId(regionId);
+        request.setAccountName(accountName);
+        request.setDBInstanceId(dBInstanceId);
+
+        final DescribeAccountsResponse response = this.acsClientStub.request(client, request);
+
+        final long count = response.getAccounts().stream().filter(dbInstanceAccount -> StringUtils.equals(accountName, dbInstanceAccount.getAccountName())).count();
+
+        if (count == 1) {
+            ifAccountCreated = true;
+        }
+
+        return ifAccountCreated;
+
     }
 
     private Boolean ifDBInstanceIsDeleted(IAcsClient client, String regionId, String dBInstanceId) throws PluginException, AliCloudException {
