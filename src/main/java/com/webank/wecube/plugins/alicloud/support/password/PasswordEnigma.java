@@ -28,6 +28,7 @@ public interface PasswordEnigma {
     String DEFAULT_CIPHER = "CIPHER_A";
     String DEFAULT_ALGO = "PKCS5";
     Charset CHAR_SET = StandardCharsets.UTF_8;
+    int BLOCK_SIZE = 16;
 
     Map<String, String> CIPHER_MAP = new HashMap<String, String>() {{
         put(DEFAULT_CIPHER, "{cipher_a}");
@@ -56,7 +57,7 @@ public interface PasswordEnigma {
             cipherKey = DEFAULT_CIPHER;
         }
 
-        String md5EncodedStr = md5HexEncode(guid + seed).substring(0, 16);
+        String md5EncodedStr = md5HexEncode(guid + seed);
 
         if (StringUtils.isEmpty(md5EncodedStr)) {
             throw new CryptoException("Error when encoding md5 string");
@@ -103,7 +104,7 @@ public interface PasswordEnigma {
 
         final String encryptedPasswordWithoutCipherPrefix = encryptedPassword.substring(prefixLength);
 
-        String md5EncodedStr = md5HexEncode(guid + seed).substring(0, 16);
+        String md5EncodedStr = md5HexEncode(guid + seed);
 
         if (StringUtils.isEmpty(md5EncodedStr)) {
             throw new CryptoException("Error when encoding md5 string");
@@ -147,7 +148,7 @@ public interface PasswordEnigma {
         }
 
         // ensure to fill the key to a 16 bytes size long array
-        byte[] keyBytes = Arrays.copyOf(key.getBytes(CHAR_SET), 16);
+        byte[] keyBytes = Arrays.copyOf(key.getBytes(CHAR_SET), BLOCK_SIZE);
 
         // encode data
         byte[] result;
@@ -188,7 +189,7 @@ public interface PasswordEnigma {
         }
 
         // ensure to fill the key to a 16 bytes size long array
-        byte[] keyBytes = Arrays.copyOf(key.getBytes(CHAR_SET), 16);
+        byte[] keyBytes = Arrays.copyOf(key.getBytes(CHAR_SET), BLOCK_SIZE);
 
         String result;
         final byte[] decodedByteArray = HexUtils.fromHexString(content);
