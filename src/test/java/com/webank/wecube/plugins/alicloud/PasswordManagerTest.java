@@ -8,10 +8,11 @@ public class PasswordManagerTest extends BaseSpringBootTest {
 
     @Autowired
     private PasswordManager passwordManager;
-    private String guid = "1234";
-    private String seed = "2234";
-    private String ***REMOVED***
-    private String encryptedPassword = "{cipher_a}6dff2cce25457bdd2ad2b516b3b48259";
+
+    private String guid = "0015_0000000020";
+    private String seed = "seed-wecube2.1-2020";
+    private ***REMOVED***
+    private String encryptedPassword = "{cipher_a}5f5fb6fd46cd7cf9183893425d1d6506";
 
 
     @Test
