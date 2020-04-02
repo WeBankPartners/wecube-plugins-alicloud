@@ -5,12 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
  * @author howechen
  */
 public class CoreCreateVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateInstanceRequest> {
+    @NotEmpty
+    private String seed;
+
     private String instanceId;
 
     private String resourceOwnerId;
@@ -537,5 +541,13 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
 
     public void setSystemDiskDescription(String systemDiskDescription) {
         this.systemDiskDescription = systemDiskDescription;
+    }
+
+    public String getSeed() {
+        return seed;
+    }
+
+    public void setSeed(String seed) {
+        this.seed = seed;
     }
 }
