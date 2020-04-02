@@ -13,6 +13,10 @@ public class PasswordManager {
     public PasswordManager() {
     }
 
+    public String generatePassword() {
+        return PasswordGenerator.generatePassword();
+    }
+
     public String encryptPassword(String guid, String seed, String password, String specifiedCipher, String algo) throws PluginException {
         String result;
         try {
