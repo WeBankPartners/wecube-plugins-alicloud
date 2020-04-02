@@ -2,6 +2,8 @@ package com.webank.wecube.plugins.alicloud.support.password;
 
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,14 +12,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class PasswordManager {
 
+    private static final Logger logger = LoggerFactory.getLogger(PasswordManager.class);
+
     public PasswordManager() {
     }
 
     public String generatePassword() {
-        return PasswordGenerator.generatePassword();
+        return PasswordGenerator.generatePassword(String.valueOf(PasswordGenerator.SCHEMA.UNIVERSAL));
+    }
+
+    public String generateUniversalPassword() {
+        return PasswordGenerator.generatePassword(String.valueOf(PasswordGenerator.SCHEMA.UNIVERSAL));
+    }
+
+    public String generateRDSPassword() {
+        return PasswordGenerator.generatePassword(String.valueOf(PasswordGenerator.SCHEMA.RDS));
+    }
+
+    public String generatePassword(String schema) {
+        return PasswordGenerator.generatePassword(schema);
     }
 
     public String encryptPassword(String guid, String seed, String password, String specifiedCipher, String algo) throws PluginException {
+
+        logger.info("Encrypting password...");
+
         String result;
         try {
             result = PasswordEnigma.encryptPassword(guid, seed, password, specifiedCipher, algo);
@@ -36,9 +55,12 @@ public class PasswordManager {
     }
 
     public String encryptGeneratedPassword(String guid, String seed, String specifiedCipher, String algo) throws PluginException {
+
+        logger.info("Generating and encrypting the password...");
+
         String result;
         try {
-            String password = PasswordGenerator.generatePassword();
+            String password = PasswordGenerator.generateUniversalPassword();
             result = PasswordEnigma.encryptPassword(guid, seed, password, specifiedCipher, algo);
         } catch (CryptoException e) {
             throw new PluginException(String.format("Encounter cryptoException while encrypting password, the message is: [%s].", e.getMessage()));
@@ -55,6 +77,9 @@ public class PasswordManager {
     }
 
     public String decryptPassword(String guid, String seed, String encryptedPassword, String specifiedCipher, String algo) throws PluginException {
+
+        logger.info("Decrypting the password");
+
         String result;
 
         try {
