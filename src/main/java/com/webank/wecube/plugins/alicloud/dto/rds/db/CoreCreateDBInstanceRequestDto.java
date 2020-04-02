@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * @author howechen
  */
@@ -12,6 +14,17 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
+
+    // RDS user management
+    private String seed;
+    private String accountType = "Super";
+    private String accountDescription;
+    @NotEmpty(message = "The accountName cannot be empty.")
+    private String accountName;
+    private String resourceOwnerAccount;
+    private String ownerAccount;
+    private String ownerId;
+    private String accountPassword;
 
     private String resourceOwnerId;
     @JsonProperty("dBInstanceStorage")
@@ -289,5 +302,69 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     public void setPayType(String payType) {
         this.payType = payType;
+    }
+
+    public String getSeed() {
+        return seed;
+    }
+
+    public void setSeed(String seed) {
+        this.seed = seed;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
+    }
+
+    public String getAccountDescription() {
+        return accountDescription;
+    }
+
+    public void setAccountDescription(String accountDescription) {
+        this.accountDescription = accountDescription;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
+    }
+
+    public String getResourceOwnerAccount() {
+        return resourceOwnerAccount;
+    }
+
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
+        this.resourceOwnerAccount = resourceOwnerAccount;
+    }
+
+    public String getOwnerAccount() {
+        return ownerAccount;
+    }
+
+    public void setOwnerAccount(String ownerAccount) {
+        this.ownerAccount = ownerAccount;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getAccountPassword() {
+        return accountPassword;
+    }
+
+    public void setAccountPassword(String accountPassword) {
+        this.accountPassword = accountPassword;
     }
 }
