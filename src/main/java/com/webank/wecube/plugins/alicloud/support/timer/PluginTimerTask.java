@@ -40,5 +40,7 @@ public class PluginTimerTask implements Runnable {
                 throw new PluginException(e.getMessage());
             }
         }
+
+        logger.info("Plugin timer task completed.");
     }
 }
