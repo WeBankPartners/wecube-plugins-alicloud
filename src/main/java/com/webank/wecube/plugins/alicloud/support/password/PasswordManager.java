@@ -29,6 +29,10 @@ public class PasswordManager {
         return PasswordGenerator.generatePassword(String.valueOf(PasswordGenerator.SCHEMA.RDS));
     }
 
+    public String generateRedisPassword() {
+        return PasswordGenerator.generatePassword(String.valueOf(PasswordGenerator.SCHEMA.REDIS));
+    }
+
     public String generatePassword(String schema) {
         return PasswordGenerator.generatePassword(schema);
     }

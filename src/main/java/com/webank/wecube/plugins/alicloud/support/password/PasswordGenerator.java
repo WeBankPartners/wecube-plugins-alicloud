@@ -15,12 +15,16 @@ import java.util.stream.Collectors;
 public interface PasswordGenerator {
     char[] ALLOWED_CHAR_ARR = {'(', ')', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '-', '_', '+', '=', '|', '{', '}', '[', ']', ':', ';', '\'', '<', '>', ',', '.', '?', '/'};
     char[] RDS_ALLOWED_CHAR_ARR = {'!', '@', '#', '$', '&', '%', '^', '*', '(', ')', '_', '+', '-', '='};
+    char[] REDIS_ALLOWED_CHAR_ARR = {'!', '@', '#', '$', '&', '%', '^', '*', '(', ')', '_', '+', '-', '='};
 
     enum SCHEMA {
         // universal
         UNIVERSAL("Universal"),
         // rds
-        RDS("RDS");
+        RDS("RDS"),
+
+        // redis
+        REDIS("Redis");
 
         private String schema;
 
@@ -90,7 +94,7 @@ public interface PasswordGenerator {
     }
 
     /**
-     * Password generation
+     * Password generation, rds schema
      *
      * @return generated password
      */
@@ -107,6 +111,41 @@ public interface PasswordGenerator {
         String lowerCaseLetters = RandomStringUtils.random(upperLetterCount, 97, 122, true, false);
         String numbers = RandomStringUtils.randomNumeric(numberCount);
         String specialChar = RandomStringUtils.random(characterCount, 0, 0, false, false, RDS_ALLOWED_CHAR_ARR);
+
+        String rdmString = upperCaseLetters.concat(lowerCaseLetters)
+                .concat(numbers)
+                .concat(specialChar);
+        List<Character> pwdChars = rdmString.chars()
+                .mapToObj(c -> (char) c)
+                .collect(Collectors.toList());
+
+        do {
+            Collections.shuffle(pwdChars);
+        } while (pwdChars.get(0) == '/');
+
+        return pwdChars.stream()
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString();
+    }
+
+    /**
+     * Password generation, redis schema
+     *
+     * @return generated password
+     */
+    static String generateRedisPassword() {
+        // lower letter + upper letter = 15
+        final int lowerLetterCount = RandomUtils.nextInt(1, 15);
+        final int upperLetterCount = 15 - lowerLetterCount;
+        // number + character = 15
+        final int numberCount = RandomUtils.nextInt(1, 15);
+        final int characterCount = 15 - numberCount;
+
+        // password generation
+        String upperCaseLetters = RandomStringUtils.random(lowerLetterCount, 65, 90, true, false);
+        String lowerCaseLetters = RandomStringUtils.random(upperLetterCount, 97, 122, true, false);
+        String numbers = RandomStringUtils.randomNumeric(numberCount);
+        String specialChar = RandomStringUtils.random(characterCount, 0, 0, false, false, REDIS_ALLOWED_CHAR_ARR);
 
         String rdmString = upperCaseLetters.concat(lowerCaseLetters)
                 .concat(numbers)
