@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.RemoveVServerGroupBackendServersRequest;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
@@ -9,11 +10,17 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
  */
 public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<RemoveVServerGroupBackendServersRequest> {
 
+    // fields from core
+    private String hostIds;
+    private String hostPorts;
+
+    // alicloud fields
     private String listenerPort;
     private String loadBalancerId;
     private String listenerProtocol;
 
     private String resourceOwnerId;
+    @JsonIgnore
     private String backendServers;
     private String vServerGroupId;
     private String resourceOwnerAccount;
@@ -93,5 +100,21 @@ public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto imple
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getHostIds() {
+        return hostIds;
+    }
+
+    public void setHostIds(String hostIds) {
+        this.hostIds = hostIds;
+    }
+
+    public String getHostPorts() {
+        return hostPorts;
+    }
+
+    public void setHostPorts(String hostPorts) {
+        this.hostPorts = hostPorts;
     }
 }
