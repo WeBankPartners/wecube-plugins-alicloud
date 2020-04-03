@@ -14,6 +14,7 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
@@ -37,11 +38,13 @@ public class RedisServiceImpl implements RedisService {
 
     private AcsClientStub acsClientStub;
     private DtoValidator dtoValidator;
+    private PasswordManager passwordManager;
 
     @Autowired
-    public RedisServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
+    public RedisServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
+        this.passwordManager = passwordManager;
     }
 
     @Override
@@ -74,6 +77,13 @@ public class RedisServiceImpl implements RedisService {
                     }
                 }
 
+                if (StringUtils.isEmpty(requestDto.getPassword())) {
+                    // no password specified, create one
+                    final String generatedRedisPassword = passwordManager.generateRedisPassword();
+                    requestDto.setPassword(generatedRedisPassword);
+                }
+                String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getPassword());
+
                 // create redis instance
                 final CreateInstanceRequest createInstanceRequest = requestDto.toSdk();
                 createInstanceRequest.setRegionId(regionId);
@@ -85,7 +95,7 @@ public class RedisServiceImpl implements RedisService {
                 Function<?, Boolean> func = o -> ifRedisInStatus(client, regionId, response.getInstanceId(), InstanceStatus.NORMAL);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
-                result = result.fromSdk(response);
+                result = result.fromSdk(response, encryptedPassword);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
