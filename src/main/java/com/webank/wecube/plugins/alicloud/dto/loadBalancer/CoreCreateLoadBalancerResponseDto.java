@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
@@ -71,11 +72,11 @@ public class CoreCreateLoadBalancerResponseDto extends CoreResponseOutputDto imp
         this.vpcId = vpcId;
     }
 
-    public String getvSwitchId() {
+    public String getVSwitchId() {
         return vSwitchId;
     }
 
-    public void setvSwitchId(String vSwitchId) {
+    public void setVSwitchId(String vSwitchId) {
         this.vSwitchId = vSwitchId;
     }
 
