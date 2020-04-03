@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.CreateInstanceResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
@@ -8,6 +9,9 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
  * @author howechen
  */
 public class CoreCreateInstanceResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateInstanceResponseDto, CreateInstanceResponse> {
+
+    @JsonProperty(value = "password")
+    private String encryptedPassword;
 
     private String requestId;
     private String instanceId;
@@ -31,6 +35,11 @@ public class CoreCreateInstanceResponseDto extends CoreResponseOutputDto impleme
     private String vSwitchId;
     private String privateIpAddr;
 
+    public CoreCreateInstanceResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword) {
+        final CoreCreateInstanceResponseDto result = this.fromSdk(response);
+        result.setEncryptedPassword(encryptedPassword);
+        return result;
+    }
 
     public CoreCreateInstanceResponseDto() {
     }
@@ -201,5 +210,13 @@ public class CoreCreateInstanceResponseDto extends CoreResponseOutputDto impleme
 
     public void setPrivateIpAddr(String privateIpAddr) {
         this.privateIpAddr = privateIpAddr;
+    }
+
+    public String getEncryptedPassword() {
+        return encryptedPassword;
+    }
+
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
     }
 }

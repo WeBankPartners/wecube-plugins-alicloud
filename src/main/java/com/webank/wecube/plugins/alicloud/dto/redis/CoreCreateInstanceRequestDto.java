@@ -5,12 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * @author howechen
  */
 public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateInstanceRequest> {
 
     private String instanceId;
+
+    // redis password generation
+    @NotEmpty
+    private String seed;
 
     private String resourceOwnerId;
     private String couponNo;
@@ -284,5 +290,13 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
     public void setConfig(String config) {
         this.config = config;
+    }
+
+    public String getSeed() {
+        return seed;
+    }
+
+    public void setSeed(String seed) {
+        this.seed = seed;
     }
 }
