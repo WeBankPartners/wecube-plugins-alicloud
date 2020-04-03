@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.loadBalancer;
 
 import com.aliyuncs.AcsRequest;
 import com.aliyuncs.IAcsClient;
+import com.aliyuncs.ecs.model.v20140526.DescribeInstancesResponse;
 import com.aliyuncs.slb.model.v20140515.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
@@ -11,14 +12,15 @@ import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalance
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreAddBackendServerRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreAddBackendServerResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreRemoveBackendServerRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.CoreRemoveBackendServerResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.*;
+import com.webank.wecube.plugins.alicloud.service.ecs.vm.VMService;
+import com.webank.wecube.plugins.alicloud.service.ecs.vm.VMServiceImpl;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginMapUtils;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author howechen
@@ -39,6 +42,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     private AcsClientStub acsClientStub;
     private DtoValidator dtoValidator;
+
 
     @Autowired
     public LoadBalancerServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
@@ -196,6 +200,9 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final String loadBalancerId = requestDto.getLoadBalancerId();
                 final String listenerProtocol = requestDto.getListenerProtocol();
 
+                final String backendServersString = getBackendServersString(requestDto.getHostIds(), requestDto.getHostPorts());
+                requestDto.setBackendServers(backendServersString);
+
                 if (!EnumUtils.isValidEnumIgnoreCase(listenerProtocolType.class, listenerProtocol.toUpperCase())) {
                     throw new PluginException("The listenerProtocol is an invalid type.");
                 }
@@ -208,6 +215,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     String listenerBondVServerGroupId = retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
                     if (StringUtils.isNotEmpty(listenerBondVServerGroupId)) {
                         // VServerGroup already bound with that listener
+
                         // add backendServer on that VServerGroup
                         logger.info("Adding backend server on existed VServerGroup");
                         final AddVServerGroupBackendServersResponse modifyResponse = this.addBackendServerOnVServerGroup(client, regionId, requestDto.getBackendServers(), listenerBondVServerGroupId);
@@ -277,6 +285,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final String loadBalancerId = requestDto.getLoadBalancerId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+                final String backendServersString = getBackendServersString(requestDto.getHostIds(), requestDto.getHostPorts());
+                requestDto.setBackendServers(backendServersString);
 
                 if (StringUtils.isAnyEmpty(listenerProtocol, loadBalancerId)) {
                     throw new PluginException("Either the listener protocol or loadBalancerId cannot be empty or null");
@@ -295,6 +305,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 RemoveVServerGroupBackendServersRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 request.setVServerGroupId(vServerGroupId);
+                request.setBackendServers(requestDto.getBackendServers());
                 RemoveVServerGroupBackendServersResponse response;
                 response = this.acsClientStub.request(client, request);
 
@@ -311,6 +322,32 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         }
         return resultList;
     }
+
+    private String getBackendServersString(String hostIds, String hostPorts) throws PluginException, AliCloudException {
+        final List<BackendServerDto> backendServerDtos = fromRawStringList(hostIds, hostPorts);
+        List<String> backendServerStringList = new ArrayList<>();
+        for (BackendServerDto backendServerDto : backendServerDtos) {
+            final String singleServerString = backendServerDto.toString();
+            backendServerStringList.add(singleServerString);
+        }
+        return PluginStringUtils.stringifyObjectList(backendServerStringList);
+    }
+
+    private List<BackendServerDto> fromRawStringList(String hostIds, String hostPorts) throws PluginException, AliCloudException {
+        final List<String> hostIdList = PluginStringUtils.splitStringList(hostIds);
+        final List<String> hostPortList = PluginStringUtils.splitStringList(hostPorts);
+
+        final Map<String, String> hostIdToPortMap = PluginMapUtils.zipToMap(hostIdList, hostPortList);
+        List<BackendServerDto> resultList = new ArrayList<>();
+        for (Map.Entry<String, String> hostIdToPort : hostIdToPortMap.entrySet()) {
+            final String id = hostIdToPort.getKey();
+            final String port = hostIdToPort.getValue();
+            BackendServerDto backendServerDto = new BackendServerDto(id, port);
+            resultList.add(backendServerDto);
+        }
+        return resultList;
+    }
+
 
     private AddVServerGroupBackendServersResponse addBackendServerOnVServerGroup(IAcsClient client, String regionId, String backendServers, String vServerGroupId) throws PluginException, AliCloudException {
         if (StringUtils.isAnyEmpty(regionId, backendServers, vServerGroupId)) {
@@ -354,6 +391,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     private CreateVServerGroupResponse createVServerGroup(CoreAddBackendServerRequestDto requestDto, IAcsClient client, String regionId) throws AliCloudException {
         CreateVServerGroupRequest createVServerGroupRequest = requestDto.toSdk();
+        createVServerGroupRequest.setBackendServers(requestDto.getBackendServers());
         createVServerGroupRequest.setRegionId(regionId);
 
         CreateVServerGroupResponse createVServerGroupResponse;
