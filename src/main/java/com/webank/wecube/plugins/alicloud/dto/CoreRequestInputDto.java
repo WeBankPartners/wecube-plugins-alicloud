@@ -12,6 +12,7 @@ public class CoreRequestInputDto {
     private String identityParams;
     @NotEmpty(message = "cloudParams cannot be null or empty")
     private String cloudParams;
+    @NotEmpty(message = "GUID cannot be null or empty")
     private String guid = StringUtils.EMPTY;
     private String callbackParameter = StringUtils.EMPTY;
 
