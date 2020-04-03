@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
@@ -28,6 +29,7 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
     private String bandwidth;
     private String ownerAccount;
     private String ownerId;
+    @JsonProperty("vSwitchId")
     private String vSwitchId;
     private String internetChargeType;
     private String vpcId;
@@ -189,11 +191,11 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
         this.ownerId = ownerId;
     }
 
-    public String getvSwitchId() {
+    public String getVSwitchId() {
         return vSwitchId;
     }
 
-    public void setvSwitchId(String vSwitchId) {
+    public void setVSwitchId(String vSwitchId) {
         this.vSwitchId = vSwitchId;
     }
 
