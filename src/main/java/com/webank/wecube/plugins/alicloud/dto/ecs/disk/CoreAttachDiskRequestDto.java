@@ -9,26 +9,26 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
  */
 public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AttachDiskRequest> {
 
-    private Long resourceOwnerId;
+    private String resourceOwnerId;
     private String keyPairName;
-    private Boolean bootable;
+    private String bootable;
     private String password;
     private String diskId;
-    private Boolean deleteWithInstance;
+    private String deleteWithInstance;
     private String resourceOwnerAccount;
     private String ownerAccount;
-    private Long ownerId;
+    private String ownerId;
     private String instanceId;
     private String device;
 
     public CoreAttachDiskRequestDto() {
     }
 
-    public Long getResourceOwnerId() {
+    public String getResourceOwnerId() {
         return resourceOwnerId;
     }
 
-    public void setResourceOwnerId(Long resourceOwnerId) {
+    public void setResourceOwnerId(String resourceOwnerId) {
         this.resourceOwnerId = resourceOwnerId;
     }
 
@@ -40,11 +40,11 @@ public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements Plu
         this.keyPairName = keyPairName;
     }
 
-    public Boolean getBootable() {
+    public String getBootable() {
         return bootable;
     }
 
-    public void setBootable(Boolean bootable) {
+    public void setBootable(String bootable) {
         this.bootable = bootable;
     }
 
@@ -64,11 +64,11 @@ public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements Plu
         this.diskId = diskId;
     }
 
-    public Boolean getDeleteWithInstance() {
+    public String getDeleteWithInstance() {
         return deleteWithInstance;
     }
 
-    public void setDeleteWithInstance(Boolean deleteWithInstance) {
+    public void setDeleteWithInstance(String deleteWithInstance) {
         this.deleteWithInstance = deleteWithInstance;
     }
 
@@ -88,11 +88,11 @@ public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements Plu
         this.ownerAccount = ownerAccount;
     }
 
-    public Long getOwnerId() {
+    public String getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(Long ownerId) {
+    public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
     }
 
