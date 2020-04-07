@@ -2,7 +2,6 @@ package com.webank.wecube.plugins.alicloud.service.cbn.cen;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.cbn.model.v20170912.*;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
@@ -22,11 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.webank.wecube.plugins.alicloud.support.PluginConstant.COUNT_DOWN_TIME;
 
 /**
  * @author howechen
