@@ -14,9 +14,11 @@ import java.io.IOException;
  * @author howechen
  */
 @Component
-public class ScpClient {
+public class PluginScpClient {
+    public static String DEFAULT_USER = "root";
+    public static final int PORT = PluginSshdClient.PORT;
 
-    private static final Logger logger = LoggerFactory.getLogger(ScpClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(PluginScpClient.class);
 
     public boolean isAuthedWithPassword(String ip, Integer port, String user, String password) {
         Connection connection = new Connection(ip, port);
@@ -85,14 +87,14 @@ public class ScpClient {
         }
     }
 
-    public void put(String ip, Integer port, String user, String password, String localFile, String remoteTargetDirectory) {
-        Connection conn = new Connection(ip, port);
+    public void put(String ip, Integer port, String user, String password, String localFile, String remoteTargetDirectory) throws PluginException {
+        Connection connection = new Connection(ip, port);
         try {
-            conn.connect();
-            boolean isconn = conn.authenticateWithPassword(user, password);
-            if (isconn) {
+            connection.connect();
+            boolean isConnected = connection.authenticateWithPassword(user, password);
+            if (isConnected) {
                 logger.info("Connection is OK");
-                SCPClient scpClient = conn.createSCPClient();
+                SCPClient scpClient = connection.createSCPClient();
                 logger.info("scp local file [{}] to remote target directory [{}]", localFile, remoteTargetDirectory);
                 scpClient.put(localFile, remoteTargetDirectory, "7777");
             } else {
@@ -103,7 +105,7 @@ public class ScpClient {
             e.printStackTrace();
             throw new PluginException("Run 'scp' command meet error: " + e.getMessage());
         } finally {
-            conn.close();
+            connection.close();
         }
     }
 }
