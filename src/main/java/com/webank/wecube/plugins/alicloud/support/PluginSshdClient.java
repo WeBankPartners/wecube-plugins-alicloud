@@ -11,15 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-
 /**
  * @author howechen
  */
 @Component
-public class SshdClient {
+public class PluginSshdClient {
+    public static String DEFAULT_USER = "root";
+    public final static int PORT = 22;
 
-    private static final Logger logger = LoggerFactory.getLogger(SshdClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(PluginSshdClient.class);
 
 
     public String run(String host, String user, String password, Integer port, String command)
@@ -34,9 +34,12 @@ public class SshdClient {
         PooledRemoteCommandExecutor executor = new PooledRemoteCommandExecutor();
         executor.init(config);
 
-        String result = executor.execute(cmd);
-
-        executor.destroy();
+        String result;
+        try {
+            result = executor.execute(cmd);
+        } finally {
+            executor.destroy();
+        }
 
         logger.info("result is: " + result);
         return result;
@@ -54,15 +57,17 @@ public class SshdClient {
         PooledRemoteCommandExecutor executor = new PooledRemoteCommandExecutor();
         executor.init(config);
 
-        String result = executor.execute(cmd);
-
-        executor.destroy();
-
-        logger.info("result is: " + result);
-        if (StringUtils.isEmpty(result)) {
-            throw new PluginException("return is empty, please check !");
-        } else {
-            return result;
+        String result;
+        try {
+            result = executor.execute(cmd);
+            logger.info("result is: " + result);
+            if (StringUtils.isEmpty(result)) {
+                throw new PluginException("return is empty, please check !");
+            }
+        } finally {
+            executor.destroy();
         }
+        return result;
+
     }
 }
