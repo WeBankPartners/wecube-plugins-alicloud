@@ -3,11 +3,11 @@ import sys,getopt,os,re
 
 fstabFile="/etc/fstab"
 
-def umountDir(mountDir):
-    cmd="umount " + mountDir
+def unmountDir(mountDir):
+    cmd="unmount " + mountDir
     result = os.system(cmd)
     if result != 0:
-        print "execute umount failed cmd=%s,result=%d" %(cmd,result)
+        print "execute unmount failed cmd=%s,result=%d" %(cmd,result)
 
 def delMountInfoFromfstabFile(diskName,mountDir):
     with open(fstabFile,"r") as f:
@@ -43,7 +43,7 @@ def main(argv):
         print "input param have some empty value"
         sys.exit(2)
     
-    umountDir(mountDir)
+    unmountDir(mountDir)
     delMountInfoFromfstabFile(diskName,mountDir)
 
   
