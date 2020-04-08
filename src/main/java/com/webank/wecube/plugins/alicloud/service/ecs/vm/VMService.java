@@ -28,4 +28,6 @@ public interface VMService {
     Boolean checkIfVMInStatus(IAcsClient client, String regionId, String instanceId, InstanceStatus status) throws PluginException, AliCloudException;
 
     void startVM(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException;
+
+    String getVMIpAddress(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException;
 }
