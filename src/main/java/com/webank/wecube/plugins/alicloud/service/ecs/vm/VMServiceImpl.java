@@ -359,6 +359,28 @@ public class VMServiceImpl implements VMService {
         PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
     }
 
+    @Override
+    public String getVMIpAddress(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
+        final DescribeInstancesResponse describeInstancesResponse = retrieveVM(client, regionId, instanceId);
+        if (describeInstancesResponse.getTotalCount().equals(0)) {
+            throw new PluginException("Cannot find VM instance by given id");
+        }
+
+        final DescribeInstancesResponse.Instance instance = describeInstancesResponse.getInstances().get(0);
+
+
+        String result;
+        if (instance.getInnerIpAddress().isEmpty()) {
+            if (instance.getPublicIpAddress().isEmpty()) {
+                throw new PluginException("The VM instance doesn't have ip address");
+            }
+            result = instance.getPublicIpAddress().get(0);
+        } else {
+            result = instance.getInnerIpAddress().get(0);
+        }
+        return result;
+    }
+
     private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) {
         final DescribeInstancesResponse describeInstancesResponse = this.retrieveVM(client, regionId, instanceId);
         return describeInstancesResponse.getTotalCount() == 0;
