@@ -1,18 +1,27 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.disk;
 
 import com.aliyuncs.ecs.model.v20140526.AttachDiskRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AttachDiskRequest> {
 
+    @JsonProperty(value = "password")
+    private String hostPassword;
+    private String fileSystemType;
+    private String mountDir;
+    @NotEmpty(message = "Seed field is mandatory.")
+    private String seed;
+
     private String resourceOwnerId;
     private String keyPairName;
     private String bootable;
-    private String password;
     private String diskId;
     private String deleteWithInstance;
     private String resourceOwnerAccount;
@@ -46,14 +55,6 @@ public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements Plu
 
     public void setBootable(String bootable) {
         this.bootable = bootable;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getDiskId() {
@@ -110,5 +111,37 @@ public class CoreAttachDiskRequestDto extends CoreRequestInputDto implements Plu
 
     public void setDevice(String device) {
         this.device = device;
+    }
+
+    public String getHostPassword() {
+        return hostPassword;
+    }
+
+    public void setHostPassword(String hostPassword) {
+        this.hostPassword = hostPassword;
+    }
+
+    public String getSeed() {
+        return seed;
+    }
+
+    public void setSeed(String seed) {
+        this.seed = seed;
+    }
+
+    public String getFileSystemType() {
+        return fileSystemType;
+    }
+
+    public void setFileSystemType(String fileSystemType) {
+        this.fileSystemType = fileSystemType;
+    }
+
+    public String getMountDir() {
+        return mountDir;
+    }
+
+    public void setMountDir(String mountDir) {
+        this.mountDir = mountDir;
     }
 }

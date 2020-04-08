@@ -8,7 +8,10 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
  * @author howechen
  */
 public class CoreAttachDiskResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreAttachDiskResponseDto, AttachDiskResponse> {
+
     private String requestId;
+
+    private String volumeName;
 
     public CoreAttachDiskResponseDto() {
     }
@@ -19,5 +22,13 @@ public class CoreAttachDiskResponseDto extends CoreResponseOutputDto implements 
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public String getVolumeName() {
+        return volumeName;
+    }
+
+    public void setVolumeName(String volumeName) {
+        this.volumeName = volumeName;
     }
 }
