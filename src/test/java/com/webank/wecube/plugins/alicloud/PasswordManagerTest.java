@@ -16,13 +16,13 @@ public class PasswordManagerTest extends BaseSpringBootTest {
 
 
     @Test
-    public void encryptTest() {
+    public void givenGuidSeedAndPassword_encryptPassword_shouldSucceed() {
         final String encryptedPassword = passwordManager.encryptPassword(guid, seed, this.password);
         assert this.encryptedPassword.equals(encryptedPassword);
     }
 
     @Test
-    public void decryptTest() {
+    public void givenGuidSeedAndPassword_decryptPassword_shouldSucceed() {
         final String decryptedPassword = passwordManager.decryptPassword(guid, seed, this.encryptedPassword);
         assert this.password.equals(decryptedPassword);
     }
