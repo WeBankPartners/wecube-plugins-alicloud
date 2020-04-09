@@ -24,31 +24,17 @@ public class DiskController {
         this.diskService = diskService;
     }
 
-    @PostMapping(path = "/create")
+    @PostMapping(path = "/create_attach")
     @ResponseBody
-    public CoreResponseDto<CoreCreateDiskResponseDto> createDisk(@RequestBody CoreRequestDto<CoreCreateDiskRequestDto> request) {
-        List<CoreCreateDiskResponseDto> result = this.diskService.createDisk(request.getInputs());
-        return new CoreResponseDto<CoreCreateDiskResponseDto>().withErrorCheck(result);
+    public CoreResponseDto<CoreCreateAttachDiskResponseDto> createDisk(@RequestBody CoreRequestDto<CoreCreateAttachDiskRequestDto> request) {
+        List<CoreCreateAttachDiskResponseDto> result = this.diskService.createAttachDisk(request.getInputs());
+        return new CoreResponseDto<CoreCreateAttachDiskResponseDto>().withErrorCheck(result);
     }
 
-    @PostMapping(path = "/delete")
+    @PostMapping(path = "/detach_delete")
     @ResponseBody
-    public CoreResponseDto<CoreDeleteDiskResponseDto> deleteDisk(@RequestBody CoreRequestDto<CoreDeleteDiskRequestDto> request) {
-        List<CoreDeleteDiskResponseDto> result = this.diskService.deleteDisk(request.getInputs());
-        return new CoreResponseDto<CoreDeleteDiskResponseDto>().withErrorCheck(result);
-    }
-
-    @PostMapping(path = "/attach")
-    @ResponseBody
-    public CoreResponseDto<CoreAttachDiskResponseDto> attachDisk(@RequestBody CoreRequestDto<CoreAttachDiskRequestDto> request) {
-        List<CoreAttachDiskResponseDto> result = this.diskService.attachDisk(request.getInputs());
-        return new CoreResponseDto<CoreAttachDiskResponseDto>().withErrorCheck(result);
-    }
-
-    @PostMapping(path = "/detach")
-    @ResponseBody
-    public CoreResponseDto<CoreDetachDiskResponseDto> detachDisk(@RequestBody CoreRequestDto<CoreDetachDiskRequestDto> request) {
-        List<CoreDetachDiskResponseDto> result = this.diskService.detachDisk(request.getInputs());
-        return new CoreResponseDto<CoreDetachDiskResponseDto>().withErrorCheck(result);
+    public CoreResponseDto<CoreDetachDeleteDiskResponseDto> deleteDisk(@RequestBody CoreRequestDto<CoreDetachDeleteDiskRequestDto> request) {
+        List<CoreDetachDeleteDiskResponseDto> result = this.diskService.detachDeleteDisk(request.getInputs());
+        return new CoreResponseDto<CoreDetachDeleteDiskResponseDto>().withErrorCheck(result);
     }
 }
