@@ -64,11 +64,11 @@ public class DiskServiceImpl implements DiskService {
     }
 
     @Override
-    public List<CoreCreateDiskResponseDto> createDisk(List<CoreCreateDiskRequestDto> coreCreateLoadBalancerRequestDtoList) {
-        List<CoreCreateDiskResponseDto> resultList = new ArrayList<>();
-        for (CoreCreateDiskRequestDto requestDto : coreCreateLoadBalancerRequestDtoList) {
+    public List<CoreCreateAttachDiskResponseDto> createAttachDisk(List<CoreCreateAttachDiskRequestDto> coreCreateAttachDiskRequestDtoList) {
+        List<CoreCreateAttachDiskResponseDto> resultList = new ArrayList<>();
+        for (CoreCreateAttachDiskRequestDto requestDto : coreCreateAttachDiskRequestDtoList) {
 
-            CoreCreateDiskResponseDto result = new CoreCreateDiskResponseDto();
+            CoreCreateAttachDiskResponseDto result = new CoreCreateAttachDiskResponseDto();
             try {
 
                 dtoValidator.validate(requestDto);
@@ -83,6 +83,7 @@ public class DiskServiceImpl implements DiskService {
 
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String diskId = requestDto.getDiskId();
+                final String attachInstanceId = requestDto.getInstanceId();
 
                 if (StringUtils.isNotEmpty(diskId)) {
                     // if disk id is not empty, retrieve disk info
@@ -95,8 +96,8 @@ public class DiskServiceImpl implements DiskService {
                     }
                 }
 
-
                 // if disk id is empty, create disk
+                // this toSdk() method would set instanceId to null due to the collision between zoneId and instanceId
                 final CreateDiskRequest createDiskRequest = requestDto.toSdk();
                 createDiskRequest.setRegionId(regionId);
                 CreateDiskResponse response;
@@ -106,6 +107,13 @@ public class DiskServiceImpl implements DiskService {
                 // setup a task to poll the the status of created disk until it is available
                 Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, response.getDiskId(), DiskStatus.AVAILABLE);
                 PluginTimer.runTask(new PluginTimerTask(func));
+
+                // attach disk, reset instanceId back
+                requestDto.setDiskId(response.getDiskId());
+                requestDto.setInstanceId(attachInstanceId);
+                final String volumeName = attachDisk(client, regionId, requestDto);
+
+                result.setVolumeName(volumeName);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -120,11 +128,11 @@ public class DiskServiceImpl implements DiskService {
     }
 
     @Override
-    public List<CoreDeleteDiskResponseDto> deleteDisk(List<CoreDeleteDiskRequestDto> coreDeleteLoadBalancerRequestDtoList) {
-        List<CoreDeleteDiskResponseDto> resultList = new ArrayList<>();
-        for (CoreDeleteDiskRequestDto requestDto : coreDeleteLoadBalancerRequestDtoList) {
+    public List<CoreDetachDeleteDiskResponseDto> detachDeleteDisk(List<CoreDetachDeleteDiskRequestDto> coreDetachDeleteDiskRequestDtoList) {
+        List<CoreDetachDeleteDiskResponseDto> resultList = new ArrayList<>();
+        for (CoreDetachDeleteDiskRequestDto requestDto : coreDetachDeleteDiskRequestDtoList) {
 
-            CoreDeleteDiskResponseDto result = new CoreDeleteDiskResponseDto();
+            CoreDetachDeleteDiskResponseDto result = new CoreDetachDeleteDiskResponseDto();
 
             try {
 
@@ -140,13 +148,17 @@ public class DiskServiceImpl implements DiskService {
                 }
 
                 final String diskId = requestDto.getDiskId();
-                final DescribeDisksResponse foundedVpcInfo = this.retrieveDisk(client, regionId, diskId);
+                final DescribeDisksResponse foundDiskInfo = this.retrieveDisk(client, regionId, diskId);
 
                 // check if disk already deleted
-                if (0 == foundedVpcInfo.getTotalCount()) {
+                if (0 == foundDiskInfo.getTotalCount()) {
                     continue;
                 }
 
+                // detach disk from instance
+                if (StringUtils.isNotEmpty(foundDiskInfo.getDisks().get(0).getInstanceId())) {
+                    detachDisk(client, regionId, requestDto);
+                }
 
                 // delete disk
                 logger.info("Deleting disk, disk ID: [{}], disk region:[{}]", diskId, regionId);
@@ -175,135 +187,81 @@ public class DiskServiceImpl implements DiskService {
         return resultList;
     }
 
-    @Override
-    public List<CoreAttachDiskResponseDto> attachDisk(List<CoreAttachDiskRequestDto> coreAttachDiskRequestDtoList) {
-        List<CoreAttachDiskResponseDto> resultList = new ArrayList<>();
-        for (CoreAttachDiskRequestDto requestDto : coreAttachDiskRequestDtoList) {
+    private String attachDisk(IAcsClient client, String regionId, CoreCreateAttachDiskRequestDto requestDto) throws PluginException, AliCloudException {
 
-            CoreAttachDiskResponseDto result = new CoreAttachDiskResponseDto();
-
-            try {
-
-                dtoValidator.validate(requestDto);
-
-                if (!EnumUtils.isValidEnumIgnoreCase(FileSystemType.class, requestDto.getFileSystemType())) {
-                    throw new PluginException("The given file system type is un-supported.");
-                }
-
-                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final String regionId = cloudParamDto.getRegionId();
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
-                final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
-
-                // scp diskScripts
-                final List<String> resourceAbsolutePathList = PluginResourceUtils.getResourceAbsolutePath(UNFORMATTED_DISK_INFO_SCRIPT_PATH, MOUNT_SCRIPT_PATH);
-                for (String resourceAbsolutePath : resourceAbsolutePathList) {
-                    pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
-                }
-
-                // ssh to host and execute the getUnformattedDiskInfo script
-                List<String> unformattedVolumeListBefore = getUnformattedDisk(vmInstanceIp, password).getVolumns();
-
-                // attach disk request
-                final AttachDiskRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
-                    throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
-                }
-
-                AttachDiskResponse response;
-                response = this.acsClientStub.request(client, request);
-
-                // check if the disk is in use
-                Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.IN_USE);
-                PluginTimer.runTask(new PluginTimerTask(func));
-
-
-                // ssh to host and execute the getUnformattedDiskInfo script again to check the difference
-                // then can get the new attached disk to be formatted and mount that disk volume
-
-                List<String> unformattedVolumeListAfter = getUnformattedDisk(vmInstanceIp, password).getVolumns();
-                if (unformattedVolumeListAfter.size() <= unformattedVolumeListBefore.size()) {
-                    throw new PluginException("The new created disk hasn't added on to the VM instance");
-                }
-
-                // calculate the list difference
-                unformattedVolumeListAfter.removeAll(unformattedVolumeListBefore);
-                // get only one un-formatted disk
-                final String needToFormatVolumeName = unformattedVolumeListAfter.get(0);
-
-                // ssh to host and execute the format then mount script
-                formatThenMountDisk(requestDto.getFileSystemType(), requestDto.getMountDir(), vmInstanceIp, password, needToFormatVolumeName);
-
-                result = result.fromSdk(response);
-
-            } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
-                result.setErrorMessage(ex.getMessage());
-            } finally {
-                result.setGuid(requestDto.getGuid());
-                result.setCallbackParameter(requestDto.getCallbackParameter());
-                resultList.add(result);
-            }
-
-
+        if (!EnumUtils.isValidEnumIgnoreCase(FileSystemType.class, requestDto.getFileSystemType())) {
+            throw new PluginException("The given file system type is un-supported.");
         }
 
-        return resultList;
+        final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
+        final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
+
+        // scp diskScripts
+        final List<String> resourceAbsolutePathList = PluginResourceUtils.getResourceAbsolutePath(UNFORMATTED_DISK_INFO_SCRIPT_PATH, MOUNT_SCRIPT_PATH);
+        for (String resourceAbsolutePath : resourceAbsolutePathList) {
+            pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
+        }
+
+        // ssh to host and execute the getUnformattedDiskInfo script
+        List<String> unformattedVolumeListBefore = getUnformattedDisk(vmInstanceIp, password).getVolumns();
+
+        // attach disk request
+        final AttachDiskRequest request = requestDto.toSdkCrossLineage(AttachDiskRequest.class);
+        request.setRegionId(regionId);
+        if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
+            throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
+        }
+
+        this.acsClientStub.request(client, request);
+
+        // check if the disk is in use
+        Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.IN_USE);
+        PluginTimer.runTask(new PluginTimerTask(func));
+
+
+        // ssh to host and execute the getUnformattedDiskInfo script again to check the difference
+        // then can get the new attached disk to be formatted and mount that disk volume
+        List<String> unformattedVolumeListAfter = getUnformattedDisk(vmInstanceIp, password).getVolumns();
+        if (unformattedVolumeListAfter.size() <= unformattedVolumeListBefore.size()) {
+            throw new PluginException("The new created disk hasn't added on to the VM instance");
+        }
+
+        // calculate the list difference
+        unformattedVolumeListAfter.removeAll(unformattedVolumeListBefore);
+        // get only one un-formatted disk
+        final String needToFormatVolumeName = unformattedVolumeListAfter.get(0);
+
+        // ssh to host and execute the format then mount script
+        formatThenMountDisk(requestDto.getFileSystemType(), requestDto.getMountDir(), vmInstanceIp, password, needToFormatVolumeName);
+
+        return needToFormatVolumeName;
     }
 
-    @Override
-    public List<CoreDetachDiskResponseDto> detachDisk(List<CoreDetachDiskRequestDto> coreDetachDiskRequestDtoList) {
-        List<CoreDetachDiskResponseDto> resultList = new ArrayList<>();
-        for (CoreDetachDiskRequestDto requestDto : coreDetachDiskRequestDtoList) {
+    private void detachDisk(IAcsClient client, String regionId, CoreDetachDeleteDiskRequestDto requestDto) throws PluginException, AliCloudException {
 
-            CoreDetachDiskResponseDto result = new CoreDetachDiskResponseDto();
 
-            try {
+        final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
+        final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
-                dtoValidator.validate(requestDto);
+        final DetachDiskRequest request = requestDto.toSdkCrossLineage(DetachDiskRequest.class);
+        request.setRegionId(regionId);
 
-                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final String regionId = cloudParamDto.getRegionId();
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
-                final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
-
-                final DetachDiskRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-
-                if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
-                    throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
-                }
-
-                // scp the unmount script to target server
-                final String resourceAbsolutePath = PluginResourceUtils.getResourceAbsolutePath(UNMOUNT_SCRIPT_PATH);
-                pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
-
-                // ssh to host and execute the unmount script
-                unmountDisk(vmInstanceIp, password, requestDto.getVolumeName(), requestDto.getUnmountDir());
-
-                DetachDiskResponse response = this.acsClientStub.request(client, request);
-
-                // wait detaching process to finish
-                Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.AVAILABLE);
-                PluginTimer.runTask(new PluginTimerTask(func));
-
-                result = result.fromSdk(response);
-
-            } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
-                result.setErrorMessage(ex.getMessage());
-            } finally {
-                result.setGuid(requestDto.getGuid());
-                result.setCallbackParameter(requestDto.getCallbackParameter());
-                resultList.add(result);
-            }
+        if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
+            throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
         }
-        return resultList;
+
+        // scp the unmount script to target server
+        final String resourceAbsolutePath = PluginResourceUtils.getResourceAbsolutePath(UNMOUNT_SCRIPT_PATH);
+        pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
+
+        // ssh to host and execute the unmount script
+        unmountDisk(vmInstanceIp, password, requestDto.getVolumeName(), requestDto.getUnmountDir());
+
+        DetachDiskResponse response = this.acsClientStub.request(client, request);
+
+        // wait detaching process to finish
+        Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.AVAILABLE);
+        PluginTimer.runTask(new PluginTimerTask(func));
     }
 
     @Override
@@ -360,6 +318,11 @@ public class DiskServiceImpl implements DiskService {
                 .concat(" -d ").concat(volumeName)
                 .concat(" -m ").concat(unmountDir);
         pluginSshdClient.runWithReturn(vmInstanceIp, PluginSshdClient.DEFAULT_USER, password, PluginSshdClient.PORT, command);
+    }
+
+    private Boolean ifDiskAttached(List<String> before, String vmInstanceIp, String password) {
+        List<String> after = getUnformattedDisk(vmInstanceIp, password).getVolumns();
+        return after.size() > before.size();
     }
 
 }
