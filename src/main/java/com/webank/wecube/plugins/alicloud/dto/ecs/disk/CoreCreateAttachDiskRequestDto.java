@@ -1,15 +1,20 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.disk;
 
 import com.aliyuncs.ecs.model.v20140526.CreateDiskRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 
+import javax.validation.constraints.NotEmpty;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 /**
  * @author howechen
  */
-public class CoreCreateDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateDiskRequest> {
+public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateDiskRequest> {
     private String diskId;
 
     private String resourceOwnerId;
@@ -34,7 +39,21 @@ public class CoreCreateDiskRequestDto extends CoreRequestInputDto implements Plu
     private String zoneId;
     private String kMSKeyId;
 
-    public CoreCreateDiskRequestDto() {
+    // attach disk fields
+    @NotEmpty(message = "Password field is mandatory.")
+    @JsonProperty(value = "password")
+    private String hostPassword;
+    private String fileSystemType;
+    private String mountDir;
+    @NotEmpty(message = "Seed field is mandatory.")
+    private String seed;
+
+    private String keyPairName;
+    private String bootable;
+    private String deleteWithInstance;
+    private String device;
+
+    public CoreCreateAttachDiskRequestDto() {
     }
 
     public String getDiskId() {
@@ -211,5 +230,78 @@ public class CoreCreateDiskRequestDto extends CoreRequestInputDto implements Plu
 
     public void setkMSKeyId(String kMSKeyId) {
         this.kMSKeyId = kMSKeyId;
+    }
+
+    public String getHostPassword() {
+        return hostPassword;
+    }
+
+    public void setHostPassword(String hostPassword) {
+        this.hostPassword = hostPassword;
+    }
+
+    public String getFileSystemType() {
+        return fileSystemType;
+    }
+
+    public void setFileSystemType(String fileSystemType) {
+        this.fileSystemType = fileSystemType;
+    }
+
+    public String getMountDir() {
+        return mountDir;
+    }
+
+    public void setMountDir(String mountDir) {
+        this.mountDir = mountDir;
+    }
+
+    public String getSeed() {
+        return seed;
+    }
+
+    public void setSeed(String seed) {
+        this.seed = seed;
+    }
+
+    public String getKeyPairName() {
+        return keyPairName;
+    }
+
+    public void setKeyPairName(String keyPairName) {
+        this.keyPairName = keyPairName;
+    }
+
+    public String getBootable() {
+        return bootable;
+    }
+
+    public void setBootable(String bootable) {
+        this.bootable = bootable;
+    }
+
+    public String getDeleteWithInstance() {
+        return deleteWithInstance;
+    }
+
+    public void setDeleteWithInstance(String deleteWithInstance) {
+        this.deleteWithInstance = deleteWithInstance;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
+    }
+
+    @Override
+    public CreateDiskRequest toSdk() {
+        if (null != this.getZoneId()) {
+            this.setInstanceId(null);
+        }
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.convertValue(this, CreateDiskRequest.class);
     }
 }
