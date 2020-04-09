@@ -208,7 +208,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 logger.info("Deleting VSwitch: [{}]", foundVSwitchId);
                 final DeleteVSwitchRequest deleteVSwitchRequest = requestDto.toSdk();
                 deleteVSwitchRequest.setRegionId(regionId);
-                this.acsClientStub.request(client, deleteVSwitchRequest);
+                final DeleteVSwitchResponse deleteVSwitchResponse = this.acsClientStub.request(client, deleteVSwitchRequest);
 
                 // re-check if VSwitch has already been deleted
                 if (0 != this.retrieveVSwitch(client, regionId, foundVSwitchId).getTotalCount()) {
@@ -216,6 +216,8 @@ public class VSwitchServiceImpl implements VSwitchService {
                     logger.error(msg);
                     throw new PluginException(msg);
                 }
+
+                result.setRequestId(deleteVSwitchResponse.getRequestId());
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
