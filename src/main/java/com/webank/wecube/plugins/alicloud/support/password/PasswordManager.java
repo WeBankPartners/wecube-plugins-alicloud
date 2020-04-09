@@ -82,7 +82,11 @@ public class PasswordManager {
 
     public String decryptPassword(String guid, String seed, String encryptedPassword, String specifiedCipher, String algo) throws PluginException {
 
-        logger.info("Decrypting the password");
+        if (StringUtils.isAnyEmpty(guid, seed, encryptedPassword)) {
+            throw new PluginException("Either guid, seed, encryptedPassword, specifiedCipher or algo cannot be null or empty.");
+        }
+
+        logger.info("Decrypting the password...");
 
         String result;
 
