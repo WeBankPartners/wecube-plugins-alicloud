@@ -368,17 +368,23 @@ public class VMServiceImpl implements VMService {
 
         final DescribeInstancesResponse.Instance instance = describeInstancesResponse.getInstances().get(0);
 
-
-        String result;
-        if (instance.getInnerIpAddress().isEmpty()) {
-            if (instance.getPublicIpAddress().isEmpty()) {
-                throw new PluginException("The VM instance doesn't have ip address");
-            }
-            result = instance.getPublicIpAddress().get(0);
-        } else {
-            result = instance.getInnerIpAddress().get(0);
+        if (null != instance.getEipAddress()) {
+            return instance.getEipAddress().getIpAddress();
         }
-        return result;
+
+        if (!instance.getPublicIpAddress().isEmpty()) {
+            return instance.getPublicIpAddress().get(0);
+        }
+
+        if (!instance.getInnerIpAddress().isEmpty()) {
+            return instance.getInnerIpAddress().get(0);
+        }
+
+        if (!instance.getNetworkInterfaces().isEmpty()) {
+            return instance.getNetworkInterfaces().get(0).getPrimaryIpAddress();
+        }
+
+        throw new PluginException("The VM instance doesn't have IP address to connect to.");
     }
 
     private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) {
