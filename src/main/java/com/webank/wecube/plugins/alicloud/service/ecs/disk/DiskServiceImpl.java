@@ -317,7 +317,7 @@ public class DiskServiceImpl implements DiskService {
                 .concat(DEFAULT_REMOTE_DIRECTORY_PATH).concat(UNMOUNT_SCRIPT_NAME)
                 .concat(" -d ").concat(volumeName)
                 .concat(" -m ").concat(unmountDir);
-        pluginSshdClient.runWithReturn(vmInstanceIp, PluginSshdClient.DEFAULT_USER, password, PluginSshdClient.PORT, command);
+        pluginSshdClient.run(vmInstanceIp, PluginSshdClient.DEFAULT_USER, password, PluginSshdClient.PORT, command);
     }
 
     private Boolean ifDiskAttached(List<String> before, String vmInstanceIp, String password) {

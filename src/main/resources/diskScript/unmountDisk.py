@@ -4,7 +4,7 @@ import sys,getopt,os,re
 fstabFile="/etc/fstab"
 
 def unmountDir(mountDir):
-    cmd="unmount " + mountDir
+    cmd="umount " + mountDir
     result = os.system(cmd)
     if result != 0:
         print "execute unmount failed cmd=%s,result=%d" %(cmd,result)
