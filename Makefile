@@ -1,5 +1,5 @@
 current_dir:=$(shell pwd)
-version:=$(shell bash ./build/version.sh)
+version:=${PLUGIN_VERSION}
 date:=$(shell date +%Y%m%d%H%M%S)
 project_name:=$(shell basename "${current_dir}")
 remote_docker_image_registry=ccr.ccs.tencentyun.com/webankpartners/$(project_name)
