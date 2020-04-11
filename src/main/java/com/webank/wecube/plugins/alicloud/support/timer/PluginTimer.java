@@ -44,6 +44,8 @@ public interface PluginTimer {
             throw new PluginException(String.format("Encounter error while running the timer task. The error is: %s", e.getMessage()));
         } catch (TimeoutException e) {
             throw new PluginException("The request is timeout.");
+        } finally {
+            service.shutdownNow();
         }
     }
 }
