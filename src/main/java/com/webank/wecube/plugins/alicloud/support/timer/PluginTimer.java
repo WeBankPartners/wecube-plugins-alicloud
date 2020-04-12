@@ -46,6 +46,9 @@ public interface PluginTimer {
         } catch (TimeoutException e) {
             throw new PluginException("The request is timeout.");
         } finally {
+            if (!scheduledFuture.isCancelled()) {
+                scheduledFuture.cancel(true);
+            }
             service.shutdownNow();
         }
     }
@@ -85,6 +88,9 @@ public interface PluginTimer {
         } catch (TimeoutException e) {
             throw new PluginException("The request is timeout.");
         } finally {
+            if (!scheduledFuture.isCancelled()) {
+                scheduledFuture.cancel(true);
+            }
             service.shutdownNow();
         }
     }
