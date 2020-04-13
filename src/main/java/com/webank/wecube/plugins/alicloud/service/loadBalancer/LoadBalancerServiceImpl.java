@@ -445,10 +445,18 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         try {
             switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, requestDto.getListenerProtocol())) {
                 case HTTP:
-                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPListenerRequest.class);
+                    SetLoadBalancerHTTPListenerAttributeRequest setLoadBalancerHTTPListenerAttributeRequest = new SetLoadBalancerHTTPListenerAttributeRequest();
+                    setLoadBalancerHTTPListenerAttributeRequest.setListenerPort(Integer.parseInt(requestDto.getListenerPort()));
+                    setLoadBalancerHTTPListenerAttributeRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
+                    setLoadBalancerHTTPListenerAttributeRequest.setVServerGroupId(vServerGroupId);
+                    request = setLoadBalancerHTTPListenerAttributeRequest;
                     break;
                 case UDP:
-                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerUDPListenerRequest.class);
+                    SetLoadBalancerUDPListenerAttributeRequest setLoadBalancerUDPListenerAttributeRequest = new SetLoadBalancerUDPListenerAttributeRequest();
+                    setLoadBalancerUDPListenerAttributeRequest.setListenerPort(Integer.parseInt(requestDto.getListenerPort()));
+                    setLoadBalancerUDPListenerAttributeRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
+                    setLoadBalancerUDPListenerAttributeRequest.setVServerGroupId(vServerGroupId);
+                    request = setLoadBalancerUDPListenerAttributeRequest;
                     break;
                 case TCP:
                     SetLoadBalancerTCPListenerAttributeRequest setLoadBalancerTCPListenerAttributeRequest = new SetLoadBalancerTCPListenerAttributeRequest();
@@ -458,18 +466,17 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     request = setLoadBalancerTCPListenerAttributeRequest;
                     break;
                 case HTTPS:
-                    request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPSListenerRequest.class);
+                    SetLoadBalancerHTTPSListenerAttributeRequest setLoadBalancerHTTPSListenerAttributeRequest = new SetLoadBalancerHTTPSListenerAttributeRequest();
+                    setLoadBalancerHTTPSListenerAttributeRequest.setListenerPort(Integer.parseInt(requestDto.getListenerPort()));
+                    setLoadBalancerHTTPSListenerAttributeRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
+                    setLoadBalancerHTTPSListenerAttributeRequest.setVServerGroupId(vServerGroupId);
+                    request = setLoadBalancerHTTPSListenerAttributeRequest;
                     break;
                 default:
                     break;
             }
         } catch (NumberFormatException ex) {
             throw new PluginException("The listenerPort should be valid integer value.");
-        }
-
-
-        if (null == request) {
-            throw new PluginException("Cannot create new listener, the request is null.");
         }
 
         request.setRegionId(regionId);
