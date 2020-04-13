@@ -1,5 +1,6 @@
-package com.webank.wecube.plugins.alicloud;
+package com.webank.wecube.plugins.alicloud.support.password;
 
+import com.webank.wecube.plugins.alicloud.BaseSpringBootTest;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
