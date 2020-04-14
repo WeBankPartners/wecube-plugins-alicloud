@@ -46,7 +46,7 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String autoRenew;
     private String roleARN;
     private String zoneId;
-    private String instanceNetworkType;
+    private String instanceNetworkType = "VPC";
     private String connectionMode;
     private String clientToken;
     private String targetDedicatedHostIdForSlave;
@@ -55,7 +55,7 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String dBInstanceStorageType;
     private String dedicatedHostGroupId;
     @JsonProperty("dBInstanceNetType")
-    private String dBInstanceNetType;
+    private String dBInstanceNetType = "Intranet";
     private String usedTime;
     private String vPCId;
     private String category;
