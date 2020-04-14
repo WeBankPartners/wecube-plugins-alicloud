@@ -35,11 +35,13 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidr</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">id</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcName</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">id</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">routeTableId</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
