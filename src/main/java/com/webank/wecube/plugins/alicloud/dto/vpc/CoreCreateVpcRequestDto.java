@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vpc;
 import com.aliyuncs.vpc.model.v20160428.CreateVpcRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -138,5 +139,26 @@ public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements Plug
 
     public void setCidrBlock(String cidrBlock) {
         this.cidrBlock = cidrBlock;
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("vpcId", vpcId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("enableIpv6", enableIpv6)
+                .append("description", description)
+                .append("vpcName", vpcName)
+                .append("resourceGroupId", resourceGroupId)
+                .append("userCidr", userCidr)
+                .append("dryRun", dryRun)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("ipv6CidrBlock", ipv6CidrBlock)
+                .append("cidrBlock", cidrBlock)
+                .toString();
     }
 }
