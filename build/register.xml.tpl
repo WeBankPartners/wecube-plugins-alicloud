@@ -28,7 +28,7 @@
 
     <!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
     <plugins>
-        <plugin name="vpc" targetPackage="wecmdb" targetEntity="network_zone">
+        <plugin name="vpc">
             <interface action="create" path="/alicloud/v1/vpc/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
