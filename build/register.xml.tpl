@@ -32,8 +32,8 @@
             <interface action="create" path="/alicloud/v1/vpc/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identity_params</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloud_params</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidr</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">id</parameter>
                 </inputParameters>
