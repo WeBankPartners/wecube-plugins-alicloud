@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc;
 
 import com.aliyuncs.vpc.model.v20160428.DeleteVpcResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 
@@ -8,6 +9,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
  * @author howechen
  */
 public class CoreDeleteVpcResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreDeleteVpcResponseDto, DeleteVpcResponse> {
+    @JsonIgnore
     private String requestId;
 
     public CoreDeleteVpcResponseDto() {
