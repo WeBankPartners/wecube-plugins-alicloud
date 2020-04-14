@@ -14,7 +14,7 @@ public class CoreDeleteNatGatewayRequestDto extends CoreRequestInputDto implemen
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
-    private String force;
+    private String force = "true";
 
     public CoreDeleteNatGatewayRequestDto() {
     }

@@ -20,12 +20,12 @@ public class CoreCreateNatGatewayRequestDto extends CoreRequestInputDto implemen
     private String natType;
     private List<CreateNatGatewayRequest.BandwidthPackage> bandwidthPackages;
     private String instanceChargeType;
-    private String autoPay;
+    private String autoPay = "true";
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
     private String vSwitchId;
-    private String internetChargeType;
+    private String internetChargeType = "PayByTraffic";
     private String vpcId;
     private String name;
     private String pricingCycle;
