@@ -17,7 +17,7 @@ public class CoreAllocateEipRequestDto extends CoreRequestInputDto implements Pl
     private String netmode;
     private String instanceChargeType;
     private String period;
-    private String autoPay;
+    private String autoPay = "true";
     private String resourceOwnerAccount;
     private String bandwidth;
     private String ownerAccount;
