@@ -14,16 +14,16 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
 
     private String resourceOwnerId;
     private String clientToken;
-    private String addressIPVersion;
+    private String addressIPVersion = "ipv4";
     private String masterZoneId;
     private String duration;
     private String resourceGroupId;
     private String loadBalancerName;
     private String addressType;
     private String slaveZoneId;
-    private String deleteProtection;
+    private String deleteProtection = "off";
     private String loadBalancerSpec;
-    private String autoPay;
+    private String autoPay = "true";
     private String address;
     private String resourceOwnerAccount;
     private String bandwidth;
