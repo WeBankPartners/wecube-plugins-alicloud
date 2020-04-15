@@ -84,6 +84,7 @@ public class VpcServiceImpl implements VpcService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Create VPC result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -149,6 +150,7 @@ public class VpcServiceImpl implements VpcService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Delete VPC result: {}", result.toString());
                 resultList.add(result);
             }
         }
