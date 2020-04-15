@@ -5,6 +5,8 @@ import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * @author howechen
  */
@@ -16,6 +18,7 @@ public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements Plug
     private String clientToken;
     private String enableIpv6;
     private String description;
+    @NotEmpty(message = "VpcName field is mandatory")
     private String vpcName;
     private String resourceGroupId;
     private String userCidr;
@@ -24,6 +27,7 @@ public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements Plug
     private String ownerAccount;
     private String ownerId;
     private String ipv6CidrBlock;
+    @NotEmpty(message = "CidrBlock field is mandatory")
     private String cidrBlock;
 
     public CoreCreateVpcRequestDto() {
