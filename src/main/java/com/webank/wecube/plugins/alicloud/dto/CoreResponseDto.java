@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author howechen
@@ -63,16 +64,10 @@ public class CoreResponseDto<E extends CoreResponseOutputDto> {
     }
 
     public CoreResponseDto<E> withErrorCheck(List<E> data) {
-        for (E singleData : data) {
-            String errorCode = null;
-            try {
-                errorCode = String.valueOf(singleData.getClass().getMethod("getErrorCode").invoke(singleData));
-            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            if (STATUS_ERROR.equals(errorCode)) {
-                return error("Unsuccess").withData(data);
-            }
+        final Optional<E> foundFirstErrorOpt = data.stream().filter(e -> STATUS_ERROR.equals(e.getErrorCode())).findFirst();
+        if (foundFirstErrorOpt.isPresent()) {
+            final String errorMessage = foundFirstErrorOpt.get().getErrorMessage();
+            return error(errorMessage).withData(data);
         }
         return okay().withData(data);
     }
