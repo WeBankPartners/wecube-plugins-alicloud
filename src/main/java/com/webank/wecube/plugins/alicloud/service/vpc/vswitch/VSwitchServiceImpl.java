@@ -63,7 +63,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                final String vSwitchId = requestDto.getvSwitchId();
+                String vSwitchId = requestDto.getvSwitchId();
 
                 if (!StringUtils.isEmpty(vSwitchId)) {
                     final DescribeVSwitchesResponse response = this.retrieveVSwitch(client, regionId, vSwitchId);
@@ -81,6 +81,7 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                 CreateVSwitchResponse createVSwitchResponse;
                 createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest);
+                vSwitchId = createVSwitchResponse.getVSwitchId();
 
 
                 // create route table
@@ -238,10 +239,14 @@ public class VSwitchServiceImpl implements VSwitchService {
         request.setVSwitchId(vSwitchId);
         response = this.acsClientStub.request(client, request);
 
+        if (0 == response.getTotalCount()) {
+            throw new PluginException(String.format("Cannot find any vSwtich by given regionId: [{%s}] and vSwitchId: [{%s}]", regionId, vSwitchId));
+        }
+
         return StringUtils.equals(AliCloudConstant.RESOURCE_AVAILABLE_STATUS, response.getVSwitches().get(0).getStatus());
     }
 
-    private Function<?, Boolean> ifBothRouteTableAndVSwitchAvailable(IAcsClient client, String regionId, String routeTableId, String vSwitchId) {
+    private Function<?, Boolean> ifBothRouteTableAndVSwitchAvailable(IAcsClient client, String regionId, String routeTableId, String vSwitchId) throws PluginException {
         return o -> {
             boolean ifRouteTableAvailable = this.routeTableService.checkIfRouteTableAvailable(client, regionId, routeTableId);
             boolean ifVSwitchAvailable = this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
