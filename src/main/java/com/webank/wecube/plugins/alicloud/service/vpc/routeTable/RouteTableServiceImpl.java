@@ -29,9 +29,9 @@ import java.util.List;
  */
 @Service
 public class RouteTableServiceImpl implements RouteTableService {
-    private static Logger logger = LoggerFactory.getLogger(RouteTableService.class);
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
+    private static final Logger logger = LoggerFactory.getLogger(RouteTableService.class);
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
 
 
     @Autowired
@@ -71,12 +71,7 @@ public class RouteTableServiceImpl implements RouteTableService {
                 }
 
                 // create the route table
-
-                if (StringUtils.isEmpty(requestDto.getVpcId())) {
-                    String msg = "The vpcId cannot be null or empty.";
-                    logger.info(msg);
-                    throw new PluginException(msg);
-                }
+                logger.info("Creating route table: {}", requestDto.toString());
 
 
                 final CreateRouteTableRequest request = requestDto.toSdk();
@@ -94,6 +89,7 @@ public class RouteTableServiceImpl implements RouteTableService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -147,15 +143,11 @@ public class RouteTableServiceImpl implements RouteTableService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                if (StringUtils.isAnyEmpty(regionId, routeTableId)) {
-                    String msg = "The regionId or route table ID cannot be null";
+                if (StringUtils.isEmpty(regionId)) {
+                    String msg = "The regionId cannot be null or empty.";
                     logger.error(msg);
                     throw new PluginException(msg);
                 }
-
-
-                logger.info("Deleting route table, route table ID: [{}], route table region:[{}]", routeTableId, regionId);
-
 
                 // check if route table already deleted
                 final DescribeRouteTablesResponse retrieveRouteTableResponse = this.retrieveRouteTable(client, regionId, routeTableId);
@@ -173,6 +165,7 @@ public class RouteTableServiceImpl implements RouteTableService {
                 }
 
                 // un-associate all related VSwitches
+                logger.info("Unassociating route table associated vSwitches");
                 if (!foundRouteTable.getVSwitchIds().isEmpty()) {
                     for (String vSwitchId : foundRouteTable.getVSwitchIds()) {
                         UnassociateRouteTableRequest unassociateRouteTableRequest = new UnassociateRouteTableRequest();
@@ -184,6 +177,8 @@ public class RouteTableServiceImpl implements RouteTableService {
                 }
 
                 // delete route table
+                logger.info("Deleting routeTable: {}", requestDto.toString());
+
                 DeleteRouteTableRequest deleteRouteTableRequest = requestDto.toSdk();
                 deleteRouteTableRequest.setRegionId(regionId);
                 final DeleteRouteTableResponse response = this.acsClientStub.request(client, deleteRouteTableRequest);
@@ -203,6 +198,7 @@ public class RouteTableServiceImpl implements RouteTableService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -233,13 +229,13 @@ public class RouteTableServiceImpl implements RouteTableService {
                 final String routeTableId = requestDto.getRouteTableId();
                 final String vSwitchId = requestDto.getVSwitchId();
 
-                if (StringUtils.isAnyEmpty(regionId, routeTableId, vSwitchId)) {
-                    String msg = "Either regionId, routeTableId, vSwitchID cannot be null or empty.";
+                if (StringUtils.isEmpty(regionId)) {
+                    String msg = "RegionId cannot be null or empty.";
                     logger.error(msg);
                     throw new PluginException(msg);
                 }
 
-                logger.info(String.format("Associating route table: [%s] with VSwitch: [%s]", requestDto.getRouteTableId(), requestDto.getVSwitchId()));
+                logger.info("Associating routeTable with vSwitch: {}", requestDto.toString());
 
                 AssociateRouteTableRequest associateRouteTableRequest = requestDto.toSdk();
                 associateRouteTableRequest.setRegionId(regionId);
@@ -256,6 +252,7 @@ public class RouteTableServiceImpl implements RouteTableService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
