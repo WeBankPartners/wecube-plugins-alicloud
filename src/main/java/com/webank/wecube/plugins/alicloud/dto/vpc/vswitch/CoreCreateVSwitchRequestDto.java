@@ -1,8 +1,16 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.vswitch;
 
 import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
+import java.lang.reflect.ParameterizedType;
 
 /**
  * @author howechen
@@ -17,18 +25,24 @@ public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements 
     private String ownerAccount;
     private String ownerId;
     private String ipv6CidrBlock;
+    @NotEmpty(message = "VpcId field is mandatory.")
     private String vpcId;
+    @NotEmpty(message = "vSwitchName field is mandatory.")
     private String vSwitchName;
+    @NotEmpty(message = "cidrBlock field is mandatory.")
     private String cidrBlock;
+    @NotEmpty(message = "zoneId field is mandatory.")
     private String zoneId;
 
     public CoreCreateVSwitchRequestDto() {
     }
 
+    @JsonProperty(value = "vSwitchId")
     public String getvSwitchId() {
         return vSwitchId;
     }
 
+    @JsonProperty(value = "vSwitchId")
     public void setvSwitchId(String vSwitchId) {
         this.vSwitchId = vSwitchId;
     }
@@ -119,5 +133,32 @@ public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements 
 
     public void setZoneId(String zoneId) {
         this.zoneId = zoneId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("vSwitchId", vSwitchId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("ipv6CidrBlock", ipv6CidrBlock)
+                .append("vpcId", vpcId)
+                .append("vSwitchName", vSwitchName)
+                .append("cidrBlock", cidrBlock)
+                .append("zoneId", zoneId)
+                .toString();
+    }
+
+    @Override
+    public CreateVSwitchRequest toSdk() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(this, CreateVSwitchRequest.class);
     }
 }

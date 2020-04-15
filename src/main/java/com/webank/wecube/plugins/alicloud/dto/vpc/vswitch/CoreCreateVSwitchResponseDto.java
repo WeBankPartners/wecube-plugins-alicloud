@@ -3,9 +3,11 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.vswitch;
 import com.aliyuncs.vpc.model.v20160428.CreateVSwitchResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.lang.reflect.ParameterizedType;
 
@@ -14,9 +16,7 @@ import java.lang.reflect.ParameterizedType;
  */
 public class CoreCreateVSwitchResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateVSwitchResponseDto, CreateVSwitchResponse> {
     private String routeTableId;
-
     private String requestId;
-    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
 
     public CoreCreateVSwitchResponseDto() {
@@ -38,21 +38,30 @@ public class CoreCreateVSwitchResponseDto extends CoreResponseOutputDto implemen
         this.requestId = requestId;
     }
 
-    @JsonProperty(value = "vSwitchId")
-    public String getVSwitchId() {
+    public String getvSwitchId() {
         return vSwitchId;
     }
 
-    @JsonProperty(value = "vSwitchId")
-    public void setVSwitchId(String vSwitchId) {
+    public void setvSwitchId(String vSwitchId) {
         this.vSwitchId = vSwitchId;
     }
 
     @Override
     public CoreCreateVSwitchResponseDto fromSdk(CreateVSwitchResponse response) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        final CoreCreateVSwitchResponseDto result = mapper.convertValue(response, this.getClass());
-        result.setVSwitchId(response.getVSwitchId());
-        return result;
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(response, this.getClass());
     }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("routeTableId", routeTableId)
+                .append("requestId", requestId)
+                .append("vSwitchId", vSwitchId)
+                .toString();
+    }
+
 }
