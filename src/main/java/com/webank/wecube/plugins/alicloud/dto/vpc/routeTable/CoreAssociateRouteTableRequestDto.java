@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 
 import com.aliyuncs.vpc.model.v20160428.AssociateRouteTableRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -19,6 +20,7 @@ public class CoreAssociateRouteTableRequestDto extends CoreRequestInputDto imple
     private String ownerAccount;
     private String ownerId;
     @NotEmpty(message = "routeTableId field is mandatory.")
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
 
     public CoreAssociateRouteTableRequestDto() {
