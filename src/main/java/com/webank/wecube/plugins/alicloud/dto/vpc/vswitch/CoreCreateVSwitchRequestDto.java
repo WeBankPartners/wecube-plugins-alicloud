@@ -25,7 +25,7 @@ public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements 
     private String ownerAccount;
     private String ownerId;
     private String ipv6CidrBlock;
-    @NotEmpty(message = "VpcId field is mandatory.")
+    @NotEmpty(message = "vpcId field is mandatory.")
     private String vpcId;
     @NotEmpty(message = "vSwitchName field is mandatory.")
     private String vSwitchName;
