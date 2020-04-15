@@ -33,11 +33,11 @@ import java.util.function.Function;
 @Service
 public class VSwitchServiceImpl implements VSwitchService {
 
-    private static Logger logger = LoggerFactory.getLogger(VSwitchService.class);
+    private static final Logger logger = LoggerFactory.getLogger(VSwitchService.class);
 
-    private AcsClientStub acsClientStub;
-    private RouteTableService routeTableService;
-    private DtoValidator dtoValidator;
+    private final AcsClientStub acsClientStub;
+    private final RouteTableService routeTableService;
+    private final DtoValidator dtoValidator;
 
     @Autowired
     public VSwitchServiceImpl(AcsClientStub acsClientStub, RouteTableService routeTableService, DtoValidator dtoValidator) {
@@ -56,6 +56,8 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                 dtoValidator.validate(requestDto);
 
+                logger.info("Creating VSwitch with info: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -64,7 +66,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 final String vSwitchId = requestDto.getvSwitchId();
 
                 if (!StringUtils.isEmpty(vSwitchId)) {
-                    final DescribeVSwitchesResponse response = this.retrieveVSwitch(client, regionId, requestDto.getvSwitchId());
+                    final DescribeVSwitchesResponse response = this.retrieveVSwitch(client, regionId, vSwitchId);
                     if (response.getTotalCount() == 1) {
                         final DescribeVSwitchesResponse.VSwitch foundVSwitch = response.getVSwitches().get(0);
                         result = result.fromSdkCrossLineage(foundVSwitch);
@@ -116,6 +118,7 @@ public class VSwitchServiceImpl implements VSwitchService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -157,7 +160,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
                 final String vSwitchId = requestDto.getVSwitchId();
-                logger.info("Deleting VSwitch, VSwitch ID: [{}], VSwitch region:[{}]", vSwitchId, regionId);
+                logger.info("Deleting VSwitch with info: {}", requestDto.toString());
                 if (StringUtils.isEmpty(vSwitchId)) {
                     throw new PluginException("The VSwitch id cannot be empty or null.");
                 }
@@ -224,6 +227,7 @@ public class VSwitchServiceImpl implements VSwitchService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
