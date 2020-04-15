@@ -3,6 +3,9 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 import com.aliyuncs.vpc.model.v20160428.CreateRouteTableRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -17,6 +20,7 @@ public class CoreCreateRouteTableRequestDto extends CoreRequestInputDto implemen
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "vpcId field is mandatory.")
     private String vpcId;
 
     public CoreCreateRouteTableRequestDto() {
@@ -92,5 +96,21 @@ public class CoreCreateRouteTableRequestDto extends CoreRequestInputDto implemen
 
     public void setVpcId(String vpcId) {
         this.vpcId = vpcId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("routeTableId", routeTableId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("routeTableName", routeTableName)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("vpcId", vpcId)
+                .toString();
     }
 }

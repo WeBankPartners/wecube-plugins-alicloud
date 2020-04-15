@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 import com.aliyuncs.vpc.model.v20160428.CreateRouteTableResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -29,5 +30,14 @@ public class CoreCreateRouteTableResponseDto extends CoreResponseOutputDto imple
 
     public void setRouteTableId(String routeTableId) {
         this.routeTableId = routeTableId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("routeTableId", routeTableId)
+                .toString();
     }
 }
