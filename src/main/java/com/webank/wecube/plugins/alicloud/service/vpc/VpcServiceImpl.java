@@ -28,10 +28,10 @@ import java.util.List;
 @Service
 public class VpcServiceImpl implements VpcService {
 
-    private static Logger logger = LoggerFactory.getLogger(VpcService.class);
+    private static final Logger logger = LoggerFactory.getLogger(VpcService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
 
     @Autowired
     public VpcServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
