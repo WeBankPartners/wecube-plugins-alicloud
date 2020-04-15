@@ -22,6 +22,7 @@ public class CoreDeleteVSwitchRequestDto extends CoreRequestInputDto implements 
     private String ownerAccount;
     private Long ownerId;
     @NotEmpty(message = "vSwitchId field is mandatory.")
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
 
     public CoreDeleteVSwitchRequestDto() {

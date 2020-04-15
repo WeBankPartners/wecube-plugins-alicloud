@@ -16,6 +16,7 @@ import java.lang.reflect.ParameterizedType;
  * @author howechen
  */
 public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateVSwitchRequest> {
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
 
     private String resourceOwnerId;
@@ -28,6 +29,7 @@ public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements 
     @NotEmpty(message = "vpcId field is mandatory.")
     private String vpcId;
     @NotEmpty(message = "vSwitchName field is mandatory.")
+    @JsonProperty(value = "vSwitchName")
     private String vSwitchName;
     @NotEmpty(message = "cidrBlock field is mandatory.")
     private String cidrBlock;
