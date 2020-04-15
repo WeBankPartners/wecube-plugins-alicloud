@@ -291,7 +291,7 @@ public class RouteTableServiceImpl implements RouteTableService {
     }
 
     @Override
-    public boolean checkIfRouteTableAvailable(IAcsClient client, String regionId, String routeTableId) throws PluginException {
+    public boolean checkIfRouteTableAvailable(IAcsClient client, String regionId, String routeTableId) throws PluginException, AliCloudException {
         logger.info("Retrieving route table status.");
         if (StringUtils.isEmpty(regionId)) {
             String msg = "The regionId cannot be null or empty.";
@@ -304,10 +304,10 @@ public class RouteTableServiceImpl implements RouteTableService {
         request.setRouteTableId(routeTableId);
 
         DescribeRouteTablesResponse response;
-        try {
-            response = this.acsClientStub.request(client, request);
-        } catch (AliCloudException ex) {
-            throw new PluginException(ex.getMessage());
+        response = this.acsClientStub.request(client, request);
+
+        if (0 == response.getTotalCount()) {
+            throw new PluginException(String.format("Cannot find any route table by given regionId: [{%s}] and routeTableId: [{%s}]", regionId, routeTableId));
         }
 
         return StringUtils.equals(AliCloudConstant.RESOURCE_AVAILABLE_STATUS, response.getRouteTables().get(0).getStatus());
