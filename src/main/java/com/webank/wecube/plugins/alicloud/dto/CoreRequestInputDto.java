@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -49,5 +50,15 @@ public class CoreRequestInputDto {
 
     public void setCallbackParameter(String callbackParameter) {
         this.callbackParameter = callbackParameter;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("identityParams", identityParams)
+                .append("cloudParams", cloudParams)
+                .append("guid", guid)
+                .append("callbackParameter", callbackParameter)
+                .toString();
     }
 }

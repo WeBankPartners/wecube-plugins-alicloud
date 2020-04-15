@@ -1,5 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * @author howechen
  */
@@ -42,5 +44,15 @@ public class CoreResponseOutputDto {
 
     public void setCallbackParameter(String callbackParameter) {
         this.callbackParameter = callbackParameter;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("errorCode", errorCode)
+                .append("errorMessage", errorMessage)
+                .append("guid", guid)
+                .append("callbackParameter", callbackParameter)
+                .toString();
     }
 }
