@@ -149,6 +149,7 @@ public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements Plug
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .appendSuper(super.toString())
                 .append("vpcId", vpcId)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("clientToken", clientToken)

@@ -62,6 +62,7 @@ public class CoreDeleteVpcRequestDto extends CoreRequestInputDto implements Plug
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .appendSuper(super.toString())
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("resourceOwnerAccount", resourceOwnerAccount)
                 .append("ownerAccount", ownerAccount)
