@@ -70,7 +70,6 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrBlock</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrBlock</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vpcId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">zoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
