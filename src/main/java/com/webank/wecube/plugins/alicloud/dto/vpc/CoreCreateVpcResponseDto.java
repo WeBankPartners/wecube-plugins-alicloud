@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -85,6 +86,7 @@ public class CoreCreateVpcResponseDto extends CoreResponseOutputDto implements P
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .appendSuper(super.toString())
                 .append("vRouterId", vRouterId)
                 .append("cidrBlock", cidrBlock)
                 .append("vpcName", vpcName)
