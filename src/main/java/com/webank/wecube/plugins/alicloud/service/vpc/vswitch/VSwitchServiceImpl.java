@@ -75,12 +75,6 @@ public class VSwitchServiceImpl implements VSwitchService {
                     }
                 }
 
-                if (StringUtils.isAnyEmpty(requestDto.getCidrBlock(), requestDto.getVpcId(), requestDto.getZoneId(), regionId)) {
-                    String msg = "The requested field: CidrBlock, VpcId, ZoneId, RegionId cannot be null or empty";
-                    logger.error(msg);
-                    throw new PluginException(msg);
-                }
-
                 // create VSwitch
                 final CreateVSwitchRequest aliCloudRequest = requestDto.toSdk();
                 aliCloudRequest.setRegionId(regionId);
@@ -95,7 +89,6 @@ public class VSwitchServiceImpl implements VSwitchService {
                 createRouteTableRequest.setVpcId(requestDto.getVpcId());
                 final CreateRouteTableResponse createRouteTableResponse = this.routeTableService.createRouteTable(client, createRouteTableRequest);
                 final String createdRouteTableId = createRouteTableResponse.getRouteTableId();
-
 
                 // wait till both route table and vSwitch are available to be configured
                 Function<?, Boolean> func = this.ifBothRouteTableAndVSwitchAvailable(client, regionId, createdRouteTableId, vSwitchId);
@@ -161,9 +154,6 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                 final String vSwitchId = requestDto.getVSwitchId();
                 logger.info("Deleting VSwitch with info: {}", requestDto.toString());
-                if (StringUtils.isEmpty(vSwitchId)) {
-                    throw new PluginException("The VSwitch id cannot be empty or null.");
-                }
 
                 final DescribeVSwitchesResponse retrieveVSwtichResponse = this.retrieveVSwitch(client, regionId, vSwitchId);
 
