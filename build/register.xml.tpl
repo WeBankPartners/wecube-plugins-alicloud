@@ -143,7 +143,102 @@
                 </outputParameters>
             </interface>
         </plugin>
-
+        <plugin name="VM">
+            <interface action="create" path="/alicloud/v1/vm/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">imageId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenew</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenewPeriod</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">internetMaxBandwidthIn</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">internetMaxBandwidthOut</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">hostName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">password</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">zoneId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vlanId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">innerIpAddress</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskSize</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskCategory</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskDiskName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskDescription</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskPerformanceLevel</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">privateIpAddress</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">ioOptimized</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceChargeType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">period</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">periodUnit</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">password</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/vm/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="start" path="/alicloud/v1/vm/start">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="stop" path="/alicloud/v1/vm/stop">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">forceStop</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="bind security group" path="/alicloud/v1/vm/security-group/bind">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
   </plugins>
 </package>
 
