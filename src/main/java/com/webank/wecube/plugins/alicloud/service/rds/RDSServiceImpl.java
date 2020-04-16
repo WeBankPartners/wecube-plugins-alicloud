@@ -41,11 +41,11 @@ import java.util.function.Function;
 @Service
 public class RDSServiceImpl implements RDSService {
 
-    private static Logger logger = LoggerFactory.getLogger(RDSService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RDSService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private PasswordManager passwordManager;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final PasswordManager passwordManager;
 
     @Autowired
     public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
@@ -82,7 +82,7 @@ public class RDSServiceImpl implements RDSService {
 
                 }
 
-                logger.info("Creating DB instance....");
+                logger.info("Creating DB instance: {}", requestDto.toString());
 
                 final CreateDBInstanceRequest createDBInstanceRequest = requestDto.toSdk();
                 createDBInstanceRequest.setRegionId(regionId);
@@ -121,6 +121,7 @@ public class RDSServiceImpl implements RDSService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -147,10 +148,6 @@ public class RDSServiceImpl implements RDSService {
 
                 final String dbInstanceId = requestDto.getDBInstanceId();
 
-                if (StringUtils.isAnyEmpty(regionId, dbInstanceId)) {
-                    throw new PluginException("Either the regionId or dbInstanceID cannot be empty or null.");
-                }
-
                 DescribeDBInstancesResponse describeDBInstancesResponse = this.retrieveDBInstance(client, regionId, dbInstanceId);
                 if (0 == describeDBInstancesResponse.getTotalRecordCount()) {
                     logger.info("The given db instance has already been released...");
@@ -158,7 +155,7 @@ public class RDSServiceImpl implements RDSService {
                     continue;
                 }
 
-                logger.info("Deleting DB instance...");
+                logger.info("Deleting DB instance: {}", requestDto.toString());
 
                 final DeleteDBInstanceRequest deleteDBInstanceRequest = requestDto.toSdk();
                 deleteDBInstanceRequest.setRegionId(regionId);
@@ -178,6 +175,7 @@ public class RDSServiceImpl implements RDSService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -199,10 +197,7 @@ public class RDSServiceImpl implements RDSService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-
-                if (StringUtils.isAnyEmpty(regionId, requestDto.getSecurityIps())) {
-                    throw new PluginException("Either regionId or security IP cannot be null or empty.");
-                }
+                logger.info("Modifying rds instance's security ip: {}", requestDto.toString());
 
                 final ModifySecurityIpsRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
@@ -217,6 +212,7 @@ public class RDSServiceImpl implements RDSService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -253,7 +249,7 @@ public class RDSServiceImpl implements RDSService {
 
                 }
 
-                logger.info("Creating backup....");
+                logger.info("Creating backup: {}", requestDto.toString());
 
                 final CreateBackupRequest createDBInstanceRequest = requestDto.toSdk();
                 createDBInstanceRequest.setRegionId(regionId);
@@ -272,6 +268,7 @@ public class RDSServiceImpl implements RDSService {
 
                 result = result.fromSdkCrossLineage(backupJob);
                 result.setRequestId(response.getRequestId());
+                result.setBackupJobId(backupJobId);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -279,6 +276,7 @@ public class RDSServiceImpl implements RDSService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -318,7 +316,7 @@ public class RDSServiceImpl implements RDSService {
                     logger.info("The backup has already been deleted...");
                 }
 
-                logger.info("Deleting backup...");
+                logger.info("Deleting backup: {}", requestDto.toString());
 
                 final DeleteBackupRequest deleteBackupRequest = requestDto.toSdk();
                 deleteBackupRequest.setRegionId(regionId);
@@ -338,6 +336,7 @@ public class RDSServiceImpl implements RDSService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -376,7 +375,7 @@ public class RDSServiceImpl implements RDSService {
         DescribeBackupTasksRequest request = new DescribeBackupTasksRequest();
         request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
-        request.setBackupJobId(backupJobId);
+        request.setBackupJobId(Integer.valueOf(backupJobId));
 
 
         final DescribeBackupTasksResponse response = this.acsClientStub.request(client, request);
@@ -476,7 +475,7 @@ public class RDSServiceImpl implements RDSService {
     private DescribeBackupTasksResponse.BackupJob retrieveBackupFromJobId(IAcsClient client, String dbInstanceId, String backupJobId) throws PluginException, AliCloudException {
         DescribeBackupTasksRequest retrieveTasksRequest = new DescribeBackupTasksRequest();
         retrieveTasksRequest.setDBInstanceId(dbInstanceId);
-        retrieveTasksRequest.setBackupJobId(backupJobId);
+        retrieveTasksRequest.setBackupJobId(Integer.valueOf(backupJobId));
         DescribeBackupTasksResponse retrieveTasksRepsonse;
         retrieveTasksRepsonse = this.acsClientStub.request(client, retrieveTasksRequest);
 
