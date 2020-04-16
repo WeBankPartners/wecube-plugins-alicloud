@@ -3,6 +3,9 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 import com.aliyuncs.ecs.model.v20140526.StartInstanceRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -15,6 +18,7 @@ public class CoreStartVMRequestDto extends CoreRequestInputDto implements Plugin
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "instanceId field is mandatory.")
     private String instanceId;
 
 
@@ -83,5 +87,20 @@ public class CoreStartVMRequestDto extends CoreRequestInputDto implements Plugin
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("sourceRegionId", sourceRegionId)
+                .append("initLocalDisk", initLocalDisk)
+                .append("dryRun", dryRun)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("instanceId", instanceId)
+                .toString();
     }
 }

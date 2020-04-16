@@ -4,6 +4,7 @@ import com.aliyuncs.ecs.model.v20140526.CreateInstanceResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -55,5 +56,16 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
         final CoreCreateVMResponseDto result = this.fromSdk(response);
         result.setEncryptedPassword(encryptedPassword);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("instanceId", instanceId)
+                .append("tradePrice", tradePrice)
+                .append("encryptedPassword", encryptedPassword)
+                .toString();
     }
 }

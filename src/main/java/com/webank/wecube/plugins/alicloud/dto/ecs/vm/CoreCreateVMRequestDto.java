@@ -4,6 +4,7 @@ import com.aliyuncs.ecs.model.v20140526.CreateInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
@@ -41,10 +42,12 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     private String instanceName;
     private String autoRenew;
     private String internetChargeType;
+    @NotEmpty(message = "zoneId field is mandatory.")
     private String zoneId;
     private String internetMaxBandwidthIn;
     private String useAdditionalService;
     private String affinity;
+    @NotEmpty(message = "imageId field is mandatory.")
     private String imageId;
     private String clientToken;
     private String vlanId;
@@ -57,6 +60,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     private String systemDiskPerformanceLevel;
     private String userData;
     private String passwordInherit;
+    @NotEmpty(message = "instanceType field is mandatory.")
     private String instanceType;
     private List<CreateInstanceRequest.Arn> arns;
     private String instanceChargeType;
@@ -549,5 +553,71 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
 
     public void setSeed(String seed) {
         this.seed = seed;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("seed", seed)
+                .append("instanceId", instanceId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("hpcClusterId", hpcClusterId)
+                .append("securityEnhancementStrategy", securityEnhancementStrategy)
+                .append("keyPairName", keyPairName)
+                .append("spotPriceLimit", spotPriceLimit)
+                .append("deletionProtection", deletionProtection)
+                .append("resourceGroupId", resourceGroupId)
+                .append("hostName", hostName)
+                .append("password", password)
+                .append("storageSetPartitionNumber", storageSetPartitionNumber)
+                .append("tags", tags)
+                .append("autoRenewPeriod", autoRenewPeriod)
+                .append("nodeControllerId", nodeControllerId)
+                .append("period", period)
+                .append("dryRun", dryRun)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("spotStrategy", spotStrategy)
+                .append("periodUnit", periodUnit)
+                .append("instanceName", instanceName)
+                .append("autoRenew", autoRenew)
+                .append("internetChargeType", internetChargeType)
+                .append("zoneId", zoneId)
+                .append("internetMaxBandwidthIn", internetMaxBandwidthIn)
+                .append("useAdditionalService", useAdditionalService)
+                .append("affinity", affinity)
+                .append("imageId", imageId)
+                .append("clientToken", clientToken)
+                .append("vlanId", vlanId)
+                .append("spotInterruptionBehavior", spotInterruptionBehavior)
+                .append("ioOptimized", ioOptimized)
+                .append("securityGroupId", securityGroupId)
+                .append("internetMaxBandwidthOut", internetMaxBandwidthOut)
+                .append("description", description)
+                .append("systemDiskCategory", systemDiskCategory)
+                .append("systemDiskPerformanceLevel", systemDiskPerformanceLevel)
+                .append("userData", userData)
+                .append("passwordInherit", passwordInherit)
+                .append("instanceType", instanceType)
+                .append("arns", arns)
+                .append("instanceChargeType", instanceChargeType)
+                .append("deploymentSetId", deploymentSetId)
+                .append("innerIpAddress", innerIpAddress)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("tenancy", tenancy)
+                .append("systemDiskDiskName", systemDiskDiskName)
+                .append("ramRoleName", ramRoleName)
+                .append("dedicatedHostId", dedicatedHostId)
+                .append("clusterId", clusterId)
+                .append("creditSpecification", creditSpecification)
+                .append("spotDuration", spotDuration)
+                .append("dataDisks", dataDisks)
+                .append("storageSetId", storageSetId)
+                .append("systemDiskSize", systemDiskSize)
+                .append("systemDiskDescription", systemDiskDescription)
+                .toString();
     }
 }
