@@ -1,11 +1,18 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
+import com.aliyuncs.AcsRequest;
 import com.aliyuncs.rds.model.v20140815.CreateDBInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
+import java.lang.reflect.ParameterizedType;
 
 /**
  * @author howechen
@@ -27,9 +34,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String accountPassword;
 
     private String resourceOwnerId;
+    @NotEmpty(message = "dBInstanceStorage field is mandatory.")
     @JsonProperty("dBInstanceStorage")
     private String dBInstanceStorage;
     private String systemDBCharset;
+    @NotEmpty(message = "engineVersion field is mandatory.")
     private String engineVersion;
     private String targetDedicatedHostIdForMaster;
     @JsonProperty("dBInstanceDescription")
@@ -39,7 +48,10 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String encryptionKey;
     @JsonProperty("dBInstanceClass")
     private String dBInstanceClass;
+    @NotEmpty(message = "securityIPList field is mandatory.")
+    @JsonProperty(value = "securityIPList")
     private String securityIPList;
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
     private String privateIpAddress;
     private String targetDedicatedHostIdForLog;
@@ -50,16 +62,23 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String connectionMode;
     private String clientToken;
     private String targetDedicatedHostIdForSlave;
+    @NotEmpty(message = "engine field is mandatory.")
     private String engine;
+    @NotEmpty(message = "dBInstanceStorageType field is mandatory")
     @JsonProperty("dBInstanceStorageType")
     private String dBInstanceStorageType;
     private String dedicatedHostGroupId;
     @JsonProperty("dBInstanceNetType")
     private String dBInstanceNetType = "Intranet";
     private String usedTime;
+    @JsonProperty(value = "vpcId")
     private String vPCId;
     private String category;
+    @NotEmpty(message = "payType field is mandatory.")
     private String payType;
+    @NotEmpty(message = "dBIsIgnoreCase field is mandatory")
+    @JsonProperty(value = "dBIsIgnoreCase")
+    private String dBIsIgnoreCase;
 
     public CoreCreateDBInstanceRequestDto() {
     }
@@ -366,5 +385,74 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     public void setAccountPassword(String accountPassword) {
         this.accountPassword = accountPassword;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("dBInstanceId", dBInstanceId)
+                .append("seed", seed)
+                .append("accountType", accountType)
+                .append("accountDescription", accountDescription)
+                .append("accountName", accountName)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("accountPassword", accountPassword)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("dBInstanceStorage", dBInstanceStorage)
+                .append("systemDBCharset", systemDBCharset)
+                .append("engineVersion", engineVersion)
+                .append("targetDedicatedHostIdForMaster", targetDedicatedHostIdForMaster)
+                .append("dBInstanceDescription", dBInstanceDescription)
+                .append("businessInfo", businessInfo)
+                .append("period", period)
+                .append("encryptionKey", encryptionKey)
+                .append("dBInstanceClass", dBInstanceClass)
+                .append("securityIPList", securityIPList)
+                .append("vSwitchId", vSwitchId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("targetDedicatedHostIdForLog", targetDedicatedHostIdForLog)
+                .append("autoRenew", autoRenew)
+                .append("roleARN", roleARN)
+                .append("zoneId", zoneId)
+                .append("instanceNetworkType", instanceNetworkType)
+                .append("connectionMode", connectionMode)
+                .append("clientToken", clientToken)
+                .append("targetDedicatedHostIdForSlave", targetDedicatedHostIdForSlave)
+                .append("engine", engine)
+                .append("dBInstanceStorageType", dBInstanceStorageType)
+                .append("dedicatedHostGroupId", dedicatedHostGroupId)
+                .append("dBInstanceNetType", dBInstanceNetType)
+                .append("usedTime", usedTime)
+                .append("vPCId", vPCId)
+                .append("category", category)
+                .append("payType", payType)
+                .append("dBIsIgnoreCase", dBIsIgnoreCase)
+                .toString();
+    }
+
+    @Override
+    public CreateDBInstanceRequest toSdk() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(this, CreateDBInstanceRequest.class);
+    }
+
+    @Override
+    public <T extends AcsRequest<?>> T toSdkCrossLineage(Class<T> clazz) throws PluginException {
+        final T result;
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        result = mapper.convertValue(this, clazz);
+        try {
+            result.setActionName(clazz.newInstance().getActionName());
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new PluginException(e.getMessage());
+        }
+        return result;
     }
 }

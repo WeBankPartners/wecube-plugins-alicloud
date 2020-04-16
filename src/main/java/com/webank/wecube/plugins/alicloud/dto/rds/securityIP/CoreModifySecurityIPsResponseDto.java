@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.rds.securityIP;
 import com.aliyuncs.rds.model.v20140815.ModifySecurityIpsResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -28,5 +29,14 @@ public class CoreModifySecurityIPsResponseDto extends CoreResponseOutputDto impl
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("taskId", taskId)
+                .toString();
     }
 }

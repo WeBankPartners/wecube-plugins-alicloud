@@ -2,8 +2,13 @@ package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.CreateDBInstanceResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+
+import java.lang.reflect.ParameterizedType;
 
 /**
  * @author howechen
@@ -85,5 +90,13 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
         result.setAccountName(accountName);
         result.setAccountEncryptedPassword(accountEncryptedPassword);
         return result;
+    }
+
+    @Override
+    public CoreCreateDBInstanceResponseDto fromSdk(CreateDBInstanceResponse response) {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(response, this.getClass());
     }
 }

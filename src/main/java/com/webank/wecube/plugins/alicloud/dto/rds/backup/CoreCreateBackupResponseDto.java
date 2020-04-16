@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 import com.aliyuncs.rds.model.v20140815.CreateBackupResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -85,5 +86,20 @@ public class CoreCreateBackupResponseDto extends CoreResponseOutputDto implement
 
     public void setBackupId(String backupId) {
         this.backupId = backupId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("backupJobId", backupJobId)
+                .append("backupProgressStatus", backupProgressStatus)
+                .append("backupStatus", backupStatus)
+                .append("jobMode", jobMode)
+                .append("process", process)
+                .append("taskAction", taskAction)
+                .append("backupId", backupId)
+                .toString();
     }
 }
