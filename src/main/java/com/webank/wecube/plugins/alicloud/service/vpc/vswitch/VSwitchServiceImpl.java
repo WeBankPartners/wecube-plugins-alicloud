@@ -87,6 +87,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 // create route table
                 CreateRouteTableRequest createRouteTableRequest = new CreateRouteTableRequest();
                 createRouteTableRequest.setRegionId(regionId);
+                createRouteTableRequest.setRouteTableName("Bind_by_" + requestDto.getvSwitchName());
                 createRouteTableRequest.setVpcId(requestDto.getVpcId());
                 final CreateRouteTableResponse createRouteTableResponse = this.routeTableService.createRouteTable(client, createRouteTableRequest);
                 final String createdRouteTableId = createRouteTableResponse.getRouteTableId();
