@@ -2,8 +2,15 @@ package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.DeleteDBInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
+import java.lang.reflect.ParameterizedType;
 
 /**
  * @author howechen
@@ -13,6 +20,7 @@ public class CoreDeleteDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "dBInstanceId field is mandatory.")
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
 
@@ -57,5 +65,25 @@ public class CoreDeleteDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     public void setDBInstanceId(String dBInstanceId) {
         this.dBInstanceId = dBInstanceId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("dBInstanceId", dBInstanceId)
+                .toString();
+    }
+
+    @Override
+    public DeleteDBInstanceRequest toSdk() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(this, DeleteDBInstanceRequest.class);
     }
 }

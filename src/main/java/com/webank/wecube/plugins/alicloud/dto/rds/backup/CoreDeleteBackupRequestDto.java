@@ -2,8 +2,12 @@ package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 
 import com.aliyuncs.rds.model.v20140815.DeleteBackupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -77,5 +81,27 @@ public class CoreDeleteBackupRequestDto extends CoreRequestInputDto implements P
 
     public void setBackupJobId(String backupJobId) {
         this.backupJobId = backupJobId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("backupId", backupId)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("dBInstanceId", dBInstanceId)
+                .append("backupJobId", backupJobId)
+                .toString();
+    }
+
+    @Override
+    public DeleteBackupRequest toSdk() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(this, DeleteBackupRequest.class);
     }
 }
