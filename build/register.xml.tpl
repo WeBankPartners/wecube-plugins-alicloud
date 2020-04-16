@@ -239,6 +239,113 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="RDS">
+            <interface action="create_db" path="/alicloud/v1/rds/db/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <!-- account info-->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">accountName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">accountPassword</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">accountDescription</parameter>
+                    <!-- db info-->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceClass</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceStorage</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">engine</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">engineVersion</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">payType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityIPList</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceDescription</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">zoneId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">privateIpAddress</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">usedTime</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">period</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceStorageType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenew</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">category</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBParamGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBTimeZone</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBIsIgnoreCase</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">accountName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">accountPassword</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">connectionString</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">port</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_db" path="/alicloud/v1/rds/db/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="modify_security_ip" path="/alicloud/v1/rds/security_ip/modify">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityIps</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceIPArrayName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">whitelistNetworkType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">modifyMode</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="create_backup" path="/alicloud/v1/rds/backup/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityIps</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceIPArrayName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">whitelistNetworkType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">modifyMode</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">backupId</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_backup" path="/alicloud/v1/rds/backup/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">backupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
   </plugins>
 </package>
 
