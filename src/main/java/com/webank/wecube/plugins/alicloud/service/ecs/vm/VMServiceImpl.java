@@ -38,9 +38,9 @@ public class VMServiceImpl implements VMService {
 
     private static final Logger logger = LoggerFactory.getLogger(VMService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private PasswordManager passwordManager;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final PasswordManager passwordManager;
 
     @Autowired
     public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
@@ -75,20 +75,15 @@ public class VMServiceImpl implements VMService {
                     }
                 }
 
-                if (StringUtils.isAnyEmpty(requestDto.getImageId(), requestDto.getInstanceType(), requestDto.getZoneId(), regionId)) {
-                    String msg = "Any of requested fields: ImageId, InstanceType, ZoneId, RegionId cannot be null or empty";
-                    logger.error(msg);
-                    throw new PluginException(msg);
-                }
-
                 // check password field, if empty, generate one
                 if (StringUtils.isEmpty(password)) {
                     password = passwordManager.generatePassword();
                     requestDto.setPassword(password);
                 }
 
-
                 // create VM instance
+                logger.info("Creating VM instance: {}", requestDto.toString());
+
                 final CreateInstanceRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
 
@@ -115,6 +110,7 @@ public class VMServiceImpl implements VMService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -156,11 +152,6 @@ public class VMServiceImpl implements VMService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String instanceId = requestDto.getInstanceId();
 
-                logger.info("Deleting VM instance, VM instance ID: [{}], VM instance region:[{}]", instanceId, regionId);
-                if (StringUtils.isEmpty(instanceId)) {
-                    throw new PluginException("The VM instance id cannot be empty or null.");
-                }
-
                 final DescribeInstancesResponse foundInstanceResponse = this.retrieveVM(client, regionId, instanceId);
 
                 // check if VM instance already deleted
@@ -170,6 +161,8 @@ public class VMServiceImpl implements VMService {
 
 
                 // delete VM instance
+                logger.info("Deleting VM instance: {}", requestDto.toString());
+
                 DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk();
                 deleteInstanceRequest.setRegionId(regionId);
                 DeleteInstanceResponse response;
@@ -189,6 +182,7 @@ public class VMServiceImpl implements VMService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -212,6 +206,8 @@ public class VMServiceImpl implements VMService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+                logger.info("Starting VM instance: {}", requestDto.toString());
+
                 final StartInstanceRequest startInstanceRequest = requestDto.toSdk();
                 startInstanceRequest.setRegionId(regionId);
                 StartInstanceResponse response;
@@ -228,6 +224,7 @@ public class VMServiceImpl implements VMService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -248,6 +245,8 @@ public class VMServiceImpl implements VMService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+                logger.info("Stopping VM instance: {}", requestDto.toString());
+
                 final StopInstanceRequest stopInstanceRequest = requestDto.toSdk();
                 stopInstanceRequest.setRegionId(regionId);
 
@@ -264,6 +263,7 @@ public class VMServiceImpl implements VMService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -300,6 +300,8 @@ public class VMServiceImpl implements VMService {
                 currentSecurityGroupIdList.add(securityGroupId);
                 currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
 
+                logger.info("Binding security group with VM instance: {}", requestDto.toString());
+
                 ModifyInstanceAttributeRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 request.setSecurityGroupIdss(currentSecurityGroupIdList);
@@ -314,6 +316,7 @@ public class VMServiceImpl implements VMService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
