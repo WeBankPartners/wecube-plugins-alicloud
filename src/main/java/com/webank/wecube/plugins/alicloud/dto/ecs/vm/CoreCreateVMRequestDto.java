@@ -562,6 +562,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
                 .append("seed", seed)
+                .append("instanceSpec", instanceSpec)
                 .append("instanceId", instanceId)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("hpcClusterId", hpcClusterId)
