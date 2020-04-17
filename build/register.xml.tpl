@@ -151,7 +151,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceSpec</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">imageId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceName</parameter>
