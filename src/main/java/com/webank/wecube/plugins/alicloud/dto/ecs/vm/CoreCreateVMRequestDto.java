@@ -16,6 +16,9 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     @NotEmpty
     private String seed;
 
+    @NotEmpty(message = "instanceSpec field is mandatory.")
+    private String instanceSpec;
+
     private String instanceId;
 
     private String resourceOwnerId;
@@ -60,7 +63,6 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     private String systemDiskPerformanceLevel;
     private String userData;
     private String passwordInherit;
-    @NotEmpty(message = "instanceType field is mandatory.")
     private String instanceType;
     private List<CreateInstanceRequest.Arn> arns;
     private String instanceChargeType;
@@ -619,5 +621,13 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
                 .append("systemDiskSize", systemDiskSize)
                 .append("systemDiskDescription", systemDiskDescription)
                 .toString();
+    }
+
+    public String getInstanceSpec() {
+        return instanceSpec;
+    }
+
+    public void setInstanceSpec(String instanceSpec) {
+        this.instanceSpec = instanceSpec;
     }
 }
