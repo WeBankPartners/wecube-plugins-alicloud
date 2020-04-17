@@ -10,6 +10,7 @@ import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.ECSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
@@ -41,12 +42,14 @@ public class VMServiceImpl implements VMService {
     private final AcsClientStub acsClientStub;
     private final DtoValidator dtoValidator;
     private final PasswordManager passwordManager;
+    private final ECSResourceSeeker ecsResourceSeeker;
 
     @Autowired
-    public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
+    public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager, ECSResourceSeeker ecsResourceSeeker) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
         this.passwordManager = passwordManager;
+        this.ecsResourceSeeker = ecsResourceSeeker;
     }
 
     @Override
@@ -80,6 +83,13 @@ public class VMServiceImpl implements VMService {
                     password = passwordManager.generatePassword();
                     requestDto.setPassword(password);
                 }
+
+                // seek available resource when instanceType is not designated
+                if (StringUtils.isEmpty(requestDto.getInstanceType()) && !StringUtils.isEmpty(requestDto.getInstanceSpec())) {
+                    final String availableInstanceType = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec());
+                    requestDto.setInstanceType(availableInstanceType);
+                }
+
 
                 // create VM instance
                 logger.info("Creating VM instance: {}", requestDto.toString());
