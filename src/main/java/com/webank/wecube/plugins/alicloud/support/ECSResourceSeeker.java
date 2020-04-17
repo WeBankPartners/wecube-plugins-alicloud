@@ -76,7 +76,7 @@ public class ECSResourceSeeker {
     }
 
 
-    private String findAvailableInstance(IAcsClient client, String regionId, String zoneId, String instanceChargeType, String coreAndMemoryString) throws PluginException, AliCloudException {
+    public String findAvailableInstance(IAcsClient client, String regionId, String zoneId, String instanceChargeType, String coreAndMemoryString) throws PluginException, AliCloudException {
 
         final Pair<String, String> coreMemoryPair = PluginStringUtils.splitCoreAndMemory(coreAndMemoryString);
 
@@ -93,7 +93,7 @@ public class ECSResourceSeeker {
         return getLastResource(client, request);
     }
 
-    private String findAvailableDataDisk(IAcsClient client, String regionId, String zoneId, String dataDiskCategory) throws PluginException, AliCloudException {
+    public String findAvailableDataDisk(IAcsClient client, String regionId, String zoneId, String dataDiskCategory) throws PluginException, AliCloudException {
 
         if (!EnumUtils.isValidEnumIgnoreCase(DataDiskCategory.class, dataDiskCategory)) {
             throw new PluginException("Invalid dataDiskCategory");
@@ -109,6 +109,15 @@ public class ECSResourceSeeker {
         return getLastResource(client, request);
     }
 
+    /**
+     * Find last available resource according to the search result
+     *
+     * @param client  AliCloud client
+     * @param request AliCloud's search resource request
+     * @return found resource type string
+     * @throws PluginException   plugin exception
+     * @throws AliCloudException alicloud exception
+     */
     private String getLastResource(IAcsClient client, DescribeAvailableResourceRequest request) throws PluginException, AliCloudException {
         final DescribeAvailableResourceResponse response = this.acsClientStub.request(client, request);
 
