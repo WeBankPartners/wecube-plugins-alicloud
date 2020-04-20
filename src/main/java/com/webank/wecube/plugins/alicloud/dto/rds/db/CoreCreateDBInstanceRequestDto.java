@@ -21,6 +21,9 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
+    @NotEmpty(message = "dBInstanceSpec field is mandatory.")
+    @JsonProperty("dBInstanceSpec")
+    private String dBInstanceSpec;
 
     // RDS user management
     private String seed;
@@ -454,5 +457,13 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
             throw new PluginException(e.getMessage());
         }
         return result;
+    }
+
+    public String getdBInstanceSpec() {
+        return dBInstanceSpec;
+    }
+
+    public void setdBInstanceSpec(String dBInstanceSpec) {
+        this.dBInstanceSpec = dBInstanceSpec;
     }
 }
