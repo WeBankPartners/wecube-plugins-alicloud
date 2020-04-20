@@ -38,10 +38,10 @@ import java.util.Map;
 @Service
 public class LoadBalancerServiceImpl implements LoadBalancerService {
 
-    private static Logger logger = LoggerFactory.getLogger(LoadBalancerService.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoadBalancerService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
 
 
     @Autowired
@@ -324,7 +324,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     }
 
     private String getBackendServersString(String hostIds, String hostPorts) throws PluginException, AliCloudException {
-        final List<BackendServerDto> backendServerDtos = fromRawStringList(hostIds, hostPorts);
+        final String formattedHostIds = PluginStringUtils.handleCoreListStr(hostIds);
+        final String formattedHostPorts = PluginStringUtils.handleCoreListStr(hostPorts);
+
+        final List<BackendServerDto> backendServerDtos = fromRawStringList(formattedHostIds, formattedHostPorts);
         List<String> backendServerStringList = new ArrayList<>();
         for (BackendServerDto backendServerDto : backendServerDtos) {
             final String singleServerString = backendServerDto.toString();

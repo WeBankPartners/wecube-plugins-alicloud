@@ -24,6 +24,7 @@ import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,6 +214,10 @@ public class RDSServiceImpl implements RDSService {
                 final String regionId = cloudParamDto.getRegionId();
 
                 logger.info("Modifying rds instance's security ip: {}", requestDto.toString());
+
+                // handle core's listStr
+                final String formattedSecurityIps = PluginStringUtils.handleCoreListStr(requestDto.getSecurityIps(), true);
+                requestDto.setSecurityIps(formattedSecurityIps);
 
                 final ModifySecurityIpsRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
