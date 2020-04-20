@@ -144,7 +144,7 @@
             </interface>
         </plugin>
         <plugin name="VM">
-            <interface action="create" path="/alicloud/v1/vm/create">
+            <interface action="create_vm" path="/alicloud/v1/vm/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
@@ -172,12 +172,14 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">password</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceSpec</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cpu</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">memory</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIp</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="delete" path="/alicloud/v1/vm/delete">
+            <interface action="delete_vm" path="/alicloud/v1/vm/delete">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
@@ -190,7 +192,7 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="start" path="/alicloud/v1/vm/start">
+            <interface action="start_vm" path="/alicloud/v1/vm/start">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
@@ -203,7 +205,7 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="stop" path="/alicloud/v1/vm/stop">
+            <interface action="stop_vm" path="/alicloud/v1/vm/stop">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
@@ -217,7 +219,7 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="bind security group" path="/alicloud/v1/vm/security-group/bind">
+            <interface action="bind_security_group" path="/alicloud/v1/vm/security-group/bind">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
