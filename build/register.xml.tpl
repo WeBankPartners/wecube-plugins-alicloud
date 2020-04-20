@@ -160,7 +160,6 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">hostName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">password</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">zoneId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">innerIpAddress</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskSize</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskCategory</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
