@@ -342,8 +342,10 @@ public class VMServiceImpl implements VMService {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
 
+        logger.info("Retrieve if VM: [{}] instance in status: [{}]...", instanceId, status.getStatus());
+
         DescribeInstanceStatusRequest request = new DescribeInstanceStatusRequest();
-        request.setRegionId("cn-shanghai");
+        request.setRegionId(regionId);
         request.setInstanceIds(Collections.singletonList(instanceId));
 
         DescribeInstanceStatusResponse foundInstance;
@@ -361,6 +363,8 @@ public class VMServiceImpl implements VMService {
         if (StringUtils.isAnyEmpty(regionId, instanceId)) {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
+
+        logger.info("Starting VM instance...");
 
         StartInstanceRequest request = new StartInstanceRequest();
         request.setRegionId(regionId);
