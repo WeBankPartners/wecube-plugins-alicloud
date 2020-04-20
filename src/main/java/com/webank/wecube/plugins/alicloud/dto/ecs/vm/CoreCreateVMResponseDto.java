@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateVMResponseDto, CreateInstanceResponse> {
     private String requestId;
     private String instanceId;
+    private String instanceSpec;
     private String tradePrice;
 
     @JsonProperty(value = "password")
@@ -52,9 +53,18 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
         this.encryptedPassword = encryptedPassword;
     }
 
-    public CoreCreateVMResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword) {
+    public String getInstanceSpec() {
+        return instanceSpec;
+    }
+
+    public void setInstanceSpec(String instanceSpec) {
+        this.instanceSpec = instanceSpec;
+    }
+
+    public CoreCreateVMResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String instanceSpec) {
         final CoreCreateVMResponseDto result = this.fromSdk(response);
         result.setEncryptedPassword(encryptedPassword);
+        result.setInstanceSpec(instanceSpec);
         return result;
     }
 
@@ -68,4 +78,6 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
                 .append("encryptedPassword", encryptedPassword)
                 .toString();
     }
+
+
 }
