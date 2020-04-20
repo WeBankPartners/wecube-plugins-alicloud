@@ -4,7 +4,9 @@ import com.aliyuncs.ecs.model.v20140526.CreateInstanceResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author howechen
@@ -12,8 +14,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateVMResponseDto, CreateInstanceResponse> {
     private String requestId;
     private String instanceId;
-    private String instanceSpec;
     private String tradePrice;
+    private String cpu;
+    private String memory;
+    @JsonProperty(value = "privateIp")
+    private String privateIpAddress;
 
     @JsonProperty(value = "password")
     private String encryptedPassword;
@@ -53,18 +58,14 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
         this.encryptedPassword = encryptedPassword;
     }
 
-    public String getInstanceSpec() {
-        return instanceSpec;
-    }
 
-    public void setInstanceSpec(String instanceSpec) {
-        this.instanceSpec = instanceSpec;
-    }
-
-    public CoreCreateVMResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String instanceSpec) {
+    public CoreCreateVMResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String instanceSpec, String privateIpAddress) {
+        final Pair<String, String> cpuMemoryPair = PluginStringUtils.splitCoreAndMemory(instanceSpec);
         final CoreCreateVMResponseDto result = this.fromSdk(response);
         result.setEncryptedPassword(encryptedPassword);
-        result.setInstanceSpec(instanceSpec);
+        result.setCpu(cpuMemoryPair.getLeft());
+        result.setMemory(cpuMemoryPair.getRight());
+        result.setPrivateIpAddress(privateIpAddress);
         return result;
     }
 
@@ -80,4 +81,27 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
     }
 
 
+    public String getCpu() {
+        return cpu;
+    }
+
+    public void setCpu(String cpu) {
+        this.cpu = cpu;
+    }
+
+    public String getMemory() {
+        return memory;
+    }
+
+    public void setMemory(String memory) {
+        this.memory = memory;
+    }
+
+    public String getPrivateIpAddress() {
+        return privateIpAddress;
+    }
+
+    public void setPrivateIpAddress(String privateIpAddress) {
+        this.privateIpAddress = privateIpAddress;
+    }
 }
