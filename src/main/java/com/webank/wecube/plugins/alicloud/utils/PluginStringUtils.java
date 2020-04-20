@@ -16,6 +16,10 @@ import java.util.regex.Pattern;
  */
 public class PluginStringUtils {
 
+    public static String formatStr(String string) {
+        return string.replaceAll("([\\r\\n])", ". ");
+    }
+
     public static String stringifyList(String... strings) {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
 

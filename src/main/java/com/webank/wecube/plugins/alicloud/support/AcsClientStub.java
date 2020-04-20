@@ -10,6 +10,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +53,10 @@ public class AcsClientStub {
             response = client.getAcsResponse(request);
         } catch (ServerException serverEx) {
             logger.error("AliCloud server error! Error type: [{}], code: [{}], msg: [{}], description: [{}]", serverEx.getErrorType(), serverEx.getErrCode(), serverEx.getMessage(), serverEx.getErrorDescription());
-            throw new AliCloudException(String.format("AliCloud server error: [%s]", serverEx.getMessage()));
+            throw new AliCloudException(String.format("AliCloud server error: [%s]", PluginStringUtils.formatStr(serverEx.getMessage())));
         } catch (ClientException clientEx) {
             logger.error("AliCloud local client error! Error type: [{}], code: [{}], msg: [{}], description: [{}]", clientEx.getErrorType(), clientEx.getErrCode(), clientEx.getMessage(), clientEx.getErrorDescription());
-            throw new AliCloudException(String.format("AliCloud local client error: [%s]", clientEx.getMessage()));
+            throw new AliCloudException(String.format("AliCloud local client error: [%s]", PluginStringUtils.formatStr(clientEx.getMessage())));
         }
         return response;
     }
