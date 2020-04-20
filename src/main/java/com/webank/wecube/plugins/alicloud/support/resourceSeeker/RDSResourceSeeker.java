@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author howechen
+ */
 @Component
 public class RDSResourceSeeker {
     private enum RDSEngine {
@@ -96,14 +99,14 @@ public class RDSResourceSeeker {
 
         final DescribeAvailableResourceResponse response = acsClientStub.request(client, request);
 
-        return matchResourceStringFromList(RDSEngine.MYSQL, coreMemoryString, response);
+        return matchResourceStringFromList(RDSEngine.MARIADB, coreMemoryString, response);
     }
 
 
     private String matchResourceStringFromList(RDSEngine engine, String coreMemoryString, DescribeAvailableResourceResponse response) throws PluginException {
         String locCoreMemoryString = coreMemoryString.toUpperCase();
 
-        List<DescribeAvailableResourceResponse.AvailableZone.SupportedEngine.SupportedEngineVersion.SupportedCategory.SupportedStorageType.AvailableResource> foundResourceList = new ArrayList<>();
+        List<DescribeAvailableResourceResponse.AvailableZone.SupportedEngine.SupportedEngineVersion.SupportedCategory.SupportedStorageType.AvailableResource> foundResourceList;
         try {
             foundResourceList = response
                     .getAvailableZones().get(0)
