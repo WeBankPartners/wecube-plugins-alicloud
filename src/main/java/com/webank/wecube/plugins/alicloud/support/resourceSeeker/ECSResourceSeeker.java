@@ -1,10 +1,12 @@
-package com.webank.wecube.plugins.alicloud.support;
+package com.webank.wecube.plugins.alicloud.support.resourceSeeker;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.DescribeAvailableResourceRequest;
 import com.aliyuncs.ecs.model.v20140526.DescribeAvailableResourceResponse;
 import com.google.common.collect.Iterables;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
+import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
+import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -58,10 +60,15 @@ public class ECSResourceSeeker {
     }
 
     private enum DataDiskCategory {
+        // cloud
         cloud,
+        // efficiency cloud disk
         cloud_efficiency,
+        // cloud ssd
         cloud_ssd,
+        // ephermeral ssd
         ephemeral_ssd,
+        // cloud essd
         cloud_essd
     }
 
