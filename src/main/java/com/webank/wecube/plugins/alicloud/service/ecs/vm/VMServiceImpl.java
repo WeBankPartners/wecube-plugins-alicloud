@@ -10,7 +10,7 @@ import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.ECSResourceSeeker;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
@@ -85,7 +85,7 @@ public class VMServiceImpl implements VMService {
                 }
 
                 // seek available resource when instanceType is not designated
-                if (StringUtils.isEmpty(requestDto.getInstanceType()) && !StringUtils.isEmpty(requestDto.getInstanceSpec())) {
+                if (!StringUtils.isEmpty(requestDto.getInstanceSpec()) && StringUtils.isEmpty(requestDto.getInstanceType())) {
                     final String availableInstanceType = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec());
                     requestDto.setInstanceType(availableInstanceType);
                 }
