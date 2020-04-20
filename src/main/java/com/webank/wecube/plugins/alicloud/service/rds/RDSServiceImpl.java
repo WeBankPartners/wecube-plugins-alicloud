@@ -16,12 +16,12 @@ import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceRequest
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
-import com.webank.wecube.plugins.alicloud.service.redis.InstanceStatus;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
@@ -46,12 +46,14 @@ public class RDSServiceImpl implements RDSService {
     private final AcsClientStub acsClientStub;
     private final DtoValidator dtoValidator;
     private final PasswordManager passwordManager;
+    private final RDSResourceSeeker rdsResourceSeeker;
 
     @Autowired
-    public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
+    public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager, RDSResourceSeeker rdsResourceSeeker) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
         this.passwordManager = passwordManager;
+        this.rdsResourceSeeker = rdsResourceSeeker;
     }
 
     @Override
@@ -83,6 +85,19 @@ public class RDSServiceImpl implements RDSService {
                 }
 
                 logger.info("Creating DB instance: {}", requestDto.toString());
+
+                // find available resource according to AliCloud's stock and return the result that match the wecube's dBInstanceSpec
+                if (!StringUtils.isEmpty(requestDto.getdBInstanceSpec()) && StringUtils.isEmpty(requestDto.getDBInstanceClass())) {
+                    final String foundDBInstanceClass = rdsResourceSeeker.findAvailableResource(client,
+                            requestDto.getEngine(),
+                            requestDto.getdBInstanceSpec(),
+                            regionId, requestDto.getZoneId(),
+                            requestDto.getEngineVersion(),
+                            requestDto.getPayType(),
+                            requestDto.getDBInstanceStorageType(),
+                            requestDto.getCategory());
+                    requestDto.setDBInstanceClass(foundDBInstanceClass);
+                }
 
                 final CreateDBInstanceRequest createDBInstanceRequest = requestDto.toSdk();
                 createDBInstanceRequest.setRegionId(regionId);
