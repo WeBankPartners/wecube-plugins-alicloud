@@ -76,10 +76,12 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
                 .append("requestId", requestId)
                 .append("instanceId", instanceId)
                 .append("tradePrice", tradePrice)
+                .append("cpu", cpu)
+                .append("memory", memory)
+                .append("privateIpAddress", privateIpAddress)
                 .append("encryptedPassword", encryptedPassword)
                 .toString();
     }
-
 
     public String getCpu() {
         return cpu;
