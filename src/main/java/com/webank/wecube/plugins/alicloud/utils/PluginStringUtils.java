@@ -16,10 +16,25 @@ import java.util.regex.Pattern;
  */
 public class PluginStringUtils {
 
+    private static final String LIST_STR_REGEX = "\\[.*]";
+    private static final String CORE_MEMORY_STR_REGEX = "^(\\d*)[C|c](\\d*)[G|g]$";
+
+    /**
+     * Remove String's EOF symbol
+     *
+     * @param string input string
+     * @return formatted string
+     */
     public static String formatStr(String string) {
         return string.replaceAll("([\\r\\n])", ". ");
     }
 
+    /**
+     * Stringify object list to AliCloud's list string
+     *
+     * @param strings String list
+     * @return formatted string
+     */
     public static String stringifyList(String... strings) {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
 
@@ -29,6 +44,12 @@ public class PluginStringUtils {
         return joiner.toString();
     }
 
+    /**
+     * Stringify object list to AliCloud's list string with inside quotation mark
+     *
+     * @param strings String list
+     * @return formatted string
+     */
     public static String stringifyList(List<String> strings) {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
 
@@ -38,6 +59,12 @@ public class PluginStringUtils {
         return joiner.toString();
     }
 
+    /**
+     * Stringify object list to AliCloud's list string
+     *
+     * @param strings String list
+     * @return formatted string
+     */
     public static String stringifyObjectList(List<String> strings) {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
 
@@ -47,6 +74,12 @@ public class PluginStringUtils {
         return joiner.toString();
     }
 
+    /**
+     * Remove square bracket and split the string into list
+     *
+     * @param rawStringList raw String list
+     * @return formatted string
+     */
     public static List<String> splitStringList(String rawStringList) {
         String str;
         str = StringUtils.removeStart(rawStringList, "[");
@@ -55,11 +88,15 @@ public class PluginStringUtils {
         return Arrays.asList(str.split(","));
     }
 
+    /**
+     * Split coreAndMemory string to a pair
+     *
+     * @param coreAndMemoryString core and memory string which match the CORE_MEMORY_STR_REGEX
+     * @return formatted string
+     */
     public static Pair<String, String> splitCoreAndMemory(String coreAndMemoryString) {
 
-        final String regex = "^(\\d*)[C|c](\\d*)[G|g]$";
-
-        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        final Pattern pattern = Pattern.compile(CORE_MEMORY_STR_REGEX, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(coreAndMemoryString);
         String core = StringUtils.EMPTY;
         String memory = StringUtils.EMPTY;
@@ -70,5 +107,50 @@ public class PluginStringUtils {
         }
 
         return new ImmutablePair<>(core, memory);
+    }
+
+    /**
+     * Handle core list Str
+     *
+     * @param rawStr raw string which might have square bracket or not.
+     * @return formatted str with square bracket
+     */
+    public static String handleCoreListStr(String rawStr) {
+        if (rawStr.matches(LIST_STR_REGEX)) {
+            return rawStr;
+        }
+        return "[" + rawStr + "]";
+    }
+
+    /**
+     * Handle core list Str
+     *
+     * @param rawStr  raw string which might have square bracket or not.
+     * @param reverse if reverse is set to true, then it will remove rawStr with square bracket
+     * @return formatted str
+     */
+    public static String handleCoreListStr(String rawStr, boolean reverse) {
+        if (reverse) {
+            return removeSquareBracket(rawStr);
+        } else {
+            return handleCoreListStr(rawStr);
+        }
+    }
+
+    /**
+     * Remove square bracket
+     *
+     * @param rawStr raw string with / without square bracket
+     * @return formatted string
+     */
+    private static String removeSquareBracket(String rawStr) {
+        if (rawStr.matches(LIST_STR_REGEX)) {
+            String listStr = StringUtils.removeStart(rawStr, "[");
+            listStr = StringUtils.removeEnd(listStr, "]");
+            return listStr;
+        } else {
+            return rawStr;
+        }
+
     }
 }
