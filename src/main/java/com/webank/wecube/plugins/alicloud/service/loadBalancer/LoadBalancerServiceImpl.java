@@ -202,6 +202,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final String loadBalancerId = requestDto.getLoadBalancerId();
                 final String listenerProtocol = requestDto.getListenerProtocol();
 
+                logger.info("Adding backend server to load balancer: {}", requestDto.toString());
+
                 final String backendServersString = getBackendServersString(requestDto.getHostIds(), requestDto.getHostPorts());
                 requestDto.setBackendServers(backendServersString);
 
@@ -260,6 +262,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -286,6 +289,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final String listenerProtocol = requestDto.getListenerProtocol();
                 final String loadBalancerId = requestDto.getLoadBalancerId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+
+                logger.info("Removing backend server from load balancer: {}", requestDto.toString());
 
                 final String backendServersString = getBackendServersString(requestDto.getHostIds(), requestDto.getHostPorts());
                 requestDto.setBackendServers(backendServersString);
@@ -319,6 +324,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -494,8 +500,18 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         try {
             switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, listenerProtocol)) {
                 case HTTP:
+                    DescribeLoadBalancerHTTPListenerAttributeRequest httpListenerAttributeRequest = new DescribeLoadBalancerHTTPListenerAttributeRequest();
+                    httpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
+                    httpListenerAttributeRequest.setListenerPort(listenerPort);
+                    httpListenerAttributeRequest.setRegionId(regionId);
+                    this.acsClientStub.request(client, httpListenerAttributeRequest);
                     break;
                 case UDP:
+                    DescribeLoadBalancerUDPListenerAttributeRequest udpListenerAttributeRequest = new DescribeLoadBalancerUDPListenerAttributeRequest();
+                    udpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
+                    udpListenerAttributeRequest.setListenerPort(listenerPort);
+                    udpListenerAttributeRequest.setRegionId(regionId);
+                    this.acsClientStub.request(client, udpListenerAttributeRequest);
                     break;
                 case TCP:
                     DescribeLoadBalancerTCPListenerAttributeRequest tcpListenerAttributeRequest = new DescribeLoadBalancerTCPListenerAttributeRequest();
@@ -505,6 +521,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     this.acsClientStub.request(client, tcpListenerAttributeRequest);
                     break;
                 case HTTPS:
+                    DescribeLoadBalancerHTTPSListenerAttributeRequest httpsListenerAttributeRequest = new DescribeLoadBalancerHTTPSListenerAttributeRequest();
+                    httpsListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
+                    httpsListenerAttributeRequest.setListenerPort(listenerPort);
+                    httpsListenerAttributeRequest.setRegionId(regionId);
+                    this.acsClientStub.request(client, httpsListenerAttributeRequest);
                     break;
                 default:
                     break;
