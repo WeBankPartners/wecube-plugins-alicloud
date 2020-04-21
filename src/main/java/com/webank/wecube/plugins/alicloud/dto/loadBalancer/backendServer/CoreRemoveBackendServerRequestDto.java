@@ -2,8 +2,14 @@ package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.RemoveVServerGroupBackendServersRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -11,7 +17,9 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<RemoveVServerGroupBackendServersRequest> {
 
     // fields from core
+    @NotEmpty(message = "hostIds field is mandatory.")
     private String hostIds;
+    @NotEmpty(message = "hostPorts field is mandatory.")
     private String hostPorts;
 
     // alicloud fields
@@ -22,6 +30,7 @@ public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto imple
     private String resourceOwnerId;
     @JsonIgnore
     private String backendServers;
+    @NotEmpty(message = "vServerGroupId field is mandatory.")
     private String vServerGroupId;
     private String resourceOwnerAccount;
     private String ownerAccount;
@@ -116,5 +125,31 @@ public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto imple
 
     public void setHostPorts(String hostPorts) {
         this.hostPorts = hostPorts;
+    }
+
+    @Override
+    public RemoveVServerGroupBackendServersRequest toSdk() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(this, RemoveVServerGroupBackendServersRequest.class);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("hostIds", hostIds)
+                .append("hostPorts", hostPorts)
+                .append("listenerPort", listenerPort)
+                .append("loadBalancerId", loadBalancerId)
+                .append("listenerProtocol", listenerProtocol)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("backendServers", backendServers)
+                .append("vServerGroupId", vServerGroupId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .toString();
     }
 }
