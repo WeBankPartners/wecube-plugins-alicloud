@@ -1,9 +1,15 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerResponse;
+import com.aliyuncs.vpc.model.v20160428.CreateVSwitchResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -102,5 +108,30 @@ public class CoreCreateLoadBalancerResponseDto extends CoreResponseOutputDto imp
 
     public void setAddressIPVersion(String addressIPVersion) {
         this.addressIPVersion = addressIPVersion;
+    }
+
+    @Override
+    public CoreCreateLoadBalancerResponseDto fromSdk(CreateLoadBalancerResponse response) {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(response, this.getClass());
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("loadBalancerId", loadBalancerId)
+                .append("resourceGroupId", resourceGroupId)
+                .append("address", address)
+                .append("loadBalancerName", loadBalancerName)
+                .append("vpcId", vpcId)
+                .append("vSwitchId", vSwitchId)
+                .append("networkType", networkType)
+                .append("orderId", orderId)
+                .append("addressIPVersion", addressIPVersion)
+                .toString();
     }
 }

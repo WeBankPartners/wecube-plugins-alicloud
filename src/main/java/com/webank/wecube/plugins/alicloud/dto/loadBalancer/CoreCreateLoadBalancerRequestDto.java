@@ -1,9 +1,17 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerRequest;
+import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
+import java.lang.reflect.ParameterizedType;
 
 /**
  * @author howechen
@@ -19,6 +27,7 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
     private String duration;
     private String resourceGroupId;
     private String loadBalancerName;
+    @NotEmpty(message = "addressType field is mandatory.")
     private String addressType;
     private String slaveZoneId;
     private String deleteProtection = "off";
@@ -33,6 +42,7 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
     private String vSwitchId;
     private String internetChargeType;
     private String vpcId;
+    @NotEmpty(message = "payType field is mandatory.")
     private String payType;
     private String pricingCycle;
 
@@ -229,5 +239,44 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
 
     public void setPricingCycle(String pricingCycle) {
         this.pricingCycle = pricingCycle;
+    }
+
+    @Override
+    public CreateLoadBalancerRequest toSdk() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(this, CreateLoadBalancerRequest.class);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("loadBalancerId", loadBalancerId)
+                .append("loadBalancerProtocol", loadBalancerProtocol)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("addressIPVersion", addressIPVersion)
+                .append("masterZoneId", masterZoneId)
+                .append("duration", duration)
+                .append("resourceGroupId", resourceGroupId)
+                .append("loadBalancerName", loadBalancerName)
+                .append("addressType", addressType)
+                .append("slaveZoneId", slaveZoneId)
+                .append("deleteProtection", deleteProtection)
+                .append("loadBalancerSpec", loadBalancerSpec)
+                .append("autoPay", autoPay)
+                .append("address", address)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("bandwidth", bandwidth)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("internetChargeType", internetChargeType)
+                .append("vpcId", vpcId)
+                .append("payType", payType)
+                .append("pricingCycle", pricingCycle)
+                .toString();
     }
 }
