@@ -342,6 +342,50 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="LoadBalancer">
+            <interface action="create_lb" path="/alicloud/v1/load_balancer/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">loadBalancerId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">addressType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">internetChargeType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">bandWidth</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">loadBalancerName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">masterZoneId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">slaveZoneId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">loadBalancerSpec</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">payType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">pricingCycle</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">duration</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">address</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">loadBalancerId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">address</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_lb" path="/alicloud/v1/load_balancer/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">loadBalancerId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
   </plugins>
 </package>
 
