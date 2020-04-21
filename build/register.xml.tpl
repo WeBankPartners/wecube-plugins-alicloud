@@ -386,6 +386,45 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="LoadBalancerTarget">
+            <interface action="add_backend_server" path="/alicloud/v1/load_balancer/backend_server/add">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">loadBalancerId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostIds</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostPorts</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vServerGroupName</parameter>
+                    <!-- listener configurations -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">bandwidth</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">listenerPort</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">listenerProtocol</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">backendServerPort</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">vServerGroupId</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="remove_backend_server" path="/alicloud/v1/load_balancer/backend_server/remove">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vServerGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostIds</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostPorts</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
   </plugins>
 </package>
 
