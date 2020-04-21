@@ -73,6 +73,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String loadBalancerId = requestDto.getLoadBalancerId();
 
+                logger.info("Creating load balancer: {}", requestDto.toString());
+
 
                 if (StringUtils.isNotEmpty(loadBalancerId)) {
                     // if load balancer id is not empty, retrieve load balancer info
@@ -97,6 +99,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -139,9 +142,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String loadBalancerId = requestDto.getLoadBalancerId();
 
-                if (StringUtils.isEmpty(loadBalancerId)) {
-                    throw new PluginException("The load balancer id cannot be empty or null.");
-                }
+                logger.info("Creating load balancer: {}", requestDto.toString());
 
                 final DescribeLoadBalancersResponse foundLoadBalancerInfo = this.retrieveLoadBalancer(client, regionId, loadBalancerId);
 
@@ -173,6 +174,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
