@@ -526,7 +526,73 @@
                 </outputParameters>
             </interface>
         </plugin>
-  </plugins>
+        <plugin name="Cen">
+            <interface action="create_cen" path="/alicloud/v1/cen/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cenId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">name</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cenId</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_cen" path="/alicloud/v1/cen/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="attach_cen" path="/alicloud/v1/cen/attach">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceRegionId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceOwnerId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="detach_cen" path="/alicloud/v1/cen/detach">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceRegionId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceOwnerId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cenOwnerId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+    </plugins>
 </package>
 
 
