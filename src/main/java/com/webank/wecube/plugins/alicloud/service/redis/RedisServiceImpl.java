@@ -15,6 +15,7 @@ import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RedisResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
@@ -34,17 +35,19 @@ import java.util.function.Function;
 @Service
 public class RedisServiceImpl implements RedisService {
 
-    private static Logger logger = LoggerFactory.getLogger(RedisService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private PasswordManager passwordManager;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final PasswordManager passwordManager;
+    private final RedisResourceSeeker redisResourceSeeker;
 
     @Autowired
-    public RedisServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
+    public RedisServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager, RedisResourceSeeker redisResourceSeeker) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
         this.passwordManager = passwordManager;
+        this.redisResourceSeeker = redisResourceSeeker;
     }
 
     @Override
@@ -85,6 +88,22 @@ public class RedisServiceImpl implements RedisService {
                 String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getPassword());
 
                 // create redis instance
+//                logger.info("Creating instance: {}", requestDto.toString());
+//                final String foundAvailableResource = redisResourceSeeker.findAvailableResource(
+//                        client,
+//                        regionId,
+//                        requestDto.getZoneId(),
+//                        requestDto.getChargeType(),
+//                        RedisResourceSeeker.Engine.REDIS.toString(),
+//                        RedisResourceSeeker.EditionType.COMMUNITY.toString(),
+//                        requestDto.getSeriesType(),
+//                        requestDto.getEngineVersion(),
+//                        requestDto.getArchitecture(),
+//                        requestDto.getShardNumber(),
+//                        requestDto.getSupportedNodeType(),
+//                        requestDto.getCapacity());
+//                requestDto.setInstanceClass(foundAvailableResource);
+
                 final CreateInstanceRequest createInstanceRequest = requestDto.toSdk();
                 createInstanceRequest.setRegionId(regionId);
                 CreateInstanceResponse response;
@@ -103,6 +122,7 @@ public class RedisServiceImpl implements RedisService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -136,6 +156,9 @@ public class RedisServiceImpl implements RedisService {
                     throw new PluginException(msg);
                 }
 
+                // delete instance
+                logger.info("Deleting instance: {}", requestDto.toString());
+
                 final DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk();
                 deleteInstanceRequest.setRegionId(regionId);
                 DeleteInstanceResponse response;
@@ -161,6 +184,7 @@ public class RedisServiceImpl implements RedisService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
