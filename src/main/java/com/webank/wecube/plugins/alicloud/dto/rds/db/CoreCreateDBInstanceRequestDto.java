@@ -436,29 +436,6 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
                 .toString();
     }
 
-    @Override
-    public CreateDBInstanceRequest toSdk() {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(this, CreateDBInstanceRequest.class);
-    }
-
-    @Override
-    public <T extends AcsRequest<?>> T toSdkCrossLineage(Class<T> clazz) throws PluginException {
-        final T result;
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        result = mapper.convertValue(this, clazz);
-        try {
-            result.setActionName(clazz.newInstance().getActionName());
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new PluginException(e.getMessage());
-        }
-        return result;
-    }
-
     public String getdBInstanceSpec() {
         return dBInstanceSpec;
     }

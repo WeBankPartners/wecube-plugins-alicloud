@@ -146,14 +146,6 @@ public class CoreAddBackendServerRequestDto extends CoreRequestInputDto implemen
     }
 
     @Override
-    public CreateVServerGroupRequest toSdk() {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(this, CreateVServerGroupRequest.class);
-    }
-
-    @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())

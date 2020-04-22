@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.dto;
 
 import com.aliyuncs.AcsRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 
@@ -19,7 +20,9 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
      * @return transferred SDK request DTO
      */
     default K toSdk() {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         return mapper.convertValue(this, (Class<K>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
     }
 
@@ -33,7 +36,9 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
      */
     default <T extends AcsRequest<?>> T toSdkCrossLineage(Class<T> clazz) throws PluginException {
         final T result;
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         result = mapper.convertValue(this, clazz);
         try {
             result.setActionName(clazz.newInstance().getActionName());

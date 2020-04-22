@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.support;
 import com.aliyuncs.AcsRequest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 
@@ -27,7 +28,9 @@ public interface PluginSdkBridge {
     static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz, boolean transLineage) throws PluginException {
         final T result;
         if (transLineage) {
-            ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            ObjectMapper mapper = new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
             result = mapper.convertValue(requestDto, clazz);
             try {
                 result.setActionName(clazz.newInstance().getActionName());
@@ -51,7 +54,9 @@ public interface PluginSdkBridge {
      * @throws PluginException plugin exception
      */
     static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         return mapper.convertValue(requestDto, clazz);
     }
 
@@ -86,12 +91,16 @@ public interface PluginSdkBridge {
      * @return transferred result
      */
     static <T, K> T fromSdk(K responseDto, Class<T> clazz) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         return mapper.convertValue(responseDto, clazz);
     }
 
     static <T, K> List<T> fromSdkList(List<K> responseDtoList, Class<T> clazz) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         return mapper.convertValue(responseDtoList, new TypeReference<List<T>>() {
         });
     }

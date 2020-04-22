@@ -110,13 +110,6 @@ public class CoreCreateLoadBalancerResponseDto extends CoreResponseOutputDto imp
         this.addressIPVersion = addressIPVersion;
     }
 
-    @Override
-    public CoreCreateLoadBalancerResponseDto fromSdk(CreateLoadBalancerResponse response) {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(response, this.getClass());
-    }
 
     @Override
     public String toString() {

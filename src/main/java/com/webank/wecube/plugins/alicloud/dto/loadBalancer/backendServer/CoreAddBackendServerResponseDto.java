@@ -46,13 +46,6 @@ public class CoreAddBackendServerResponseDto extends CoreResponseOutputDto imple
         this.backendServers = backendServers;
     }
 
-    @Override
-    public CoreAddBackendServerResponseDto fromSdk(CreateVServerGroupResponse response) {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(response, this.getClass());
-    }
 
     @Override
     public String toString() {
