@@ -79,11 +79,4 @@ public class CoreDeleteDBInstanceRequestDto extends CoreRequestInputDto implemen
                 .toString();
     }
 
-    @Override
-    public DeleteDBInstanceRequest toSdk() {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(this, DeleteDBInstanceRequest.class);
-    }
 }

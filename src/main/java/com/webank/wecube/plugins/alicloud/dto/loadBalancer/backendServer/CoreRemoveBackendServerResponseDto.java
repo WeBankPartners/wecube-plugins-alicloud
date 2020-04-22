@@ -45,13 +45,6 @@ public class CoreRemoveBackendServerResponseDto extends CoreResponseOutputDto im
         this.backendServers = backendServers;
     }
 
-    @Override
-    public CoreRemoveBackendServerResponseDto fromSdk(RemoveVServerGroupBackendServersResponse response) {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(response, this.getClass());
-    }
 
     @Override
     public String toString() {

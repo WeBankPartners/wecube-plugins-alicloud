@@ -111,12 +111,4 @@ public class CoreModifySecurityIPsRequestDto extends CoreRequestInputDto impleme
                 .append("dBInstanceIPArrayAttribute", dBInstanceIPArrayAttribute)
                 .toString();
     }
-
-    @Override
-    public ModifySecurityIpsRequest toSdk() {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(this, ModifySecurityIpsRequest.class);
-    }
 }

@@ -92,11 +92,4 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
         return result;
     }
 
-    @Override
-    public CoreCreateDBInstanceResponseDto fromSdk(CreateDBInstanceResponse response) {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(response, this.getClass());
-    }
 }
