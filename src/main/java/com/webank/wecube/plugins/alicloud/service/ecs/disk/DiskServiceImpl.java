@@ -33,7 +33,7 @@ import java.util.function.Function;
 @Service
 public class DiskServiceImpl implements DiskService {
 
-    private static Logger logger = LoggerFactory.getLogger(DiskService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DiskService.class);
 
     private static final String DISK_SCRIPT_PATH = "classpath:diskScript/";
     private static final String MOUNT_SCRIPT_PATH = "classpath:diskScript/formatAndMountDisk.py";
@@ -45,12 +45,12 @@ public class DiskServiceImpl implements DiskService {
     private static final String DEFAULT_REMOTE_DIRECTORY_PATH = "/tmp/";
 
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private VMService vmService;
-    private PluginScpClient pluginScpClient;
-    private PluginSshdClient pluginSshdClient;
-    private PasswordManager passwordManager;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final VMService vmService;
+    private final PluginScpClient pluginScpClient;
+    private final PluginSshdClient pluginSshdClient;
+    private final PasswordManager passwordManager;
 
 
     @Autowired
@@ -72,6 +72,8 @@ public class DiskServiceImpl implements DiskService {
             try {
 
                 dtoValidator.validate(requestDto);
+
+                logger.info("Creating and attaching disk: {}", requestDto.toString());
 
                 // check region id
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
@@ -121,6 +123,7 @@ public class DiskServiceImpl implements DiskService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -138,14 +141,12 @@ public class DiskServiceImpl implements DiskService {
 
                 dtoValidator.validate(requestDto);
 
+                logger.info("Detaching and deleting disk: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-
-                if (StringUtils.isEmpty(requestDto.getDiskId())) {
-                    throw new PluginException("The disk id cannot be empty or null.");
-                }
 
                 final String diskId = requestDto.getDiskId();
                 final DescribeDisksResponse foundDiskInfo = this.retrieveDisk(client, regionId, diskId);
@@ -181,6 +182,7 @@ public class DiskServiceImpl implements DiskService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
