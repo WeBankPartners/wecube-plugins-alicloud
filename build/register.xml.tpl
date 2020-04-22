@@ -478,6 +478,54 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="Disk">
+            <interface action="create_attach_disk" path="/alicloud/v1/disk/create_attach">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <!-- instance password -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">password</parameter>
+                    <!-- attach disk to instance -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">fileSystemType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">mountDir</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                    <!-- create disk -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">diskId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">zoneId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">diskName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">size</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">diskCategory</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">diskId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">volumeName</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="detach_delete_disk" path="/alicloud/v1/disk/detach_delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">diskId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">unmountDir</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">password</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">volumeName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
   </plugins>
 </package>
 
