@@ -342,6 +342,59 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="Redis">
+            <interface action="create_redis" path="/alicloud/v1/redis/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">password</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">capacity</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceClass</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">zoneId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">chargeType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">engineVersion</parameter>
+<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seriesType</parameter>-->
+<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">architecture</parameter>-->
+<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">shardNumber</parameter>-->
+<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">supportedNodeType</parameter>-->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">networkType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">period</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">srcDBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">backupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">privateIpAddress</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenew</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">password</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">port</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIpAddr</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_redis" path="/alicloud/v1/redis/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
         <plugin name="LoadBalancer">
             <interface action="create_lb" path="/alicloud/v1/load_balancer/create">
                 <inputParameters>
