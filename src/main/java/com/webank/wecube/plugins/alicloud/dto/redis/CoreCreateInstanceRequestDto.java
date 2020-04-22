@@ -4,6 +4,7 @@ import com.aliyuncs.r_kvstore.model.v20150101.CreateInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -14,13 +15,25 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
     private String instanceId;
 
+//    // redis instance spec
+//    @NotEmpty(message = "seriesType field is mandatory")
+//    private String seriesType;
+//    @NotEmpty(message = "architecture field is mandatory")
+//    private String architecture;
+//    @NotEmpty(message = "shardNumber field is mandatory")
+//    private String shardNumber;
+//    @NotEmpty(message = "supportedNodeType field is mandatory")
+//    private String supportedNodeType;
+//
+
     // redis password generation
-    @NotEmpty
+    @NotEmpty(message = "seed field is mandatory")
     private String seed;
 
     private String resourceOwnerId;
     private String couponNo;
     private String networkType;
+    //    @NotEmpty(message = "engineVersion field is mandatory")
     private String engineVersion;
     private String resourceGroupId;
     private String password;
@@ -46,6 +59,7 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
     private String ownerAccount;
     private String token;
     private String vpcId;
+    @NotEmpty(message = "chargeType field is mandatory")
     private String chargeType;
     private String config;
 
@@ -298,5 +312,79 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
     public void setSeed(String seed) {
         this.seed = seed;
+    }
+//
+//    public String getSeriesType() {
+//        return seriesType;
+//    }
+//
+//    public void setSeriesType(String seriesType) {
+//        this.seriesType = seriesType;
+//    }
+//
+//    public String getShardNumber() {
+//        return shardNumber;
+//    }
+//
+//    public void setShardNumber(String shardNumber) {
+//        this.shardNumber = shardNumber;
+//    }
+//
+//    public String getArchitecture() {
+//        return architecture;
+//    }
+//
+//    public void setArchitecture(String architecture) {
+//        this.architecture = architecture;
+//    }
+//
+//    public String getSupportedNodeType() {
+//        return supportedNodeType;
+//    }
+//
+//    public void setSupportedNodeType(String supportedNodeType) {
+//        this.supportedNodeType = supportedNodeType;
+//    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("instanceId", instanceId)
+//                .append("seriesType", seriesType)
+//                .append("architecture", architecture)
+//                .append("shardNumber", shardNumber)
+//                .append("supportedNodeType", supportedNodeType)
+                .append("seed", seed)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("couponNo", couponNo)
+                .append("networkType", networkType)
+                .append("engineVersion", engineVersion)
+                .append("resourceGroupId", resourceGroupId)
+                .append("password", password)
+                .append("securityToken", securityToken)
+                .append("businessInfo", businessInfo)
+                .append("autoRenewPeriod", autoRenewPeriod)
+                .append("period", period)
+                .append("backupId", backupId)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("instanceName", instanceName)
+                .append("autoRenew", autoRenew)
+                .append("zoneId", zoneId)
+                .append("nodeType", nodeType)
+                .append("autoUseCoupon", autoUseCoupon)
+                .append("instanceClass", instanceClass)
+                .append("capacity", capacity)
+                .append("instanceType", instanceType)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("srcDBInstanceId", srcDBInstanceId)
+                .append("ownerAccount", ownerAccount)
+                .append("token", token)
+                .append("vpcId", vpcId)
+                .append("chargeType", chargeType)
+                .append("config", config)
+                .toString();
     }
 }
