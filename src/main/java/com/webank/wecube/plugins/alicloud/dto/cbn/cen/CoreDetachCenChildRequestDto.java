@@ -3,20 +3,27 @@ package com.webank.wecube.plugins.alicloud.dto.cbn.cen;
 import com.aliyuncs.cbn.model.v20170912.DetachCenChildInstanceRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreDetachCenChildRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DetachCenChildInstanceRequest> {
     private String resourceOwnerId;
+    @NotEmpty(message = "cenId field is mandatory")
     private String cenId;
     private String cenOwnerId;
+    @NotEmpty(message = "childInstanceRegionId field is mandatory")
     private String childInstanceRegionId;
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "childInstanceType field is mandatory")
     private String childInstanceType;
     private String childInstanceOwnerId;
+    @NotEmpty(message = "childInstanceId field is mandatory")
     private String childInstanceId;
 
     public CoreDetachCenChildRequestDto() {
@@ -100,5 +107,22 @@ public class CoreDetachCenChildRequestDto extends CoreRequestInputDto implements
 
     public void setChildInstanceId(String childInstanceId) {
         this.childInstanceId = childInstanceId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("cenId", cenId)
+                .append("cenOwnerId", cenOwnerId)
+                .append("childInstanceRegionId", childInstanceRegionId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("childInstanceType", childInstanceType)
+                .append("childInstanceOwnerId", childInstanceOwnerId)
+                .append("childInstanceId", childInstanceId)
+                .toString();
     }
 }
