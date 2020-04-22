@@ -1,6 +1,5 @@
 package com.webank.wecube.plugins.alicloud.utils;
 
-import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -152,5 +151,32 @@ public class PluginStringUtils {
             return rawStr;
         }
 
+    }
+
+    /**
+     * kb to larger unit
+     *
+     * @param kbSize kb
+     * @return transferred larger unit string
+     */
+    public static String kbToLargerUnit(long kbSize) {
+        long kb = 1024;
+        long mb = kb * 1024;
+        long gb = mb * 1024;
+        long tb = gb * 1024;
+
+        if (kbSize >= tb) {
+            return String.format("%.0fT", (float) kbSize / tb);
+        } else if (kbSize >= gb) {
+            return String.format("%.0fG", (float) kbSize / gb);
+        } else if (kbSize >= mb) {
+            float f = (float) kbSize / mb;
+            return String.format(f > 100 ? "%.0M" : "%.1f MB", f);
+        } else if (kbSize >= kb) {
+            float f = (float) kbSize / kb;
+            return String.format(f > 100 ? "%.0f KB" : "%.1f KB", f);
+        } else {
+            return String.format("%d B", kbSize);
+        }
     }
 }
