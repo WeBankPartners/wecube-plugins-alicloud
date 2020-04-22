@@ -32,8 +32,8 @@ public class CenServiceImpl implements CenService {
 
     private static final Logger logger = LoggerFactory.getLogger(CenService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator validator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator validator;
 
     @Autowired
     public CenServiceImpl(AcsClientStub acsClientStub, DtoValidator validator) {
@@ -69,7 +69,7 @@ public class CenServiceImpl implements CenService {
 
                 }
 
-                logger.info("Creating Cen...");
+                logger.info("Creating Cen: {}", requestDto.toString());
 
                 CreateCenRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
@@ -82,6 +82,7 @@ public class CenServiceImpl implements CenService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -123,7 +124,7 @@ public class CenServiceImpl implements CenService {
                     detachAllChildInstances(client, cenId, childInstances);
                 }
 
-                logger.info("Deleting Cen...");
+                logger.info("Deleting Cen: {}", requestDto.toString());
 
                 final DeleteCenRequest deleteCenRequest = requestDto.toSdk();
                 final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest);
@@ -139,6 +140,7 @@ public class CenServiceImpl implements CenService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -174,7 +176,7 @@ public class CenServiceImpl implements CenService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-                logger.info("Attaching Cen child instance...");
+                logger.info("Attaching Cen child instance: {}", requestDto.toString());
 
                 AttachCenChildInstanceRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
@@ -187,6 +189,7 @@ public class CenServiceImpl implements CenService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -209,7 +212,7 @@ public class CenServiceImpl implements CenService {
                 final String regionId = cloudParamDto.getRegionId();
 
 
-                logger.info("Detaching Cen child instance...");
+                logger.info("Detaching Cen child instance: {}", requestDto.toString());
 
                 DetachCenChildInstanceRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
@@ -222,6 +225,7 @@ public class CenServiceImpl implements CenService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
