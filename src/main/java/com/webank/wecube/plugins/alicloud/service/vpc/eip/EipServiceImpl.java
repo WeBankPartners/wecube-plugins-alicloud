@@ -30,8 +30,8 @@ public class EipServiceImpl implements EipService {
 
     private static final Logger logger = LoggerFactory.getLogger(EipService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
 
     @Autowired
     public EipServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
@@ -46,6 +46,8 @@ public class EipServiceImpl implements EipService {
             CoreAllocateEipResponseDto result = new CoreAllocateEipResponseDto();
             try {
                 this.dtoValidator.validate(requestDto);
+
+                logger.info("Allocating EIP address: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -65,7 +67,6 @@ public class EipServiceImpl implements EipService {
                     }
                 }
 
-                logger.info("Allocating EIP address...");
 
                 AllocateEipAddressRequest allocateEipAddressRequest = requestDto.toSdk();
                 AllocateEipAddressResponse response = this.acsClientStub.request(client, allocateEipAddressRequest);
@@ -77,6 +78,7 @@ public class EipServiceImpl implements EipService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -91,6 +93,8 @@ public class EipServiceImpl implements EipService {
             CoreReleaseEipResponseDto result = new CoreReleaseEipResponseDto();
             try {
                 this.dtoValidator.validate(requestDto);
+
+                logger.info("Releasing EIP address: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -108,8 +112,6 @@ public class EipServiceImpl implements EipService {
                 }
 
 
-                logger.info("Releasing EIP address...");
-
                 ReleaseEipAddressRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 ReleaseEipAddressResponse response = this.acsClientStub.request(client, request);
@@ -121,6 +123,7 @@ public class EipServiceImpl implements EipService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -164,12 +167,13 @@ public class EipServiceImpl implements EipService {
             try {
                 this.dtoValidator.validate(requestDto);
 
+                logger.info("Associating EIP address: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-                logger.info("Associating EIP address...");
 
                 AssociateEipAddressRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
@@ -182,6 +186,7 @@ public class EipServiceImpl implements EipService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -197,12 +202,12 @@ public class EipServiceImpl implements EipService {
             try {
                 this.dtoValidator.validate(requestDto);
 
+                logger.info("Un-associating EIP address: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
-
-                logger.info("Un-associating EIP address...");
 
                 UnassociateEipAddressRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
@@ -214,6 +219,7 @@ public class EipServiceImpl implements EipService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
