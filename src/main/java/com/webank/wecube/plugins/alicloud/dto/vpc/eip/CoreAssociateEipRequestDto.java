@@ -3,12 +3,16 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 import com.aliyuncs.vpc.model.v20160428.AssociateEipAddressRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreAssociateEipRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AssociateEipAddressRequest> {
     private String resourceOwnerId;
+    @NotEmpty(message = "allocationId field is mandatory")
     private String allocationId;
     private String mode;
     private String instanceRegionId;
@@ -17,6 +21,7 @@ public class CoreAssociateEipRequestDto extends CoreRequestInputDto implements P
     private String ownerAccount;
     private String ownerId;
     private String privateIpAddress;
+    @NotEmpty(message = "instanceId field is mandatory")
     private String instanceId;
 
     public CoreAssociateEipRequestDto() {
@@ -100,5 +105,22 @@ public class CoreAssociateEipRequestDto extends CoreRequestInputDto implements P
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("allocationId", allocationId)
+                .append("mode", mode)
+                .append("instanceRegionId", instanceRegionId)
+                .append("instanceType", instanceType)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("instanceId", instanceId)
+                .toString();
     }
 }
