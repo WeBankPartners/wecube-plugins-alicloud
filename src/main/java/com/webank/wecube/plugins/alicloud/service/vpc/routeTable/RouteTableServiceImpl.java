@@ -323,6 +323,8 @@ public class RouteTableServiceImpl implements RouteTableService {
 
                 dtoValidator.validate(requestDto);
 
+                logger.info("Creating route entry: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -342,6 +344,7 @@ public class RouteTableServiceImpl implements RouteTableService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -358,6 +361,8 @@ public class RouteTableServiceImpl implements RouteTableService {
             try {
 
                 dtoValidator.validate(requestDto);
+
+                logger.info("Deleting route entry: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -378,6 +383,7 @@ public class RouteTableServiceImpl implements RouteTableService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
