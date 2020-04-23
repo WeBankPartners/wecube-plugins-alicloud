@@ -36,9 +36,9 @@ public class NatGatewayServiceImpl implements NatGatewayService {
 
     private static final Logger logger = LoggerFactory.getLogger(NatGatewayService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private EipService eipService;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final EipService eipService;
 
     @Autowired
     public NatGatewayServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, EipService eipService) {
@@ -53,7 +53,10 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         for (CoreCreateNatGatewayRequestDto requestDto : requestDtoList) {
             CoreCreateNatGatewayResponseDto result = new CoreCreateNatGatewayResponseDto();
             try {
-                this.dtoValidator.validate(requestDto);
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Creating NAT gateway: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -86,6 +89,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -99,7 +103,10 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         for (CoreDeleteNatGatewayRequestDto requestDto : requestDtoList) {
             CoreDeleteNatGatewayResponseDto result = new CoreDeleteNatGatewayResponseDto();
             try {
-                this.dtoValidator.validate(requestDto);
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Deleting NAT gateway: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -141,6 +148,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -167,7 +175,6 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         }
 
         logger.info("Retrieving NAT gateway info...");
-        DescribeNatGatewaysResponse response = this.acsClientStub.request(client, request);
-        return response;
+        return this.acsClientStub.request(client, request);
     }
 }
