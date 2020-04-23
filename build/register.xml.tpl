@@ -626,6 +626,64 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="SecurityPolicy">
+            <interface action="authorize_security_policy" path="/alicloud/v1/security_group/authorize">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">isEgress</parameter>
+                    <!-- in -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceCidrIp</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destCidrIp</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policy</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
+                    <!-- egress -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerAccount</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourcePortRange</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">priority</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">nicType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="revoke_security_policy" path="/alicloud/v1/security_group/revoke">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">isEgress</parameter>
+                    <!-- in -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceCidrIp</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destCidrIp</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policy</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
+                    <!-- egress -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerAccount</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourcePortRange</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">priority</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">nicType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
     </plugins>
 </package>
 
