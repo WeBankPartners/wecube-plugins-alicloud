@@ -3,12 +3,16 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 import com.aliyuncs.vpc.model.v20160428.ReleaseEipAddressRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreReleaseEipRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<ReleaseEipAddressRequest> {
     private String resourceOwnerId;
+    @NotEmpty(message = "allocationId field is mandatory")
     private String allocationId;
     private String resourceOwnerAccount;
     private String ownerAccount;
@@ -55,5 +59,17 @@ public class CoreReleaseEipRequestDto extends CoreRequestInputDto implements Plu
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("allocationId", allocationId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .toString();
     }
 }

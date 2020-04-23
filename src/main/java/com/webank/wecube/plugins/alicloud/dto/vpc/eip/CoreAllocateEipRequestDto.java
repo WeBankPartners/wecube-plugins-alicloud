@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 import com.aliyuncs.vpc.model.v20160428.AllocateEipAddressRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -155,5 +156,28 @@ public class CoreAllocateEipRequestDto extends CoreRequestInputDto implements Pl
 
     public void setPricingCycle(String pricingCycle) {
         this.pricingCycle = pricingCycle;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("allocationId", allocationId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("iSP", iSP)
+                .append("resourceGroupId", resourceGroupId)
+                .append("netmode", netmode)
+                .append("instanceChargeType", instanceChargeType)
+                .append("period", period)
+                .append("autoPay", autoPay)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("bandwidth", bandwidth)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("activityId", activityId)
+                .append("internetChargeType", internetChargeType)
+                .append("pricingCycle", pricingCycle)
+                .toString();
     }
 }
