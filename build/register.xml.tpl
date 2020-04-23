@@ -592,6 +592,40 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="SecurityGroup">
+            <interface action="create_security_group" path="/alicloud/v1/security_group/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_security_group" path="/alicloud/v1/security_group/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
     </plugins>
 </package>
 
