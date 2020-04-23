@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 import com.aliyuncs.ecs.model.v20140526.CreateSecurityGroupResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author howechen
@@ -30,5 +31,14 @@ public class CoreCreateSecurityGroupResponseDto extends CoreResponseOutputDto im
 
     public void setSecurityGroupId(String securityGroupId) {
         this.securityGroupId = securityGroupId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("securityGroupId", securityGroupId)
+                .toString();
     }
 }
