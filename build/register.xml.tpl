@@ -718,6 +718,43 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="NatGateway">
+            <interface action="create_nat_gateway" path="/alicloud/v1/vpc/nat/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">natGatewayId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">name</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">spec</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceChargeType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">pricingCycle</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">duration</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_nat_gateway" path="/alicloud/v1/vpc/nat/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natGatewayId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
     </plugins>
 </package>
 
