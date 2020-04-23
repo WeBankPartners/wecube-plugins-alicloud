@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 import com.aliyuncs.vpc.model.v20160428.CreateNatGatewayResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 
@@ -57,5 +58,17 @@ public class CoreCreateNatGatewayResponseDto extends CoreResponseOutputDto imple
 
     public void setBandwidthPackageIds(List<String> bandwidthPackageIds) {
         this.bandwidthPackageIds = bandwidthPackageIds;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("natGatewayId", natGatewayId)
+                .append("forwardTableIds", forwardTableIds)
+                .append("snatTableIds", snatTableIds)
+                .append("bandwidthPackageIds", bandwidthPackageIds)
+                .toString();
     }
 }

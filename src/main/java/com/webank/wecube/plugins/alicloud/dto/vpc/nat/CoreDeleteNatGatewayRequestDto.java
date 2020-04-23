@@ -3,6 +3,9 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 import com.aliyuncs.vpc.model.v20160428.DeleteNatGatewayRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -10,6 +13,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 public class CoreDeleteNatGatewayRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteNatGatewayRequest> {
 
     private String resourceOwnerId;
+    @NotEmpty(message = "natGatewayId field is mandatory")
     private String natGatewayId;
     private String resourceOwnerAccount;
     private String ownerAccount;
@@ -65,5 +69,18 @@ public class CoreDeleteNatGatewayRequestDto extends CoreRequestInputDto implemen
 
     public void setForce(String force) {
         this.force = force;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("natGatewayId", natGatewayId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("force", force)
+                .toString();
     }
 }

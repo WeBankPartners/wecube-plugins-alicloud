@@ -3,7 +3,9 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 import com.aliyuncs.vpc.model.v20160428.CreateNatGatewayRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -26,6 +28,7 @@ public class CoreCreateNatGatewayRequestDto extends CoreRequestInputDto implemen
     private String ownerId;
     private String vSwitchId;
     private String internetChargeType = "PayByTraffic";
+    @NotEmpty(message = "vpcId field is mandatory")
     private String vpcId;
     private String name;
     private String pricingCycle;
@@ -175,5 +178,30 @@ public class CoreCreateNatGatewayRequestDto extends CoreRequestInputDto implemen
 
     public void setPricingCycle(String pricingCycle) {
         this.pricingCycle = pricingCycle;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("natGatewayId", natGatewayId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("spec", spec)
+                .append("duration", duration)
+                .append("natType", natType)
+                .append("bandwidthPackages", bandwidthPackages)
+                .append("instanceChargeType", instanceChargeType)
+                .append("autoPay", autoPay)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("internetChargeType", internetChargeType)
+                .append("vpcId", vpcId)
+                .append("name", name)
+                .append("pricingCycle", pricingCycle)
+                .toString();
     }
 }
