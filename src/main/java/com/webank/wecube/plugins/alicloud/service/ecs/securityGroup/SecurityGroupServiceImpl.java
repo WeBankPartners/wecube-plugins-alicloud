@@ -27,8 +27,8 @@ import java.util.List;
 public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final static Logger logger = LoggerFactory.getLogger(SecurityGroupService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
 
     @Autowired
     public SecurityGroupServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
@@ -45,6 +45,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             try {
 
                 dtoValidator.validate(requestDto);
+
+                logger.info("Creating security group: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -74,6 +76,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -91,6 +94,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             try {
 
                 dtoValidator.validate(requestDto);
+
+                logger.info("Deleting security group: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -113,6 +118,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
