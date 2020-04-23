@@ -26,7 +26,18 @@ import java.util.List;
 @Service
 public class EipServiceImpl implements EipService {
 
-    public enum AssociatedInstanceType {EcsInstance, SlbInstance, Nat, HaVip, NetworkInterface}
+    public enum AssociatedInstanceType {
+        // ecs
+        EcsInstance,
+        // slb
+        SlbInstance,
+        // nat
+        Nat,
+        // HaVip
+        HaVip,
+        // network interface
+        NetworkInterface
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(EipService.class);
 
@@ -252,7 +263,6 @@ public class EipServiceImpl implements EipService {
 
     private DescribeEipAddressesResponse retrieveEipAddress(IAcsClient client, DescribeEipAddressesRequest request) throws AliCloudException, PluginException {
         logger.info("Retrieving EIP address...");
-        DescribeEipAddressesResponse response = this.acsClientStub.request(client, request);
-        return response;
+        return this.acsClientStub.request(client, request);
     }
 }
