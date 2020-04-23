@@ -4,12 +4,16 @@ import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AuthorizeSecurityGroupRequest> {
 
+    @NotEmpty(message = "isEgress field is mandatory")
     @JsonProperty(value = "isEgress")
     private String isEgress = "false";
 
@@ -17,6 +21,7 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     private String resourceOwnerId;
     private String sourcePortRange;
     private String clientToken;
+    @NotEmpty(message = "securityGroupId field is mandatory")
     private String securityGroupId;
     private String description;
     private String sourceGroupOwnerId;
@@ -24,8 +29,10 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     private String ipv6SourceCidrIp;
     private String ipv6DestCidrIp;
     private String policy;
+    @NotEmpty(message = "portRange field is mandatory")
     private String portRange;
     private String resourceOwnerAccount;
+    @NotEmpty(message = "ipProtocol field is mandatory")
     private String ipProtocol;
     private String ownerAccount;
     private String sourceCidrIp;
@@ -203,5 +210,33 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
 
     public void setSourceGroupId(String sourceGroupId) {
         this.sourceGroupId = sourceGroupId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("isEgress", isEgress)
+                .append("nicType", nicType)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("sourcePortRange", sourcePortRange)
+                .append("clientToken", clientToken)
+                .append("securityGroupId", securityGroupId)
+                .append("description", description)
+                .append("sourceGroupOwnerId", sourceGroupOwnerId)
+                .append("sourceGroupOwnerAccount", sourceGroupOwnerAccount)
+                .append("ipv6SourceCidrIp", ipv6SourceCidrIp)
+                .append("ipv6DestCidrIp", ipv6DestCidrIp)
+                .append("policy", policy)
+                .append("portRange", portRange)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ipProtocol", ipProtocol)
+                .append("ownerAccount", ownerAccount)
+                .append("sourceCidrIp", sourceCidrIp)
+                .append("ownerId", ownerId)
+                .append("priority", priority)
+                .append("destCidrIp", destCidrIp)
+                .append("sourceGroupId", sourceGroupId)
+                .toString();
     }
 }
