@@ -143,6 +143,40 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="RouteEntry">
+            <interface action="create_route_entry" path="/alicloud/v1/route_table/route_entry/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">destinationCidrBlock</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">routeTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">routeEntryName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_route_entry" path="/alicloud/v1/route_table/route_entry/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">destinationCidrBlock</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">routeTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
         <plugin name="VM">
             <interface action="create_vm" path="/alicloud/v1/vm/create">
                 <inputParameters>
