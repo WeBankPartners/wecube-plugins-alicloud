@@ -134,6 +134,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
                 dtoValidator.validate(requestDto);
 
+                logger.info("Authorizing security group with policy: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
@@ -161,6 +163,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -179,6 +182,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             try {
 
                 dtoValidator.validate(requestDto);
+
+                logger.info("Revoking security group with policy: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
@@ -207,6 +212,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
