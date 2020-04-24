@@ -1,9 +1,6 @@
 package com.webank.wecube.plugins.alicloud.service.vpc.nat;
 
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.nat.*;
 
 import java.util.List;
 
@@ -16,5 +13,8 @@ public interface NatGatewayService {
 
     List<CoreDeleteNatGatewayResponseDto> deleteNatGateway(List<CoreDeleteNatGatewayRequestDto> requestDtoList);
 
+    List<CoreCreateSnatEntryResponseDto> createSnatEntry(List<CoreCreateSnatEntryRequestDto> requestDtoList);
+
+    List<CoreDeleteSnatEntryResponseDto> deleteSnatEntry(List<CoreDeleteSnatEntryRequestDto> requestDtoList);
 
 }

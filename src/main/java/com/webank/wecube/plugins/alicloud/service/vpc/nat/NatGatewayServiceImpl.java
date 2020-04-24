@@ -6,10 +6,7 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreCreateNatGatewayResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.vpc.nat.CoreDeleteNatGatewayResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.vpc.nat.*;
 import com.webank.wecube.plugins.alicloud.service.vpc.eip.EipService;
 import com.webank.wecube.plugins.alicloud.service.vpc.eip.EipServiceImpl;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
@@ -17,6 +14,7 @@ import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,6 +150,77 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 resultList.add(result);
             }
 
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreCreateSnatEntryResponseDto> createSnatEntry(List<CoreCreateSnatEntryRequestDto> requestDtoList) {
+        List<CoreCreateSnatEntryResponseDto> resultList = new ArrayList<>();
+        for (CoreCreateSnatEntryRequestDto requestDto : requestDtoList) {
+            CoreCreateSnatEntryResponseDto result = new CoreCreateSnatEntryResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Creating SNAT entry: {}", requestDto.toString());
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                final String listStr = PluginStringUtils.handleCoreListStr(requestDto.getSnatIp(), true);
+                requestDto.setSnatIp(listStr);
+
+                CreateSnatEntryRequest request = requestDto.toSdk();
+                request.setRegionId(regionId);
+                CreateSnatEntryResponse response = this.acsClientStub.request(client, request);
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreDeleteSnatEntryResponseDto> deleteSnatEntry(List<CoreDeleteSnatEntryRequestDto> requestDtoList) {
+        List<CoreDeleteSnatEntryResponseDto> resultList = new ArrayList<>();
+        for (CoreDeleteSnatEntryRequestDto requestDto : requestDtoList) {
+            CoreDeleteSnatEntryResponseDto result = new CoreDeleteSnatEntryResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Deleting SNAT entry: {}", requestDto.toString());
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                DeleteSnatEntryRequest request = requestDto.toSdk();
+                request.setRegionId(regionId);
+                DeleteSnatEntryResponse response = this.acsClientStub.request(client, request);
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
         }
         return resultList;
     }
