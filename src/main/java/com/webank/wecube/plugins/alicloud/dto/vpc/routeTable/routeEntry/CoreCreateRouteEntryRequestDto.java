@@ -17,6 +17,7 @@ public class CoreCreateRouteEntryRequestDto extends CoreRequestInputDto implemen
     private String clientToken;
     @NotEmpty(message = "nextHopId field is mandatory")
     private String nextHopId;
+    @NotEmpty(message = "nextHopType filed is mandatory")
     private String nextHopType;
     @NotEmpty(message = "routeTableId field is mandatory")
     private String routeTableId;
