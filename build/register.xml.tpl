@@ -152,7 +152,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">destinationCidrBlock</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">routeTableId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">nextHopType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">routeEntryName</parameter>
                 </inputParameters>
                 <outputParameters>
