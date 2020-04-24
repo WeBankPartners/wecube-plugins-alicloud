@@ -560,7 +560,7 @@
                 </outputParameters>
             </interface>
         </plugin>
-        <plugin name="Cen">
+        <plugin name="CloudEnterpriseNetwork">
             <interface action="create_cen" path="/alicloud/v1/cen/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
