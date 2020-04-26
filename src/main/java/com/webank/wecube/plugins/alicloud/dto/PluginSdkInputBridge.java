@@ -20,6 +20,8 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
      * @return transferred SDK request DTO
      */
     default K toSdk() {
+        adaptToAliCloud();
+
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
@@ -35,6 +37,8 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
      * @throws PluginException while transferring the DTO
      */
     default <T extends AcsRequest<?>> T toSdkCrossLineage(Class<T> clazz) throws PluginException {
+        adaptToAliCloud();
+
         final T result;
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -46,6 +50,12 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
             throw new PluginException(e.getMessage());
         }
         return result;
+    }
+
+    /**
+     * adapt self to Alicloud required field
+     */
+    default void adaptToAliCloud() {
     }
 
 
