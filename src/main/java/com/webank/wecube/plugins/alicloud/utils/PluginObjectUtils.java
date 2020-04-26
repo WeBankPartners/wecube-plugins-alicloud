@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.ecs.disk.UnformattedDiskDto;
-import net.bytebuddy.build.Plugin;
 
 /**
  * @author howechen
@@ -23,6 +21,15 @@ public class PluginObjectUtils {
             return mapper.readValue(jsonString, clazz);
         } catch (JsonProcessingException e) {
             throw new PluginException("Error while transforming JSON string to class");
+        }
+    }
+
+    public static <T> String mapObjectToJsonStr(T obj) throws PluginException {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new PluginException("Cannot map object to JSON string.");
         }
     }
 }
