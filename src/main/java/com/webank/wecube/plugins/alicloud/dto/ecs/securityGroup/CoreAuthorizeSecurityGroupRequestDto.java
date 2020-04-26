@@ -2,8 +2,12 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
@@ -238,5 +242,21 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
                 .append("destCidrIp", destCidrIp)
                 .append("sourceGroupId", sourceGroupId)
                 .toString();
+    }
+
+    @Override
+    public AuthorizeSecurityGroupRequest toSdk() {
+        if (!StringUtils.isEmpty(this.getIpProtocol())) {
+            this.setIpProtocol(this.getIpProtocol().toLowerCase());
+        }
+
+        if (!StringUtils.isEmpty(this.getPolicy())) {
+            this.setPolicy(this.getPolicy().toLowerCase());
+        }
+
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return mapper.convertValue(this, AuthorizeSecurityGroupRequest.class);
     }
 }
