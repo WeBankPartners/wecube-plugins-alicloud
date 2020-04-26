@@ -1,17 +1,12 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerRequest;
-import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
-import java.lang.reflect.ParameterizedType;
 
 /**
  * @author howechen
@@ -42,7 +37,6 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
     private String vSwitchId;
     private String internetChargeType;
     private String vpcId;
-    @NotEmpty(message = "payType field is mandatory.")
     private String payType;
     private String pricingCycle;
 
