@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.rds;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.rds.model.v20140815.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
@@ -24,6 +25,7 @@ import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
+import com.webank.wecube.plugins.alicloud.utils.PluginObjectUtils;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -84,6 +87,9 @@ public class RDSServiceImpl implements RDSService {
                     }
 
                 }
+
+                final String parameterGroupId = fetchParameterGroupId(client, regionId, requestDto.getEngine(), requestDto.getEngineVersion());
+                requestDto.setdBParamGroupId(parameterGroupId);
 
                 logger.info("Creating DB instance: {}", requestDto.toString());
 
@@ -546,6 +552,76 @@ public class RDSServiceImpl implements RDSService {
         DescribeBackupsResponse response;
         response = this.acsClientStub.request(client, request);
         return response;
+    }
+
+    /**
+     * Fetch parameter group id, if no parameter group found, then create one and return
+     *
+     * @param client   acsclient
+     * @param regionId regionId
+     * @return found parameter gropu id
+     * @throws PluginException   plugin exception
+     * @throws AliCloudException alicloud exception
+     */
+    private String fetchParameterGroupId(IAcsClient client, String regionId, String engine, String engineVersion) throws PluginException, AliCloudException {
+        final String presetGroupName = "rds" + "_" + engine + "_" + engineVersion;
+
+        DescribeParameterGroupsRequest request = new DescribeParameterGroupsRequest();
+        request.setRegionId(regionId);
+
+        final DescribeParameterGroupsResponse response = acsClientStub.request(client, request);
+        final List<DescribeParameterGroupsResponse.ParameterGroup> groupList = response.getParameterGroups();
+        final List<String> foundId = groupList.stream().filter(parameterGroup -> StringUtils.equalsIgnoreCase(presetGroupName, parameterGroup.getParameterGroupName())).map(DescribeParameterGroupsResponse.ParameterGroup::getParameterGroupId).collect(Collectors.toList());
+
+        String result;
+        if (foundId.isEmpty()) {
+            // create new one
+            createParameterGroup(client, regionId, engine, engineVersion, presetGroupName);
+            return fetchParameterGroupId(client, regionId, engine, engineVersion);
+        } else {
+            result = foundId.get(0);
+        }
+        return result;
+    }
+
+    /**
+     * Create new parameter group
+     *
+     * @param client          acsclient
+     * @param regionId        regionId
+     * @param engine          engine name
+     * @param engineVersion   engine version
+     * @param presetGroupName preset group name
+     * @throws PluginException   plugin exception
+     * @throws AliCloudException alicloud exception
+     */
+    private void createParameterGroup(IAcsClient client, String regionId, String engine, String engineVersion, String presetGroupName) throws PluginException, AliCloudException {
+
+        CreateParameterGroupRequest request = new CreateParameterGroupRequest();
+        request.setRegionId(regionId);
+        request.setEngine(engine.toLowerCase());
+        request.setEngineVersion(engineVersion);
+        request.setParameterGroupName(presetGroupName);
+        request.setParameters(PluginObjectUtils.mapObjectToJsonStr(new RdsParameterGroupTemplate()));
+
+        acsClientStub.request(client, request);
+    }
+
+
+    private static class RdsParameterGroupTemplate {
+        @JsonProperty(value = "character_set_server")
+        private String characterSetServer = "utf8";
+
+        public RdsParameterGroupTemplate() {
+        }
+
+        public String getCharacterSetServer() {
+            return characterSetServer;
+        }
+
+        public void setCharacterSetServer(String characterSetServer) {
+            this.characterSetServer = characterSetServer;
+        }
     }
 
 }
