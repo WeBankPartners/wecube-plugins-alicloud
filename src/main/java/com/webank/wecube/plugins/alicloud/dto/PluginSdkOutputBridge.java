@@ -20,6 +20,9 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
      * @return transferred CoreResponseOutputDto
      */
     default T fromSdk(K response) {
+
+        adaptToCore(response);
+
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
@@ -35,9 +38,21 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
      * @return CoreResponseOutputDto
      */
     default <V> T fromSdkCrossLineage(V response) {
+
+        adaptToCore(response);
+
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+    }
+
+    /**
+     * Adapt to core required field
+     *
+     * @param response AliCloud's response
+     * @param <J>      AliCloud response type
+     */
+    default <J> void adaptToCore(J response) {
     }
 }
