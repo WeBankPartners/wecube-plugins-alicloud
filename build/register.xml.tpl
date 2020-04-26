@@ -446,7 +446,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">slaveZoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">loadBalancerSpec</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">payType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">payType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">pricingCycle</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">duration</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">address</parameter>
