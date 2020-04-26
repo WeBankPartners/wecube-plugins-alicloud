@@ -1,18 +1,12 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
-import com.aliyuncs.AcsRequest;
 import com.aliyuncs.rds.model.v20140815.CreateDBInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
-import java.lang.reflect.ParameterizedType;
 
 /**
  * @author howechen
@@ -36,6 +30,7 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String ownerId;
     private String accountPassword;
 
+    private String dBParamGroupId;
     private String resourceOwnerId;
     @NotEmpty(message = "dBInstanceStorage field is mandatory.")
     @JsonProperty("dBInstanceStorage")
@@ -390,11 +385,36 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         this.accountPassword = accountPassword;
     }
 
+    public String getDBIsIgnoreCase() {
+        return dBIsIgnoreCase;
+    }
+
+    public void setDBIsIgnoreCase(String dBIsIgnoreCase) {
+        this.dBIsIgnoreCase = dBIsIgnoreCase;
+    }
+
+    public String getdBInstanceSpec() {
+        return dBInstanceSpec;
+    }
+
+    public void setDBInstanceSpec(String dBInstanceSpec) {
+        this.dBInstanceSpec = dBInstanceSpec;
+    }
+
+    public String getDBParamGroupId() {
+        return dBParamGroupId;
+    }
+
+    public void setdBParamGroupId(String dBParamGroupId) {
+        this.dBParamGroupId = dBParamGroupId;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
                 .append("dBInstanceId", dBInstanceId)
+                .append("dBInstanceSpec", dBInstanceSpec)
                 .append("seed", seed)
                 .append("accountType", accountType)
                 .append("accountDescription", accountDescription)
@@ -403,6 +423,7 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
                 .append("ownerAccount", ownerAccount)
                 .append("ownerId", ownerId)
                 .append("accountPassword", accountPassword)
+                .append("dBParamGroupId", dBParamGroupId)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("dBInstanceStorage", dBInstanceStorage)
                 .append("systemDBCharset", systemDBCharset)
@@ -434,13 +455,5 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
                 .append("payType", payType)
                 .append("dBIsIgnoreCase", dBIsIgnoreCase)
                 .toString();
-    }
-
-    public String getdBInstanceSpec() {
-        return dBInstanceSpec;
-    }
-
-    public void setdBInstanceSpec(String dBInstanceSpec) {
-        this.dBInstanceSpec = dBInstanceSpec;
     }
 }
