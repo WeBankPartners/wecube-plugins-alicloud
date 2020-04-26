@@ -4,6 +4,7 @@ import com.aliyuncs.AcsResponse;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 
 import java.lang.reflect.ParameterizedType;
 
@@ -27,7 +28,11 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
-        return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+        try {
+            return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+        } catch (IllegalArgumentException exception) {
+            throw new PluginException(exception.getMessage());
+        }
     }
 
     /**
@@ -44,7 +49,11 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+        try {
+            return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+        } catch (IllegalArgumentException exception) {
+            throw new PluginException(exception.getMessage());
+        }
     }
 
     /**
