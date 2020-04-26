@@ -1,10 +1,6 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupRequest;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +13,8 @@ import javax.validation.constraints.NotEmpty;
  */
 public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AuthorizeSecurityGroupRequest> {
 
-    @NotEmpty(message = "isEgress field is mandatory")
-    @JsonProperty(value = "isEgress")
-    private String isEgress = "false";
+    @NotEmpty(message = "actionType field is mandatory")
+    private String actionType;
 
     private String nicType;
     private String resourceOwnerId;
@@ -48,12 +43,12 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     public CoreAuthorizeSecurityGroupRequestDto() {
     }
 
-    public String getIsEgress() {
-        return isEgress;
+    public String getActionType() {
+        return actionType;
     }
 
-    public void setIsEgress(String isEgress) {
-        this.isEgress = isEgress;
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
     }
 
     public String getNicType() {
@@ -220,7 +215,7 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
-                .append("isEgress", isEgress)
+                .append("actionType", actionType)
                 .append("nicType", nicType)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("sourcePortRange", sourcePortRange)
@@ -245,7 +240,11 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     }
 
     @Override
-    public AuthorizeSecurityGroupRequest toSdk() {
+    public void adaptToAliCloud() {
+        if (!StringUtils.isEmpty(this.getPortRange())) {
+            this.setPortRange(this.getPortRange().replace('-', '/'));
+        }
+
         if (!StringUtils.isEmpty(this.getIpProtocol())) {
             this.setIpProtocol(this.getIpProtocol().toLowerCase());
         }
@@ -253,10 +252,5 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
         if (!StringUtils.isEmpty(this.getPolicy())) {
             this.setPolicy(this.getPolicy().toLowerCase());
         }
-
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(this, AuthorizeSecurityGroupRequest.class);
     }
 }
