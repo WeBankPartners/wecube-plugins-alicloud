@@ -647,7 +647,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupType</parameter>

@@ -25,7 +25,6 @@ public class CoreCreateSecurityGroupRequestDto extends CoreRequestInputDto imple
     private String ownerAccount;
     private String ownerId;
     private String securityGroupType;
-    @NotEmpty(message = "vpcId field is mandatory")
     private String vpcId;
 
     public CoreCreateSecurityGroupRequestDto() {
