@@ -4,9 +4,13 @@ import com.aliyuncs.ecs.model.v20140526.CreateInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +36,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     private String password;
     private String storageSetPartitionNumber;
     private List<CreateInstanceRequest.Tag> tags;
+    private String resourceTag;
     private String autoRenewPeriod;
     private String nodeControllerId;
     private String period;
@@ -557,6 +562,22 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
         this.seed = seed;
     }
 
+    public String getInstanceSpec() {
+        return instanceSpec;
+    }
+
+    public void setInstanceSpec(String instanceSpec) {
+        this.instanceSpec = instanceSpec;
+    }
+
+    public String getResourceTag() {
+        return resourceTag;
+    }
+
+    public void setResourceTag(String resourceTag) {
+        this.resourceTag = resourceTag;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -575,6 +596,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
                 .append("password", password)
                 .append("storageSetPartitionNumber", storageSetPartitionNumber)
                 .append("tags", tags)
+                .append("resourceTag", resourceTag)
                 .append("autoRenewPeriod", autoRenewPeriod)
                 .append("nodeControllerId", nodeControllerId)
                 .append("period", period)
@@ -624,11 +646,18 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
                 .toString();
     }
 
-    public String getInstanceSpec() {
-        return instanceSpec;
-    }
-
-    public void setInstanceSpec(String instanceSpec) {
-        this.instanceSpec = instanceSpec;
+    @Override
+    public void adaptToAliCloud() {
+        if (!StringUtils.isEmpty(this.getResourceTag())) {
+            final List<Pair<String, String>> pairs = PluginStringUtils.splitResourceTag(this.getResourceTag());
+            List<CreateInstanceRequest.Tag> tags = new ArrayList<>();
+            for (Pair<String, String> pair : pairs) {
+                final CreateInstanceRequest.Tag tag = new CreateInstanceRequest.Tag();
+                tag.setKey(pair.getKey());
+                tag.setValue(pair.getValue());
+                tags.add(tag);
+            }
+            this.setTags(tags);
+        }
     }
 }
