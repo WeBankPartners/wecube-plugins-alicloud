@@ -8,10 +8,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 /**
  * @author howechen
  */
-public class CoreBindSecurityGroupResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreBindSecurityGroupResponseDto, ModifyInstanceAttributeResponse> {
+public class CoreModifyInstanceAttributeResponesDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreModifyInstanceAttributeResponesDto, ModifyInstanceAttributeResponse> {
     private String requestId;
 
-    public CoreBindSecurityGroupResponseDto() {
+    public CoreModifyInstanceAttributeResponesDto() {
     }
 
     public String getRequestId() {
