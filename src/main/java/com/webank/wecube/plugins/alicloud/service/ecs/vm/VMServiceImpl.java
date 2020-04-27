@@ -10,8 +10,8 @@ import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
@@ -113,7 +113,7 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                result = result.fromSdk(response, encryptedPassword, availableInstanceType, requestDto.getPrivateIpAddress());
+                result = result.fromSdk(response, encryptedPassword, requestDto.getInstanceSpec(), requestDto.getPrivateIpAddress());
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
