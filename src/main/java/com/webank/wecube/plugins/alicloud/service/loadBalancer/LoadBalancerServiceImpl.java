@@ -2,7 +2,6 @@ package com.webank.wecube.plugins.alicloud.service.loadBalancer;
 
 import com.aliyuncs.AcsRequest;
 import com.aliyuncs.IAcsClient;
-import com.aliyuncs.ecs.model.v20140526.DescribeInstancesResponse;
 import com.aliyuncs.slb.model.v20140515.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
@@ -13,8 +12,6 @@ import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreCreateLoadBalance
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.CoreDeleteLoadBalancerResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer.*;
-import com.webank.wecube.plugins.alicloud.service.ecs.vm.VMService;
-import com.webank.wecube.plugins.alicloud.service.ecs.vm.VMServiceImpl;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
@@ -83,6 +80,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                         final DescribeLoadBalancersResponse.LoadBalancer foundLoadBalancer = foundLoadBalancerResponse.getLoadBalancers().get(0);
                         result = result.fromSdkCrossLineage(foundLoadBalancer);
                         result.setRequestId(foundLoadBalancerResponse.getRequestId());
+                        continue;
                     }
                 }
 
