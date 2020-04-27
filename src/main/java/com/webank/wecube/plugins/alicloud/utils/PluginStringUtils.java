@@ -1,9 +1,11 @@
 package com.webank.wecube.plugins.alicloud.utils;
 
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
@@ -178,5 +180,31 @@ public class PluginStringUtils {
         } else {
             return String.format("%d B", kbSize);
         }
+    }
+
+    /**
+     * Split resource tag raw string into pair list.
+     * Example: a=b;c=d -> [<a,b>, <c,d>]
+     * Example: a=b -> [<a,b>]
+     *
+     * @param rawTagStr resource tag raw string
+     * @return result
+     * @throws PluginException plugin exception
+     */
+    public static List<Pair<String, String>> splitResourceTag(String rawTagStr) throws PluginException {
+
+        List<Pair<String, String>> result = new ArrayList<>();
+
+        final String[] kvPairs = rawTagStr.split(";");
+
+        for (String kvPair : kvPairs) {
+            final String[] split = kvPair.split("=");
+            if (2 != split.length) {
+                throw new PluginException("The resource tag format is invalid");
+            }
+
+            result.add(new ImmutablePair<>(split[0], split[1]));
+        }
+        return result;
     }
 }

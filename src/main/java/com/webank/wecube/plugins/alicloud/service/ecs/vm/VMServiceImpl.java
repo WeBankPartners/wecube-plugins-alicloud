@@ -10,8 +10,8 @@ import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
@@ -113,7 +113,7 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                result = result.fromSdk(response, encryptedPassword, availableInstanceType, requestDto.getPrivateIpAddress());
+                result = result.fromSdk(response, encryptedPassword, requestDto.getInstanceSpec(), requestDto.getPrivateIpAddress());
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
@@ -282,10 +282,10 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public List<CoreBindSecurityGroupResponseDto> bindSecurityGroup(List<CoreBindSecurityGroupRequestDto> coreBindSecurityGroupRequestDtoList) throws PluginException {
-        List<CoreBindSecurityGroupResponseDto> resultList = new ArrayList<>();
-        for (CoreBindSecurityGroupRequestDto requestDto : coreBindSecurityGroupRequestDtoList) {
-            CoreBindSecurityGroupResponseDto result = new CoreBindSecurityGroupResponseDto();
+    public List<CoreModifyInstanceAttributeResponesDto> bindSecurityGroup(List<CoreModifyInstanceAttributeRequestDto> coreModifyInstanceAttributeRequestDtoList) throws PluginException {
+        List<CoreModifyInstanceAttributeResponesDto> resultList = new ArrayList<>();
+        for (CoreModifyInstanceAttributeRequestDto requestDto : coreModifyInstanceAttributeRequestDtoList) {
+            CoreModifyInstanceAttributeResponesDto result = new CoreModifyInstanceAttributeResponesDto();
 
             try {
 
@@ -311,6 +311,63 @@ public class VMServiceImpl implements VMService {
                 currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
 
                 logger.info("Binding security group with VM instance: {}", requestDto.toString());
+
+                ModifyInstanceAttributeRequest request = requestDto.toSdk();
+                request.setRegionId(regionId);
+                request.setSecurityGroupIdss(currentSecurityGroupIdList);
+
+                ModifyInstanceAttributeResponse response;
+                response = this.acsClientStub.request(client, request);
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifyInstanceAttributeResponesDto> unbindSecurityGroup(List<CoreModifyInstanceAttributeRequestDto> coreModifyInstanceAttributeRequestDtoList) {
+        List<CoreModifyInstanceAttributeResponesDto> resultList = new ArrayList<>();
+        for (CoreModifyInstanceAttributeRequestDto requestDto : coreModifyInstanceAttributeRequestDtoList) {
+            CoreModifyInstanceAttributeResponesDto result = new CoreModifyInstanceAttributeResponesDto();
+
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String securityGroupId = requestDto.getSecurityGroupId();
+                final String instanceId = requestDto.getInstanceId();
+
+                final DescribeInstancesResponse retrieveVMResponse = this.retrieveVM(client, regionId, instanceId);
+                if (0 == retrieveVMResponse.getTotalCount()) {
+                    String msg = String.format("Cannot retrieve instance info according to given regionId: [%s] and instanceId: [%s]", regionId, instanceId);
+                    logger.error(msg);
+                    throw new PluginException(msg);
+                }
+
+                final DescribeInstancesResponse.Instance foundInstance = retrieveVMResponse.getInstances().get(0);
+                List<String> currentSecurityGroupIdList = foundInstance.getSecurityGroupIds();
+                if (!currentSecurityGroupIdList.contains(securityGroupId)) {
+                    throw new PluginException(String.format("The current instance doesn't bind the request security group id: [%s]", securityGroupId));
+                }
+                currentSecurityGroupIdList.remove(securityGroupId);
+                currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
+
+                logger.info("Unbinding security group with VM instance: {}", requestDto.toString());
 
                 ModifyInstanceAttributeRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);

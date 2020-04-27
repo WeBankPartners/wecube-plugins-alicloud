@@ -1,9 +1,9 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.RevokeSecurityGroupRequest;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.validation.constraints.NotEmpty;
@@ -13,9 +13,8 @@ import javax.validation.constraints.NotEmpty;
  */
 public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<RevokeSecurityGroupRequest> {
 
-    @NotEmpty(message = "isEgress field is mandatory")
-    @JsonProperty(value = "isEgress")
-    private String isEgress = "false";
+    @NotEmpty(message = "actionType field is mandatory")
+    private String actionType;
 
     private String nicType;
     private String resourceOwnerId;
@@ -44,12 +43,12 @@ public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto imple
     public CoreRevokeSecurityGroupRequestDto() {
     }
 
-    public String getIsEgress() {
-        return isEgress;
+    public String getActionType() {
+        return actionType;
     }
 
-    public void setIsEgress(String isEgress) {
-        this.isEgress = isEgress;
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
     }
 
     public String getNicType() {
@@ -216,7 +215,7 @@ public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto imple
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
-                .append("isEgress", isEgress)
+                .append("actionType", actionType)
                 .append("nicType", nicType)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("sourcePortRange", sourcePortRange)
@@ -238,5 +237,20 @@ public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto imple
                 .append("destCidrIp", destCidrIp)
                 .append("sourceGroupId", sourceGroupId)
                 .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() {
+        if (!StringUtils.isEmpty(this.getPortRange())) {
+            this.setPortRange(this.getPortRange().replace('-', '/'));
+        }
+
+        if (!StringUtils.isEmpty(this.getIpProtocol())) {
+            this.setIpProtocol(this.getIpProtocol().toLowerCase());
+        }
+
+        if (!StringUtils.isEmpty(this.getPolicy())) {
+            this.setPolicy(this.getPolicy().toLowerCase());
+        }
     }
 }

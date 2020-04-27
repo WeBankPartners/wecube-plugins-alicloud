@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author howechen
  */
-public class CoreBindSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<ModifyInstanceAttributeRequest> {
+public class CoreModifyInstanceAttributeRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<ModifyInstanceAttributeRequest> {
     @NotEmpty(message = "securityGroupId field is mandatory.")
     private String securityGroupId;
 
@@ -31,7 +31,7 @@ public class CoreBindSecurityGroupRequestDto extends CoreRequestInputDto impleme
     private String instanceId;
     private String instanceName;
 
-    public CoreBindSecurityGroupRequestDto() {
+    public CoreModifyInstanceAttributeRequestDto() {
     }
 
     public String getSecurityGroupId() {
