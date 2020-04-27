@@ -152,7 +152,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">destinationCidrBlock</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">routeTableId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">nextHopType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">routeEntryName</parameter>
                 </inputParameters>
                 <outputParameters>
@@ -254,6 +254,20 @@
                 </outputParameters>
             </interface>
             <interface action="bind_security_group" path="/alicloud/v1/vm/security-group/bind">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="unbind_security_group" path="/alicloud/v1/vm/security-group/unbind">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
@@ -446,7 +460,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">slaveZoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">loadBalancerSpec</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">payType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">payType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">pricingCycle</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">duration</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">address</parameter>
@@ -560,7 +574,7 @@
                 </outputParameters>
             </interface>
         </plugin>
-        <plugin name="Cen">
+        <plugin name="CloudEnterpriseNetwork">
             <interface action="create_cen" path="/alicloud/v1/cen/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
@@ -633,7 +647,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vpcId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupType</parameter>
@@ -737,6 +751,7 @@
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -747,6 +762,38 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natGatewayId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="create_snat_entry" path="/alicloud/v1/vpc/nat/snat_entry/create">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatIp</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceVSwitchId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceCIDR</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">snatEntryName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_snat_entry" path="/alicloud/v1/vpc/nat/snat_entry/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatEntryId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>

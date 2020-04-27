@@ -19,11 +19,17 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
      *
      * @return transferred SDK request DTO
      */
-    default K toSdk() {
+    default K toSdk() throws PluginException {
+        adaptToAliCloud();
+
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return mapper.convertValue(this, (Class<K>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+        try {
+            return mapper.convertValue(this, (Class<K>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+        } catch (IllegalArgumentException ex) {
+            throw new PluginException(ex.getMessage());
+        }
     }
 
     /**
@@ -35,17 +41,30 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
      * @throws PluginException while transferring the DTO
      */
     default <T extends AcsRequest<?>> T toSdkCrossLineage(Class<T> clazz) throws PluginException {
+        adaptToAliCloud();
+
         final T result;
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        result = mapper.convertValue(this, clazz);
+        try {
+            result = mapper.convertValue(this, clazz);
+        } catch (IllegalArgumentException ex) {
+            throw new PluginException(ex.getMessage());
+        }
+
         try {
             result.setActionName(clazz.newInstance().getActionName());
         } catch (IllegalAccessException | InstantiationException e) {
             throw new PluginException(e.getMessage());
         }
         return result;
+    }
+
+    /**
+     * adapt self to Alicloud required field
+     */
+    default void adaptToAliCloud() {
     }
 
 

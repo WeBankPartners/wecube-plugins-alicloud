@@ -11,6 +11,7 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,59 @@ import java.util.List;
  */
 @Service
 public class SecurityGroupServiceImpl implements SecurityGroupService {
+
+    @Override
+    public List<CoreAuthorizeSecurityGroupResponseDto> authorizeSecurityGroup(List<CoreAuthorizeSecurityGroupRequestDto> coreAuthorizeSecurityGroupRequestDtoList) throws PluginException {
+        List<CoreAuthorizeSecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreAuthorizeSecurityGroupRequestDto requestDto : coreAuthorizeSecurityGroupRequestDtoList) {
+            CoreAuthorizeSecurityGroupResponseDto result = new CoreAuthorizeSecurityGroupResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Authorizing security group with policy: {}", requestDto.toString());
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+
+                switch (EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType())) {
+                    case EGRESS:
+                        // egress authorization
+                        AuthorizeSecurityGroupEgressRequest egressRequest = requestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
+                        egressRequest.setRegionId(regionId);
+                        AuthorizeSecurityGroupEgressResponse egressResponse;
+                        egressResponse = this.acsClientStub.request(client, egressRequest);
+                        result = result.fromSdkCrossLineage(egressResponse);
+                        break;
+                    case INGRESS:
+                        // ingress authorization
+                        AuthorizeSecurityGroupRequest request = requestDto.toSdk();
+                        request.setRegionId(regionId);
+                        AuthorizeSecurityGroupResponse response;
+                        response = this.acsClientStub.request(client, request);
+                        result = result.fromSdk(response);
+                        break;
+                    default:
+                        break;
+                }
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+
+        }
+        return resultList;
+    }
+
     private final static Logger logger = LoggerFactory.getLogger(SecurityGroupService.class);
 
     private final AcsClientStub acsClientStub;
@@ -126,53 +180,6 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
     @Override
-    public List<CoreAuthorizeSecurityGroupResponseDto> authorizeSecurityGroup(List<CoreAuthorizeSecurityGroupRequestDto> coreAuthorizeSecurityGroupRequestDtoList) throws PluginException {
-        List<CoreAuthorizeSecurityGroupResponseDto> resultList = new ArrayList<>();
-        for (CoreAuthorizeSecurityGroupRequestDto requestDto : coreAuthorizeSecurityGroupRequestDtoList) {
-            CoreAuthorizeSecurityGroupResponseDto result = new CoreAuthorizeSecurityGroupResponseDto();
-            try {
-
-                dtoValidator.validate(requestDto);
-
-                logger.info("Authorizing security group with policy: {}", requestDto.toString());
-
-                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final String regionId = cloudParamDto.getRegionId();
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-
-                if (Boolean.parseBoolean(requestDto.getIsEgress())) {
-                    // egress authorization
-                    AuthorizeSecurityGroupEgressRequest egressRequest = requestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
-                    egressRequest.setRegionId(regionId);
-                    AuthorizeSecurityGroupEgressResponse egressResponse;
-                    egressResponse = this.acsClientStub.request(client, egressRequest);
-                    result = result.fromSdkCrossLineage(egressResponse);
-                } else {
-                    // not egress authorization
-                    AuthorizeSecurityGroupRequest request = requestDto.toSdk();
-                    request.setRegionId(regionId);
-                    AuthorizeSecurityGroupResponse response;
-                    response = this.acsClientStub.request(client, request);
-                    result = result.fromSdk(response);
-                }
-
-            } catch (PluginException | AliCloudException ex) {
-                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
-                result.setErrorMessage(ex.getMessage());
-            } finally {
-                result.setGuid(requestDto.getGuid());
-                result.setCallbackParameter(requestDto.getCallbackParameter());
-                logger.info("Result: {}", result.toString());
-                resultList.add(result);
-            }
-
-
-        }
-        return resultList;
-    }
-
-    @Override
     public List<CoreRevokeSecurityGroupResponseDto> revokeSecurityGroup(List<CoreRevokeSecurityGroupRequestDto> coreRevokeSecurityGroupRequestDtoList) throws PluginException {
         List<CoreRevokeSecurityGroupResponseDto> resultList = new ArrayList<>();
         for (CoreRevokeSecurityGroupRequestDto requestDto : coreRevokeSecurityGroupRequestDtoList) {
@@ -190,20 +197,25 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                if (Boolean.parseBoolean(requestDto.getIsEgress())) {
-                    // egress authorization
-                    RevokeSecurityGroupEgressRequest egressRequest = PluginSdkBridge.toSdk(requestDto, RevokeSecurityGroupEgressRequest.class, true);
-                    egressRequest.setRegionId(regionId);
-                    RevokeSecurityGroupEgressResponse egressResponse;
-                    egressResponse = this.acsClientStub.request(client, egressRequest);
-                    result = result.fromSdkCrossLineage(egressResponse);
-                } else {
-                    // not egress authorization
-                    RevokeSecurityGroupRequest request = PluginSdkBridge.toSdk(requestDto, RevokeSecurityGroupRequest.class);
-                    request.setRegionId(regionId);
-                    RevokeSecurityGroupResponse response;
-                    response = this.acsClientStub.request(client, request);
-                    result = result.fromSdk(response);
+                switch (EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType())) {
+                    case EGRESS:
+                        // egress authorization
+                        RevokeSecurityGroupEgressRequest egressRequest = PluginSdkBridge.toSdk(requestDto, RevokeSecurityGroupEgressRequest.class, true);
+                        egressRequest.setRegionId(regionId);
+                        RevokeSecurityGroupEgressResponse egressResponse;
+                        egressResponse = this.acsClientStub.request(client, egressRequest);
+                        result = result.fromSdkCrossLineage(egressResponse);
+                        break;
+                    case INGRESS:
+                        // ingress authorization
+                        RevokeSecurityGroupRequest request = PluginSdkBridge.toSdk(requestDto, RevokeSecurityGroupRequest.class);
+                        request.setRegionId(regionId);
+                        RevokeSecurityGroupResponse response;
+                        response = this.acsClientStub.request(client, request);
+                        result = result.fromSdk(response);
+                        break;
+                    default:
+                        break;
                 }
 
             } catch (PluginException | AliCloudException ex) {
@@ -217,6 +229,13 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             }
         }
         return resultList;
+    }
+
+    public enum ActionType {
+        // ingress
+        INGRESS,
+        // egress
+        EGRESS
     }
 
     private DescribeSecurityGroupsResponse retrieveSecurityGroup(IAcsClient client, String regionId, String securityGroupId) throws PluginException, AliCloudException {
