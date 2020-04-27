@@ -22,17 +22,18 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
      */
     default T fromSdk(K response) {
 
-        adaptToCore(response);
-
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-
+        T result;
         try {
-            return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+            result = mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
         } catch (IllegalArgumentException exception) {
             throw new PluginException(exception.getMessage());
         }
+
+        adaptToCore(response, result);
+        return result;
     }
 
     /**
@@ -44,16 +45,21 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
      */
     default <V> T fromSdkCrossLineage(V response) {
 
-        adaptToCore(response);
 
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+
+        T result;
         try {
-            return mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
+            result = mapper.convertValue(response, (Class<T>) ((ParameterizedType) getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]);
         } catch (IllegalArgumentException exception) {
             throw new PluginException(exception.getMessage());
         }
+
+        adaptToCore(response, result);
+
+        return result;
     }
 
     /**
@@ -62,6 +68,6 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
      * @param response AliCloud's response
      * @param <J>      AliCloud response type
      */
-    default <J> void adaptToCore(J response) {
+    default <J> void adaptToCore(J response, T result) {
     }
 }
