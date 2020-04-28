@@ -64,7 +64,7 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
     /**
      * adapt self to Alicloud required field
      */
-    default void adaptToAliCloud() {
+    default void adaptToAliCloud() throws PluginException {
     }
 
 
