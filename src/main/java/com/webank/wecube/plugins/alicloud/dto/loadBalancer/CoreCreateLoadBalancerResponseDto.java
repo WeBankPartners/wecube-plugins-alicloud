@@ -1,15 +1,10 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerResponse;
-import com.aliyuncs.vpc.model.v20160428.CreateVSwitchResponse;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
-import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -113,7 +108,7 @@ public class CoreCreateLoadBalancerResponseDto extends CoreResponseOutputDto imp
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("requestId", requestId)
                 .append("loadBalancerId", loadBalancerId)

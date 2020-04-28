@@ -1,14 +1,12 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.CreateVServerGroupRequest;
-import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -35,6 +33,7 @@ public class CoreAddBackendServerRequestDto extends CoreRequestInputDto implemen
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @JsonProperty(value = "vServerGroupName")
     private String vServerGroupName;
     private String loadBalancerId;
 
@@ -147,7 +146,7 @@ public class CoreAddBackendServerRequestDto extends CoreRequestInputDto implemen
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("hostIds", hostIds)
                 .append("hostPorts", hostPorts)

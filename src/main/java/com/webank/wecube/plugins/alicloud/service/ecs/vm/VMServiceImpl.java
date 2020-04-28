@@ -295,7 +295,7 @@ public class VMServiceImpl implements VMService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String securityGroupId = requestDto.getSecurityGroupId();
+                final List<String> securityGroupIdList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
                 final String instanceId = requestDto.getInstanceId();
 
                 final DescribeInstancesResponse retrieveVMResponse = this.retrieveVM(client, regionId, instanceId);
@@ -307,7 +307,7 @@ public class VMServiceImpl implements VMService {
 
                 final DescribeInstancesResponse.Instance foundInstance = retrieveVMResponse.getInstances().get(0);
                 List<String> currentSecurityGroupIdList = foundInstance.getSecurityGroupIds();
-                currentSecurityGroupIdList.add(securityGroupId);
+                currentSecurityGroupIdList.addAll(securityGroupIdList);
                 currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
 
                 logger.info("Binding security group with VM instance: {}", requestDto.toString());
@@ -349,7 +349,7 @@ public class VMServiceImpl implements VMService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String securityGroupId = requestDto.getSecurityGroupId();
+                final List<String> securityGroupIdList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
                 final String instanceId = requestDto.getInstanceId();
 
                 final DescribeInstancesResponse retrieveVMResponse = this.retrieveVM(client, regionId, instanceId);
@@ -361,10 +361,7 @@ public class VMServiceImpl implements VMService {
 
                 final DescribeInstancesResponse.Instance foundInstance = retrieveVMResponse.getInstances().get(0);
                 List<String> currentSecurityGroupIdList = foundInstance.getSecurityGroupIds();
-                if (!currentSecurityGroupIdList.contains(securityGroupId)) {
-                    throw new PluginException(String.format("The current instance doesn't bind the request security group id: [%s]", securityGroupId));
-                }
-                currentSecurityGroupIdList.remove(securityGroupId);
+                currentSecurityGroupIdList.removeAll(securityGroupIdList);
                 currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
 
                 logger.info("Unbinding security group with VM instance: {}", requestDto.toString());
@@ -465,6 +462,4 @@ public class VMServiceImpl implements VMService {
         final DescribeInstancesResponse describeInstancesResponse = this.retrieveVM(client, regionId, instanceId);
         return describeInstancesResponse.getTotalCount() == 0;
     }
-
-
 }

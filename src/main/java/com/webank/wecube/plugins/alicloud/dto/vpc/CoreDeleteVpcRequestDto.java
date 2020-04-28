@@ -4,6 +4,7 @@ import com.aliyuncs.vpc.model.v20160428.DeleteVpcRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -61,7 +62,7 @@ public class CoreDeleteVpcRequestDto extends CoreRequestInputDto implements Plug
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("resourceOwnerAccount", resourceOwnerAccount)

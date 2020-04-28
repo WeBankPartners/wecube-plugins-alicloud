@@ -4,6 +4,7 @@ import com.aliyuncs.ecs.model.v20140526.DeleteSecurityGroupRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -64,7 +65,7 @@ public class CoreDeleteSecurityGroupRequestDto extends CoreRequestInputDto imple
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("securityGroupId", securityGroupId)
