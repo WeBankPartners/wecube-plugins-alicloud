@@ -279,27 +279,37 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             try {
 
                 dtoValidator.validate(requestDto);
+                logger.info("Removing backend server from load balancer: {}", requestDto.toString());
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
-                final Integer listenerPort = Integer.parseInt(requestDto.getListenerPort());
-                final String listenerProtocol = requestDto.getListenerProtocol();
-                final String loadBalancerId = requestDto.getLoadBalancerId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-
-                logger.info("Removing backend server from load balancer: {}", requestDto.toString());
-
                 final String backendServersString = getBackendServersString(requestDto.getHostIds(), requestDto.getHostPorts());
                 requestDto.setBackendServers(backendServersString);
+                String vServerGroupId = requestDto.getvServerGroupId();
 
-                if (StringUtils.isAnyEmpty(listenerProtocol, loadBalancerId)) {
-                    throw new PluginException("Either the listener protocol or loadBalancerId cannot be empty or null");
+                if (StringUtils.isEmpty(requestDto.getvServerGroupId())) {
+
+                    Integer listenerPort;
+                    try {
+                        listenerPort = Integer.parseInt(requestDto.getListenerPort());
+                    } catch (NumberFormatException ex) {
+                        throw new PluginException(String.format("Cannot format [%s] to integer.", requestDto.getListenerPort()));
+                    }
+
+                    final String listenerProtocol = requestDto.getListenerProtocol();
+                    final String loadBalancerId = requestDto.getLoadBalancerId();
+
+                    if (StringUtils.isAnyEmpty(listenerProtocol, loadBalancerId)) {
+                        throw new PluginException("Either the listener protocol or loadBalancerId cannot be empty or null");
+                    }
+
+                    logger.info("Retrieving the vServerGroupId bound on listener port: [{}] with protocol: [{}] from load balancer ID: [{}]", listenerPort, listenerProtocol, loadBalancerId);
+
+                    vServerGroupId = this.retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
                 }
 
-                logger.info("Retrieving the vServerGroupId bound on listener port: [{}] with protocol: [{}] from load balancer ID: [{}]", listenerPort, listenerProtocol, loadBalancerId);
-
-                final String vServerGroupId = this.retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
 
                 if (StringUtils.isEmpty(vServerGroupId)) {
                     throw new PluginException("Cannot find vServerGroup ID by the given info.");
