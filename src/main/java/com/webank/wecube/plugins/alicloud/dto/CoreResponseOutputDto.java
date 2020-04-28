@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -48,7 +49,7 @@ public class CoreResponseOutputDto {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .append("errorCode", errorCode)
                 .append("errorMessage", errorMessage)
                 .append("guid", guid)

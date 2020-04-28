@@ -85,7 +85,7 @@ public class CoreCreateVpcResponseDto extends CoreResponseOutputDto implements P
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("vRouterId", vRouterId)
                 .append("cidrBlock", cidrBlock)
