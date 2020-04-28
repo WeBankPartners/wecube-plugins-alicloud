@@ -18,7 +18,11 @@ public interface VSwitchService {
 
     List<CoreCreateVSwitchResponseDto> createVSwitch(List<CoreCreateVSwitchRequestDto> requestDtoList);
 
+    List<CoreCreateVSwitchResponseDto> createVSwitchWithRouteTable(List<CoreCreateVSwitchRequestDto> requestDtoList);
+
     DescribeVSwitchesResponse retrieveVSwitch(IAcsClient client, String regionId, String vSwitchId) throws PluginException, AliCloudException;
 
     List<CoreDeleteVSwitchResponseDto> deleteVSwitch(List<CoreDeleteVSwitchRequestDto> requestDtoList);
+
+    List<CoreDeleteVSwitchResponseDto> deleteVSwitchWithRouteTable(List<CoreDeleteVSwitchRequestDto> requestDtoList);
 }

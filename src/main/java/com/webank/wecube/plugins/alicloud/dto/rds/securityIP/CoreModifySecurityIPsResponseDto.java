@@ -4,6 +4,7 @@ import com.aliyuncs.rds.model.v20140815.ModifySecurityIpsResponse;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -33,7 +34,7 @@ public class CoreModifySecurityIPsResponseDto extends CoreResponseOutputDto impl
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("requestId", requestId)
                 .append("taskId", taskId)

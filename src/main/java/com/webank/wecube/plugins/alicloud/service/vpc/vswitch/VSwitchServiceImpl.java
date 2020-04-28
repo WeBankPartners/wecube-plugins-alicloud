@@ -79,8 +79,61 @@ public class VSwitchServiceImpl implements VSwitchService {
                 final CreateVSwitchRequest aliCloudRequest = requestDto.toSdk();
                 aliCloudRequest.setRegionId(regionId);
 
-                CreateVSwitchResponse createVSwitchResponse;
-                createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest);
+                CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest);
+                vSwitchId = createVSwitchResponse.getVSwitchId();
+
+                // wait till vSwitch is available
+                Function<?, Boolean> func = this.ifVSwitchAvailable(client, regionId, vSwitchId);
+                final PluginTimerTask checkRouteTableStatusTask = new PluginTimerTask(func);
+                PluginTimer.runTask(checkRouteTableStatusTask);
+
+                result = result.fromSdk(createVSwitchResponse);
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreCreateVSwitchResponseDto> createVSwitchWithRouteTable(List<CoreCreateVSwitchRequestDto> requestDtoList) {
+        List<CoreCreateVSwitchResponseDto> resultList = new ArrayList<>();
+        for (CoreCreateVSwitchRequestDto requestDto : requestDtoList) {
+            CoreCreateVSwitchResponseDto result = new CoreCreateVSwitchResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Creating VSwitch with info: {}", requestDto.toString());
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+
+                String vSwitchId = requestDto.getvSwitchId();
+
+                if (!StringUtils.isEmpty(vSwitchId)) {
+                    final DescribeVSwitchesResponse response = this.retrieveVSwitch(client, regionId, vSwitchId);
+                    if (response.getTotalCount() == 1) {
+                        final DescribeVSwitchesResponse.VSwitch foundVSwitch = response.getVSwitches().get(0);
+                        result = result.fromSdkCrossLineage(foundVSwitch);
+                        result.setRequestId(response.getRequestId());
+                        continue;
+                    }
+                }
+
+                // create VSwitch
+                final CreateVSwitchRequest aliCloudRequest = requestDto.toSdk();
+                aliCloudRequest.setRegionId(regionId);
+
+                CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest);
                 vSwitchId = createVSwitchResponse.getVSwitchId();
 
 
@@ -142,6 +195,58 @@ public class VSwitchServiceImpl implements VSwitchService {
 
     @Override
     public List<CoreDeleteVSwitchResponseDto> deleteVSwitch(List<CoreDeleteVSwitchRequestDto> requestDtoList) {
+        List<CoreDeleteVSwitchResponseDto> resultList = new ArrayList<>();
+        for (CoreDeleteVSwitchRequestDto requestDto : requestDtoList) {
+            CoreDeleteVSwitchResponseDto result = new CoreDeleteVSwitchResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+
+                final String vSwitchId = requestDto.getVSwitchId();
+                logger.info("Deleting VSwitch with info: {}", requestDto.toString());
+
+                final DescribeVSwitchesResponse retrieveVSwtichResponse = this.retrieveVSwitch(client, regionId, vSwitchId);
+
+                // check if VSwitch already deleted
+                if (0 == retrieveVSwtichResponse.getTotalCount()) {
+                    continue;
+                }
+
+                // delete VSwitch
+                logger.info("Deleting VSwitch: {}", requestDto.toString());
+
+                final DeleteVSwitchRequest deleteVSwitchRequest = requestDto.toSdk();
+                deleteVSwitchRequest.setRegionId(regionId);
+                final DeleteVSwitchResponse deleteVSwitchResponse = this.acsClientStub.request(client, deleteVSwitchRequest);
+
+                // re-check if VSwitch has already been deleted
+                if (0 != this.retrieveVSwitch(client, regionId, vSwitchId).getTotalCount()) {
+                    String msg = String.format("The VSwitch: [%s] from region: [%s] hasn't been deleted", vSwitchId, regionId);
+                    logger.error(msg);
+                    throw new PluginException(msg);
+                }
+
+                result = result.fromSdk(deleteVSwitchResponse);
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreDeleteVSwitchResponseDto> deleteVSwitchWithRouteTable(List<CoreDeleteVSwitchRequestDto> requestDtoList) {
         List<CoreDeleteVSwitchResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteVSwitchRequestDto requestDto : requestDtoList) {
             CoreDeleteVSwitchResponseDto result = new CoreDeleteVSwitchResponseDto();
@@ -252,6 +357,12 @@ public class VSwitchServiceImpl implements VSwitchService {
             boolean ifRouteTableAvailable = this.routeTableService.checkIfRouteTableAvailable(client, regionId, routeTableId);
             boolean ifVSwitchAvailable = this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
             return ifRouteTableAvailable && ifVSwitchAvailable;
+        };
+    }
+
+    private Function<?, Boolean> ifVSwitchAvailable(IAcsClient client, String regionId, String vSwitchId) throws PluginException {
+        return o -> {
+            return this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
         };
     }
 }

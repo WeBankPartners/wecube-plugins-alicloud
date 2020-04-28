@@ -1,14 +1,11 @@
 package com.webank.wecube.plugins.alicloud.dto.rds.securityIP;
 
-import com.aliyuncs.rds.model.v20140815.CreateDBInstanceRequest;
 import com.aliyuncs.rds.model.v20140815.ModifySecurityIpsRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -99,7 +96,7 @@ public class CoreModifySecurityIPsRequestDto extends CoreRequestInputDto impleme
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("dBInstanceIPArrayName", dBInstanceIPArrayName)
                 .append("resourceOwnerId", resourceOwnerId)

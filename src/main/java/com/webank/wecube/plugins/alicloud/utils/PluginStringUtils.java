@@ -82,9 +82,11 @@ public class PluginStringUtils {
      * @return formatted string
      */
     public static List<String> splitStringList(String rawStringList) {
-        String str;
-        str = StringUtils.removeStart(rawStringList, "[");
-        str = StringUtils.removeEnd(str, "]");
+        String str = rawStringList;
+        if (str.matches(LIST_STR_REGEX)) {
+            str = StringUtils.removeStart(rawStringList, "[");
+            str = StringUtils.removeEnd(str, "]");
+        }
 
         return Arrays.asList(str.split(","));
     }
