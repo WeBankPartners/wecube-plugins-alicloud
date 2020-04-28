@@ -1,9 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.RemoveVServerGroupBackendServersResponse;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -15,6 +13,7 @@ import java.util.List;
  */
 public class CoreRemoveBackendServerResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreRemoveBackendServerResponseDto, RemoveVServerGroupBackendServersResponse> {
     private String requestId;
+    @JsonProperty(value = "vServerGroupId")
     private String vServerGroupId;
     private List<RemoveVServerGroupBackendServersResponse.BackendServer> backendServers;
 

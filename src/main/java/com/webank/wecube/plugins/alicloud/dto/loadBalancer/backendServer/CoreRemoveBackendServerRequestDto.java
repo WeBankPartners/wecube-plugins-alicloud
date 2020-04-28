@@ -2,9 +2,7 @@ package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.RemoveVServerGroupBackendServersRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -31,6 +29,7 @@ public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto imple
     @JsonIgnore
     private String backendServers;
     @NotEmpty(message = "vServerGroupId field is mandatory.")
+    @JsonProperty(value = "vServerGroupId")
     private String vServerGroupId;
     private String resourceOwnerAccount;
     private String ownerAccount;
