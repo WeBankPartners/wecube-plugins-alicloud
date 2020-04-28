@@ -2,15 +2,14 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 
 import com.aliyuncs.vpc.model.v20160428.CreateNatGatewayResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 /**
@@ -72,7 +71,7 @@ public class CoreCreateNatGatewayResponseDto extends CoreResponseOutputDto imple
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("requestId", requestId)
                 .append("natGatewayId", natGatewayId)

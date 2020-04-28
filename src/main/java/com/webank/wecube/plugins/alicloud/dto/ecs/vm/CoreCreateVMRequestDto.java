@@ -7,6 +7,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.validation.constraints.NotEmpty;
@@ -580,7 +581,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("seed", seed)
                 .append("instanceSpec", instanceSpec)
