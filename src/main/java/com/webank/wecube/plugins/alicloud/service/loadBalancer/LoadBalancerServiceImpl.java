@@ -307,13 +307,15 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
                     logger.info("Retrieving the vServerGroupId bound on listener port: [{}] with protocol: [{}] from load balancer ID: [{}]", listenerPort, listenerProtocol, loadBalancerId);
 
-                    vServerGroupId = this.retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
+                    String foundVServerGroupId = this.retrieveVServerGroupId(client, regionId, listenerPort, loadBalancerId, listenerProtocol);
+
+                    if (StringUtils.isEmpty(foundVServerGroupId)) {
+                        throw new PluginException("Cannot find vServerGroup ID by the given info.");
+                    }
+
+                    vServerGroupId = foundVServerGroupId;
                 }
 
-
-                if (StringUtils.isEmpty(vServerGroupId)) {
-                    throw new PluginException("Cannot find vServerGroup ID by the given info.");
-                }
 
                 logger.info("The vServerGroupId found: [{}], removing backendServers from that vServerGroup", vServerGroupId);
 
