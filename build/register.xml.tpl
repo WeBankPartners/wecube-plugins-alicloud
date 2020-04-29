@@ -644,8 +644,8 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceRegionId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceRegionId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceOwnerId</parameter>
                 </inputParameters>
                 <outputParameters>
@@ -661,8 +661,8 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceRegionId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceRegionId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceOwnerId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cenOwnerId</parameter>
                 </inputParameters>
