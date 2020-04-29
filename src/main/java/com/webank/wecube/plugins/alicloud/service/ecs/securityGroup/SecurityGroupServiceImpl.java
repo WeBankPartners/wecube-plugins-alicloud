@@ -11,6 +11,7 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,7 +27,6 @@ import java.util.List;
  */
 @Service
 public class SecurityGroupServiceImpl implements SecurityGroupService {
-
     @Override
     public List<CoreAuthorizeSecurityGroupResponseDto> authorizeSecurityGroup(List<CoreAuthorizeSecurityGroupRequestDto> coreAuthorizeSecurityGroupRequestDtoList) throws PluginException {
         List<CoreAuthorizeSecurityGroupResponseDto> resultList = new ArrayList<>();
@@ -43,34 +43,24 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+                // according to WeCMDB's data, one request will be sepereated to multiple sub-requests
+                List<CoreAuthorizeSecurityGroupRequestDto> subRequestDtoList = mapToMultipleRequest(requestDto);
 
-                final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType());
-                if (null == actionType) {
-                    throw new PluginException(String.format("Invalid action type: [%s]", requestDto.getActionType()));
-                } else {
-                    switch (actionType) {
-                        case EGRESS:
-                            // egress authorization
-                            AuthorizeSecurityGroupEgressRequest egressRequest = requestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
-                            egressRequest.setRegionId(regionId);
-                            AuthorizeSecurityGroupEgressResponse egressResponse;
-                            egressResponse = this.acsClientStub.request(client, egressRequest);
-                            result = result.fromSdkCrossLineage(egressResponse);
-                            break;
-                        case INGRESS:
-                            // ingress authorization
-                            AuthorizeSecurityGroupRequest request = requestDto.toSdk();
-                            request.setRegionId(regionId);
-                            AuthorizeSecurityGroupResponse response;
-                            response = this.acsClientStub.request(client, request);
-                            result = result.fromSdk(response);
-                            break;
-                        default:
-                            break;
+                List<CoreAuthorizeSecurityGroupRequestDto> succeededRequestList = new ArrayList<>();
+                for (CoreAuthorizeSecurityGroupRequestDto subRequestDto : subRequestDtoList) {
+
+                    logger.info("Authorizing security group sub-request: {}", subRequestDto.toString());
+                    try {
+                        result = authorizeSecurityGroup(regionId, client, subRequestDto);
+                        succeededRequestList.add(subRequestDto);
+                    } catch (AliCloudException ex) {
+                        // once there is AliCloudException, roll back all succeeded request
+                        for (CoreAuthorizeSecurityGroupRequestDto rollBackDto : succeededRequestList) {
+                            revokeSecurityGroup(regionId, client, rollBackDto);
+                        }
+                        throw new PluginException(String.format("Error when authorizing security group: [%s]", subRequestDto.toString()));
                     }
                 }
-
-
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
@@ -80,8 +70,6 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
-
-
         }
         return resultList;
     }
@@ -204,6 +192,12 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+                final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType());
+
+                if (null == actionType) {
+                    throw new PluginException(String.format("Invalid action type: [%s]", actionType));
+                }
+
                 switch (EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType())) {
                     case EGRESS:
                         // egress authorization
@@ -238,11 +232,35 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return resultList;
     }
 
-    public enum ActionType {
-        // ingress
-        INGRESS,
-        // egress
-        EGRESS
+    private CoreAuthorizeSecurityGroupResponseDto authorizeSecurityGroup(String regionId, IAcsClient client, CoreAuthorizeSecurityGroupRequestDto singleRequestDto) throws PluginException, AliCloudException {
+        final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, singleRequestDto.getActionType());
+
+        if (null == actionType) {
+            throw new PluginException(String.format("Invalid action type: [%s]", actionType));
+        }
+
+        CoreAuthorizeSecurityGroupResponseDto result = new CoreAuthorizeSecurityGroupResponseDto();
+        switch (actionType) {
+            case EGRESS:
+                // egress authorization
+                AuthorizeSecurityGroupEgressRequest egressRequest = singleRequestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
+                egressRequest.setRegionId(regionId);
+                AuthorizeSecurityGroupEgressResponse egressResponse;
+                egressResponse = this.acsClientStub.request(client, egressRequest);
+                result = result.fromSdkCrossLineage(egressResponse);
+                break;
+            case INGRESS:
+                // ingress authorization
+                AuthorizeSecurityGroupRequest request = singleRequestDto.toSdk();
+                request.setRegionId(regionId);
+                AuthorizeSecurityGroupResponse response;
+                response = this.acsClientStub.request(client, request);
+                result = result.fromSdk(response);
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
     private DescribeSecurityGroupsResponse retrieveSecurityGroup(IAcsClient client, String regionId, String securityGroupId) throws PluginException, AliCloudException {
@@ -268,5 +286,99 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
         return response;
 
+    }
+
+    private void revokeSecurityGroup(String regionId, IAcsClient client, CoreAuthorizeSecurityGroupRequestDto rollBackDto) throws AliCloudException {
+        final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, rollBackDto.getActionType());
+
+        if (null == actionType) {
+            throw new PluginException(String.format("Invalid action type: [%s]", actionType));
+        }
+
+        switch (actionType) {
+            case EGRESS:
+                // egress authorization
+                RevokeSecurityGroupEgressRequest egressRequest = rollBackDto.toSdkCrossLineage(RevokeSecurityGroupEgressRequest.class);
+                egressRequest.setRegionId(regionId);
+                this.acsClientStub.request(client, egressRequest);
+                break;
+            case INGRESS:
+                // ingress authorization
+                RevokeSecurityGroupRequest request = rollBackDto.toSdkCrossLineage(RevokeSecurityGroupRequest.class);
+                request.setRegionId(regionId);
+                this.acsClientStub.request(client, request);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private List<CoreAuthorizeSecurityGroupRequestDto> mapToMultipleRequest(CoreAuthorizeSecurityGroupRequestDto requestDto) throws PluginException {
+        List<CoreAuthorizeSecurityGroupRequestDto> result = new ArrayList<>();
+        final String cidrIp = requestDto.getCidrIp();
+        final String portRange = requestDto.getPortRange();
+        final String ipProtocol = requestDto.getIpProtocol();
+        if (PluginStringUtils.isListStr(cidrIp)) {
+            // list cidr ip
+            final List<String> splittedIpList = PluginStringUtils.splitStringList(cidrIp);
+            if (PluginStringUtils.isListStr(portRange)) {
+                // list port range
+                final List<String> portList = PluginStringUtils.splitStringList(portRange);
+                if (splittedIpList.size() != portList.size()) {
+                    throw new PluginException("The cidrIp and portRange size doesn't match");
+                }
+
+                if (PluginStringUtils.isListStr(ipProtocol)) {
+                    // list ipProtocol
+                    final List<String> ipProtocolList = PluginStringUtils.splitStringList(ipProtocol);
+                    if (splittedIpList.size() != ipProtocolList.size()) {
+                        throw new PluginException("When cidrIp, portRange and ipProtocol fields are list string, the size of all three fields should be the same.");
+                    }
+                    for (int i = 0; i < splittedIpList.size(); i++) {
+                        result.add(requestDto.updateField(splittedIpList.get(i), portList.get(i), ipProtocolList.get(i)));
+                    }
+                } else {
+                    // single ipProtocol
+                    for (int i = 0; i < splittedIpList.size(); i++) {
+                        result.add(requestDto.updateField(splittedIpList.get(i), portList.get(i), ipProtocol));
+                    }
+                }
+            } else {
+                // single port range
+                if (PluginStringUtils.isListStr(ipProtocol)) {
+                    // list protocol
+                    throw new PluginException("When cidrIp is list and portRange is single, protocol cannot be a list field");
+                } else {
+                    // single protocol
+                    for (String ip : splittedIpList) {
+                        result.add(requestDto.updateField(ip, portRange, ipProtocol));
+                    }
+                }
+            }
+        } else {
+            // single cidr ip
+            if (PluginStringUtils.isListStr(portRange)) {
+                // list portRange
+                throw new PluginException("When cidrIp is single field, portRange cannot be list.");
+            } else {
+                // single portRange
+                if (PluginStringUtils.isListStr(ipProtocol)) {
+                    // list protocol
+                    throw new PluginException("When cidrIp and portRange field is single, ipProtocol field can only be single field");
+                } else {
+                    // single protocol
+                    result.add(requestDto.updateField(cidrIp, portRange, ipProtocol));
+                }
+            }
+        }
+        return result;
+    }
+
+
+    public enum ActionType {
+        // ingress
+        INGRESS,
+        // egress
+        EGRESS
     }
 }
