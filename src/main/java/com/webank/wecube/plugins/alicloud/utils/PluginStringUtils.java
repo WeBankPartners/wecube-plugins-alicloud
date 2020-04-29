@@ -241,4 +241,14 @@ public class PluginStringUtils {
         }
         return result;
     }
+
+    /**
+     * If the rawString matches the list string pattern
+     *
+     * @param rawString rawString
+     * @return boolean match result
+     */
+    public static boolean isListStr(String rawString) {
+        return rawString.matches(LIST_STR_REGEX);
+    }
 }
