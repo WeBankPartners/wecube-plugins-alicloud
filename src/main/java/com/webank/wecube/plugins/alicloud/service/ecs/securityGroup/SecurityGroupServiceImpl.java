@@ -43,26 +43,33 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
-                switch (EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType())) {
-                    case EGRESS:
-                        // egress authorization
-                        AuthorizeSecurityGroupEgressRequest egressRequest = requestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
-                        egressRequest.setRegionId(regionId);
-                        AuthorizeSecurityGroupEgressResponse egressResponse;
-                        egressResponse = this.acsClientStub.request(client, egressRequest);
-                        result = result.fromSdkCrossLineage(egressResponse);
-                        break;
-                    case INGRESS:
-                        // ingress authorization
-                        AuthorizeSecurityGroupRequest request = requestDto.toSdk();
-                        request.setRegionId(regionId);
-                        AuthorizeSecurityGroupResponse response;
-                        response = this.acsClientStub.request(client, request);
-                        result = result.fromSdk(response);
-                        break;
-                    default:
-                        break;
+
+                final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType());
+                if (null == actionType) {
+                    throw new PluginException(String.format("Invalid action type: [%s]", requestDto.getActionType()));
+                } else {
+                    switch (actionType) {
+                        case EGRESS:
+                            // egress authorization
+                            AuthorizeSecurityGroupEgressRequest egressRequest = requestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
+                            egressRequest.setRegionId(regionId);
+                            AuthorizeSecurityGroupEgressResponse egressResponse;
+                            egressResponse = this.acsClientStub.request(client, egressRequest);
+                            result = result.fromSdkCrossLineage(egressResponse);
+                            break;
+                        case INGRESS:
+                            // ingress authorization
+                            AuthorizeSecurityGroupRequest request = requestDto.toSdk();
+                            request.setRegionId(regionId);
+                            AuthorizeSecurityGroupResponse response;
+                            response = this.acsClientStub.request(client, request);
+                            result = result.fromSdk(response);
+                            break;
+                        default:
+                            break;
+                    }
                 }
+
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
