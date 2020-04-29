@@ -1,8 +1,10 @@
 package com.webank.wecube.plugins.alicloud.dto.cbn.cen;
 
 import com.aliyuncs.cbn.model.v20170912.DetachCenChildInstanceRequest;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -125,5 +127,12 @@ public class CoreDetachCenChildRequestDto extends CoreRequestInputDto implements
                 .append("childInstanceOwnerId", childInstanceOwnerId)
                 .append("childInstanceId", childInstanceId)
                 .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (StringUtils.isEmpty(this.getChildInstanceType())) {
+            this.setChildInstanceType("VPC");
+        }
     }
 }
