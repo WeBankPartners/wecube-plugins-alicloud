@@ -297,5 +297,12 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
         }
     }
 
+    public CoreAuthorizeSecurityGroupRequestDto updateField(String cidrIp, String port, String ipProtocol) {
+        this.setCidrIp(cidrIp);
+        this.setPortRange(port);
+        this.setIpProtocol(ipProtocol);
+        return this;
+    }
+
 
 }
