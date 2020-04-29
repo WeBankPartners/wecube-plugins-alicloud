@@ -1,8 +1,12 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupRequest;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.ecs.securityGroup.SecurityGroupServiceImpl;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -16,6 +20,8 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
 
     @NotEmpty(message = "actionType field is mandatory")
     private String actionType;
+    @NotEmpty(message = "cidrIp field is mandatory")
+    private String cidrIp;
 
     private String nicType;
     private String resourceOwnerId;
@@ -212,6 +218,14 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
         this.sourceGroupId = sourceGroupId;
     }
 
+    public String getCidrIp() {
+        return cidrIp;
+    }
+
+    public void setCidrIp(String cidrIp) {
+        this.cidrIp = cidrIp;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
@@ -241,7 +255,7 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     }
 
     @Override
-    public void adaptToAliCloud() {
+    public void adaptToAliCloud() throws PluginException {
         if (!StringUtils.isEmpty(this.getPortRange())) {
             this.setPortRange(this.getPortRange().replace('-', '/'));
         }
@@ -253,5 +267,35 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
         if (!StringUtils.isEmpty(this.getPolicy())) {
             this.setPolicy(this.getPolicy().toLowerCase());
         }
+
+        if (!StringUtils.isEmpty(this.getIpProtocol())) {
+            this.setIpProtocol(this.getIpProtocol().toLowerCase());
+        }
+
+        if (!StringUtils.isEmpty(this.getCidrIp())) {
+
+            String transferred = PluginStringUtils.handleCidrListString(this.getCidrIp());
+
+            final SecurityGroupServiceImpl.ActionType actionType = EnumUtils.getEnumIgnoreCase(SecurityGroupServiceImpl.ActionType.class, this.getActionType());
+            if (null == actionType) {
+                throw new PluginException("Invalid actionType");
+            } else {
+                switch (actionType) {
+                    case EGRESS:
+                        this.setDestCidrIp(transferred);
+                        this.setSourceCidrIp(null);
+                        break;
+                    case INGRESS:
+                        this.setSourceCidrIp(transferred);
+                        this.setDestCidrIp(null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
     }
+
+
 }

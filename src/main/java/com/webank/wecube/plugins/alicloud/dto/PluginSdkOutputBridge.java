@@ -68,6 +68,6 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
      * @param response AliCloud's response
      * @param <J>      AliCloud response type
      */
-    default <J> void adaptToCore(J response, T result) {
+    default <J> void adaptToCore(J response, T result) throws PluginException {
     }
 }
