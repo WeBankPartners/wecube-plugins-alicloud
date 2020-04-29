@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -19,6 +20,7 @@ public class PluginStringUtils {
 
     private static final String LIST_STR_REGEX = "\\[.*]";
     private static final String CORE_MEMORY_STR_REGEX = "^(\\d*)[C|c](\\d*)[G|g]$";
+    private static final String CIDR_FORMAT = "^.+/\\d+$";
 
     /**
      * Remove String's EOF symbol
@@ -206,6 +208,36 @@ public class PluginStringUtils {
             }
 
             result.add(new ImmutablePair<>(split[0], split[1]));
+        }
+        return result;
+    }
+
+
+    /**
+     * Handle core cidr list string
+     * Example: 192.168.1.1 -> 192.168.1.1/32
+     * Example: [192.168.1.1] -> 192.168.1.1/32
+     * Example: [192.168.1.1,192.168.2.1/32] -> 192.168.1.1/32,192.168.2.1/32
+     * Example: [192.168.1.1/32,192.168.2.1/32] -> 192.168.1.1/32,192.168.2.1/32
+     *
+     * @param rawStr raw list string
+     * @return transferred result
+     * @throws PluginException plugin exception
+     */
+    public static String handleCidrListString(String rawStr) throws PluginException {
+        String result = StringUtils.EMPTY;
+        if (rawStr.matches(LIST_STR_REGEX)) {
+            final List<String> strings = splitStringList(rawStr);
+            result = strings.stream().map(s -> {
+                if (!s.matches(CIDR_FORMAT)) {
+                    s = s.concat("/32");
+                }
+                return s;
+            }).collect(Collectors.joining(","));
+        } else {
+            if (!rawStr.matches(CIDR_FORMAT)) {
+                result = rawStr.concat("/32");
+            }
         }
         return result;
     }
