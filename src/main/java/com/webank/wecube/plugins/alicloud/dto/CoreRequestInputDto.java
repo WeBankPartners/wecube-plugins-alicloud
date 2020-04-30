@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 /**
  * @author howechen
  */
-public class CoreRequestInputDto {
+public class CoreRequestInputDto implements Cloneable {
     @NotEmpty(message = "identityParams cannot be null or empty")
     private String identityParams;
     @NotEmpty(message = "cloudParams cannot be null or empty")
