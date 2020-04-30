@@ -58,7 +58,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                         for (CoreAuthorizeSecurityGroupRequestDto rollBackDto : succeededRequestList) {
                             revokeSecurityGroup(regionId, client, rollBackDto);
                         }
-                        throw new PluginException(String.format("Error when authorizing security group: [%s]", subRequestDto.toString()));
+                        throw new PluginException(String.format("Error when authorizing security group, error msg: [%s]", ex.getMessage()));
+
                     }
                 }
             } catch (PluginException | AliCloudException ex) {
@@ -318,6 +319,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         final String cidrIp = requestDto.getCidrIp();
         final String portRange = requestDto.getPortRange();
         final String ipProtocol = requestDto.getIpProtocol();
+        // TODO: need to optimize
         if (PluginStringUtils.isListStr(cidrIp)) {
             // list cidr ip
             final List<String> splittedIpList = PluginStringUtils.splitStringList(cidrIp);
@@ -335,12 +337,12 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                         throw new PluginException("When cidrIp, portRange and ipProtocol fields are list string, the size of all three fields should be the same.");
                     }
                     for (int i = 0; i < splittedIpList.size(); i++) {
-                        result.add(requestDto.updateField(splittedIpList.get(i), portList.get(i), ipProtocolList.get(i)));
+                        result.add(requestDto.forkSubRequest(splittedIpList.get(i), portList.get(i), ipProtocolList.get(i)));
                     }
                 } else {
                     // single ipProtocol
                     for (int i = 0; i < splittedIpList.size(); i++) {
-                        result.add(requestDto.updateField(splittedIpList.get(i), portList.get(i), ipProtocol));
+                        result.add(requestDto.forkSubRequest(splittedIpList.get(i), portList.get(i), ipProtocol));
                     }
                 }
             } else {
@@ -351,7 +353,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 } else {
                     // single protocol
                     for (String ip : splittedIpList) {
-                        result.add(requestDto.updateField(ip, portRange, ipProtocol));
+                        result.add(requestDto.forkSubRequest(ip, portRange, ipProtocol));
                     }
                 }
             }
@@ -367,7 +369,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                     throw new PluginException("When cidrIp and portRange field is single, ipProtocol field can only be single field");
                 } else {
                     // single protocol
-                    result.add(requestDto.updateField(cidrIp, portRange, ipProtocol));
+                    result.add(requestDto.forkSubRequest(cidrIp, portRange, ipProtocol));
                 }
             }
         }
