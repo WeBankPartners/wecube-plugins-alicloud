@@ -225,7 +225,7 @@ public class PluginStringUtils {
      * @throws PluginException plugin exception
      */
     public static String handleCidrListString(String rawStr) throws PluginException {
-        String result = StringUtils.EMPTY;
+        String result;
         if (rawStr.matches(LIST_STR_REGEX)) {
             final List<String> strings = splitStringList(rawStr);
             result = strings.stream().map(s -> {
@@ -237,8 +237,20 @@ public class PluginStringUtils {
         } else {
             if (!rawStr.matches(CIDR_FORMAT)) {
                 result = rawStr.concat("/32");
+            } else {
+                result = rawStr;
             }
         }
         return result;
+    }
+
+    /**
+     * If the rawString matches the list string pattern
+     *
+     * @param rawString rawString
+     * @return boolean match result
+     */
+    public static boolean isListStr(String rawString) {
+        return rawString.matches(LIST_STR_REGEX);
     }
 }
