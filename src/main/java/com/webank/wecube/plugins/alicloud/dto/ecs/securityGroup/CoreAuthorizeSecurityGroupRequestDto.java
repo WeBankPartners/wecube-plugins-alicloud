@@ -297,11 +297,17 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
         }
     }
 
-    public CoreAuthorizeSecurityGroupRequestDto updateField(String cidrIp, String port, String ipProtocol) {
-        this.setCidrIp(cidrIp);
-        this.setPortRange(port);
-        this.setIpProtocol(ipProtocol);
-        return this;
+    public CoreAuthorizeSecurityGroupRequestDto forkSubRequest(String cidrIp, String port, String ipProtocol) throws PluginException {
+        final CoreAuthorizeSecurityGroupRequestDto clonedDto;
+        try {
+            clonedDto = (CoreAuthorizeSecurityGroupRequestDto) this.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new PluginException(e.getMessage());
+        }
+        clonedDto.setCidrIp(cidrIp);
+        clonedDto.setPortRange(port);
+        clonedDto.setIpProtocol(ipProtocol);
+        return clonedDto;
     }
 
 
