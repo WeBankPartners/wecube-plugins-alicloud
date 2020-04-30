@@ -176,6 +176,10 @@ public class CenServiceImpl implements CenService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
+                if (StringUtils.isEmpty(requestDto.getChildInstanceRegionId())) {
+                    requestDto.setChildInstanceRegionId(regionId);
+                }
+
                 logger.info("Attaching Cen child instance: {}", requestDto.toString());
 
                 AttachCenChildInstanceRequest request = requestDto.toSdk();
@@ -211,6 +215,9 @@ public class CenServiceImpl implements CenService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
+                if (StringUtils.isEmpty(requestDto.getChildInstanceRegionId())) {
+                    requestDto.setChildInstanceRegionId(regionId);
+                }
 
                 logger.info("Detaching Cen child instance: {}", requestDto.toString());
 
