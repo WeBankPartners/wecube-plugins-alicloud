@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 import com.aliyuncs.ecs.model.v20140526.AuthorizeSecurityGroupRequest;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.ForkableDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import com.webank.wecube.plugins.alicloud.service.ecs.securityGroup.SecurityGroupServiceImpl;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
@@ -12,11 +13,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * @author howechen
  */
-public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AuthorizeSecurityGroupRequest> {
+public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AuthorizeSecurityGroupRequest>, ForkableDto<CoreAuthorizeSecurityGroupRequestDto> {
 
     @NotEmpty(message = "actionType field is mandatory")
     private String actionType;
@@ -297,18 +301,24 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
         }
     }
 
-    public CoreAuthorizeSecurityGroupRequestDto forkSubRequest(String cidrIp, String port, String ipProtocol) throws PluginException {
+    @Override
+    public CoreAuthorizeSecurityGroupRequestDto forkThenUpdateFields(Object... fields) throws PluginException {
         final CoreAuthorizeSecurityGroupRequestDto clonedDto;
         try {
             clonedDto = (CoreAuthorizeSecurityGroupRequestDto) this.clone();
         } catch (CloneNotSupportedException e) {
             throw new PluginException(e.getMessage());
         }
-        clonedDto.setCidrIp(cidrIp);
-        clonedDto.setPortRange(port);
-        clonedDto.setIpProtocol(ipProtocol);
+
+        final Iterator<Object> iterator = Arrays.asList(fields).iterator();
+        try {
+            clonedDto.setCidrIp(String.valueOf(iterator.next()));
+            clonedDto.setPortRange(String.valueOf(iterator.next()));
+            clonedDto.setIpProtocol(String.valueOf(iterator.next()));
+        } catch (NoSuchElementException ex) {
+            throw new PluginException("Error when updating new fields");
+        }
+
         return clonedDto;
     }
-
-
 }

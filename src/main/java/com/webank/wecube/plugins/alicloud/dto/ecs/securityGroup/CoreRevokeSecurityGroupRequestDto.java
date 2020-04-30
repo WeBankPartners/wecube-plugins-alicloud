@@ -1,21 +1,31 @@
 package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 
 import com.aliyuncs.ecs.model.v20140526.RevokeSecurityGroupRequest;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
+import com.webank.wecube.plugins.alicloud.dto.ForkableDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.ecs.securityGroup.SecurityGroupServiceImpl;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * @author howechen
  */
-public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<RevokeSecurityGroupRequest> {
+public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<RevokeSecurityGroupRequest>, ForkableDto<CoreRevokeSecurityGroupRequestDto> {
 
     @NotEmpty(message = "actionType field is mandatory")
     private String actionType;
+    @NotEmpty(message = "cidrIp field is mandatory")
+    private String cidrIp;
 
     private String nicType;
     private String resourceOwnerId;
@@ -212,11 +222,20 @@ public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto imple
         this.sourceGroupId = sourceGroupId;
     }
 
+    public String getCidrIp() {
+        return cidrIp;
+    }
+
+    public void setCidrIp(String cidrIp) {
+        this.cidrIp = cidrIp;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("actionType", actionType)
+                .append("cidrIp", cidrIp)
                 .append("nicType", nicType)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("sourcePortRange", sourcePortRange)
@@ -253,5 +272,54 @@ public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto imple
         if (!StringUtils.isEmpty(this.getPolicy())) {
             this.setPolicy(this.getPolicy().toLowerCase());
         }
+
+        if (!StringUtils.isEmpty(this.getIpProtocol())) {
+            this.setIpProtocol(this.getIpProtocol().toLowerCase());
+        }
+
+        if (!StringUtils.isEmpty(this.getCidrIp())) {
+
+            String transferred = PluginStringUtils.handleCidrListString(this.getCidrIp());
+
+            final SecurityGroupServiceImpl.ActionType actionType = EnumUtils.getEnumIgnoreCase(SecurityGroupServiceImpl.ActionType.class, this.getActionType());
+            if (null == actionType) {
+                throw new PluginException("Invalid actionType");
+            } else {
+                switch (actionType) {
+                    case EGRESS:
+                        this.setDestCidrIp(transferred);
+                        this.setSourceCidrIp(null);
+                        break;
+                    case INGRESS:
+                        this.setSourceCidrIp(transferred);
+                        this.setDestCidrIp(null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+
+    @Override
+    public CoreRevokeSecurityGroupRequestDto forkThenUpdateFields(Object... fields) throws PluginException {
+        final CoreRevokeSecurityGroupRequestDto clonedDto;
+        try {
+            clonedDto = (CoreRevokeSecurityGroupRequestDto) this.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new PluginException(e.getMessage());
+        }
+
+        final Iterator<Object> iterator = Arrays.asList(fields).iterator();
+        try {
+            clonedDto.setCidrIp(String.valueOf(iterator.next()));
+            clonedDto.setPortRange(String.valueOf(iterator.next()));
+            clonedDto.setIpProtocol(String.valueOf(iterator.next()));
+        } catch (NoSuchElementException ex) {
+            throw new PluginException("Error when updating new fields");
+        }
+
+        return clonedDto;
     }
 }
