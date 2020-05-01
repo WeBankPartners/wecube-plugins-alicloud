@@ -13,6 +13,8 @@ public class CoreAllocateEipResponseDto extends CoreResponseOutputDto implements
 
     private String requestId;
     private String allocationId;
+    private String cbpId;
+    private String cbpName;
     private String eipAddress;
     private String orderId;
     private String resourceGroupId;
@@ -60,15 +62,37 @@ public class CoreAllocateEipResponseDto extends CoreResponseOutputDto implements
         this.resourceGroupId = resourceGroupId;
     }
 
+
+    public String getCbpId() {
+        return cbpId;
+    }
+
+    public void setCbpId(String cbpId) {
+        this.cbpId = cbpId;
+    }
+
+    public String getCbpName() {
+        return cbpName;
+    }
+
+    public void setCbpName(String cbpName) {
+        this.cbpName = cbpName;
+    }
+
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("requestId", requestId)
                 .append("allocationId", allocationId)
+                .append("cbpId", cbpId)
+                .append("cbpName", cbpName)
                 .append("eipAddress", eipAddress)
                 .append("orderId", orderId)
                 .append("resourceGroupId", resourceGroupId)
                 .toString();
     }
+
+
 }

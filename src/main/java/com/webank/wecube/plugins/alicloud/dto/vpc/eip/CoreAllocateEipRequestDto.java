@@ -1,6 +1,7 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 
 import com.aliyuncs.vpc.model.v20160428.AllocateEipAddressRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -12,6 +13,12 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class CoreAllocateEipRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AllocateEipAddressRequest> {
     private String allocationId;
 
+    // common band width package info
+    // shared field: bandwidth
+    @JsonProperty(value = "cbpName")
+    private String name;
+
+    // eip info
     private String resourceOwnerId;
     private String clientToken;
     private String iSP;
@@ -164,6 +171,7 @@ public class CoreAllocateEipRequestDto extends CoreRequestInputDto implements Pl
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("allocationId", allocationId)
+                .append("cbpName", name)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("clientToken", clientToken)
                 .append("iSP", iSP)
@@ -180,5 +188,13 @@ public class CoreAllocateEipRequestDto extends CoreRequestInputDto implements Pl
                 .append("internetChargeType", internetChargeType)
                 .append("pricingCycle", pricingCycle)
                 .toString();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
