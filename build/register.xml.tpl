@@ -824,6 +824,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">allocationId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cbpName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">bandwidth</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceChargeType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">internetChargeType</parameter>
@@ -835,6 +836,8 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">eipAddress</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cbpId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -845,6 +848,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">allocationId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cbpName</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
