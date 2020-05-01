@@ -80,8 +80,27 @@ public class EipServiceImpl implements EipService {
 
 
                 AllocateEipAddressRequest allocateEipAddressRequest = requestDto.toSdk();
-                AllocateEipAddressResponse response = this.acsClientStub.request(client, allocateEipAddressRequest);
-                result = result.fromSdk(response);
+                AllocateEipAddressResponse createEipResponse = this.acsClientStub.request(client, allocateEipAddressRequest);
+
+                // if cbpName is empty, create CBP
+                String cbpId;
+                if (StringUtils.isEmpty(requestDto.getName())) {
+                    final CreateCommonBandwidthPackageRequest createCommonBandwidthPackageRequest = requestDto.toSdkCrossLineage(CreateCommonBandwidthPackageRequest.class);
+                    createCommonBandwidthPackageRequest.setRegionId(regionId);
+                    cbpId = createCBP(client, createCommonBandwidthPackageRequest);
+                } else {
+                    // bind created EIP address to that
+
+                    DescribeCommonBandwidthPackagesRequest queryCBPRequest = new DescribeCommonBandwidthPackagesRequest();
+                    queryCBPRequest.setRegionId(regionId);
+                    cbpId = queryCBP(client, queryCBPRequest);
+                }
+                final String allocationId = createEipResponse.getAllocationId();
+                addEipToCBP(client, cbpId, allocationId);
+
+                result = result.fromSdk(createEipResponse);
+                result.setCbpId(cbpId);
+                result.setCbpName(requestDto.getName());
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -96,6 +115,7 @@ public class EipServiceImpl implements EipService {
         }
         return resultList;
     }
+
 
     @Override
     public List<CoreReleaseEipResponseDto> releaseEipAddress(List<CoreReleaseEipRequestDto> requestDtoList) {
@@ -122,7 +142,17 @@ public class EipServiceImpl implements EipService {
                     continue;
                 }
 
+                // remove eip from cbp
+                if (StringUtils.isEmpty(requestDto.getName())) {
+                    DescribeCommonBandwidthPackagesRequest queryCBP = new DescribeCommonBandwidthPackagesRequest();
+                    queryCBP.setRegionId(regionId);
+                    queryCBP.setName(requestDto.getName());
+                    final String foundCBPId = queryCBP(client, queryCBP);
 
+                    removeFromCBP(client, requestDto.getAllocationId(), regionId, foundCBPId);
+                }
+
+                // release eip
                 ReleaseEipAddressRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 ReleaseEipAddressResponse response = this.acsClientStub.request(client, request);
@@ -140,6 +170,15 @@ public class EipServiceImpl implements EipService {
 
         }
         return resultList;
+    }
+
+    private void removeFromCBP(IAcsClient client, String ipInstanceId, String regionId, String foundCBPId) throws AliCloudException {
+        RemoveCommonBandwidthPackageIpRequest removeCommonBandwidthPackageIpRequest = new RemoveCommonBandwidthPackageIpRequest();
+        removeCommonBandwidthPackageIpRequest.setRegionId(regionId);
+        removeCommonBandwidthPackageIpRequest.setBandwidthPackageId(foundCBPId);
+        removeCommonBandwidthPackageIpRequest.setIpInstanceId(ipInstanceId);
+
+        acsClientStub.request(client, removeCommonBandwidthPackageIpRequest);
     }
 
     @Override
@@ -264,5 +303,30 @@ public class EipServiceImpl implements EipService {
     private DescribeEipAddressesResponse retrieveEipAddress(IAcsClient client, DescribeEipAddressesRequest request) throws AliCloudException, PluginException {
         logger.info("Retrieving EIP address...");
         return this.acsClientStub.request(client, request);
+    }
+
+    private void addEipToCBP(IAcsClient client, String cbpId, String allocationId) throws AliCloudException {
+        AddCommonBandwidthPackageIpRequest request = new AddCommonBandwidthPackageIpRequest();
+        request.setBandwidthPackageId(cbpId);
+        request.setIpInstanceId(allocationId);
+
+        acsClientStub.request(client, request);
+    }
+
+    private String queryCBP(IAcsClient client, DescribeCommonBandwidthPackagesRequest queryCBPRequest) throws PluginException, AliCloudException {
+        final DescribeCommonBandwidthPackagesResponse response = acsClientStub.request(client, queryCBPRequest);
+        if (response.getCommonBandwidthPackages().isEmpty()) {
+            throw new PluginException("Cannot find common bandwidth packages by given info.");
+        }
+
+        return response.getCommonBandwidthPackages().get(0).getBandwidthPackageId();
+
+    }
+
+    private String createCBP(IAcsClient client, CreateCommonBandwidthPackageRequest createCommonBandwidthPackageRequest) throws AliCloudException {
+
+        final CreateCommonBandwidthPackageResponse response = acsClientStub.request(client, createCommonBandwidthPackageRequest);
+        return response.getBandwidthPackageId();
+
     }
 }
