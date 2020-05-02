@@ -329,4 +329,60 @@ public class EipServiceImpl implements EipService {
         return response.getBandwidthPackageId();
 
     }
+
+    private DescribeEipAddressesResponse.EipAddress queryEipByAddress(IAcsClient client, String regionId, String ipAddress) throws PluginException, AliCloudException {
+        if (StringUtils.isEmpty(ipAddress)) {
+            throw new PluginException("ipAddress cannot be empty or null while query EIP");
+        }
+
+        DescribeEipAddressesRequest queryEipRequest = new DescribeEipAddressesRequest();
+        queryEipRequest.setRegionId(regionId);
+        queryEipRequest.setEipAddress(ipAddress);
+
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, queryEipRequest);
+        if (response.getEipAddresses().isEmpty()) {
+            throw new PluginException(String.format("Cannot find EIP by given ip address: [%s]", ipAddress));
+        }
+
+        return response.getEipAddresses().get(0);
+    }
+
+    private boolean ifIpAddressBindInstance(IAcsClient client, String regionId, String ipAddress, String instanceId) throws PluginException, AliCloudException {
+        final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ipAddress);
+
+        return StringUtils.equals(instanceId, eipAddress.getInstanceId());
+    }
+
+    @Override
+    public void bindIpToInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException {
+        for (String ip : ipAddress) {
+            if (ifIpAddressBindInstance(client, regionId, ip, instanceId)) {
+                continue;
+            }
+            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
+            final String allocationId = eipAddress.getAllocationId();
+            AssociateEipAddressRequest request = new AssociateEipAddressRequest();
+            request.setRegionId(regionId);
+            request.setAllocationId(allocationId);
+            request.setInstanceId(instanceId);
+            acsClientStub.request(client, request);
+        }
+
+    }
+
+    @Override
+    public void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException {
+        for (String ip : ipAddress) {
+            if (!ifIpAddressBindInstance(client, regionId, ip, instanceId)) {
+                continue;
+            }
+            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
+            final String allocationId = eipAddress.getAllocationId();
+            UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
+            request.setRegionId(regionId);
+            request.setAllocationId(allocationId);
+            request.setInstanceId(instanceId);
+            acsClientStub.request(client, request);
+        }
+    }
 }
