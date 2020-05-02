@@ -148,7 +148,7 @@ public class PluginStringUtils {
      * @param rawStr raw string with / without square bracket
      * @return formatted string
      */
-    private static String removeSquareBracket(String rawStr) {
+    public static String removeSquareBracket(String rawStr) {
         if (rawStr.matches(LIST_STR_REGEX)) {
             String listStr = StringUtils.removeStart(rawStr, "[");
             listStr = StringUtils.removeEnd(listStr, "]");
