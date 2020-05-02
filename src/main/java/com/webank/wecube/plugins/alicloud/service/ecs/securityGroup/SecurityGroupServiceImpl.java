@@ -59,8 +59,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 final String securityGroupId = requestDto.getSecurityGroupId();
                 if (StringUtils.isNotEmpty(securityGroupId)) {
                     final DescribeSecurityGroupsResponse foundSecurityGroup = this.retrieveSecurityGroup(client, regionId, securityGroupId);
-                    final DescribeSecurityGroupsResponse.SecurityGroup securityGroup = foundSecurityGroup.getSecurityGroups().get(0);
                     if (!foundSecurityGroup.getSecurityGroups().isEmpty()) {
+                        final DescribeSecurityGroupsResponse.SecurityGroup securityGroup = foundSecurityGroup.getSecurityGroups().get(0);
                         result = result.fromSdkCrossLineage(securityGroup);
                         result.setRequestId(foundSecurityGroup.getRequestId());
                         continue;
@@ -306,15 +306,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest();
         request.setRegionId(regionId);
         request.setSecurityGroupId(securityGroupId);
-        final DescribeSecurityGroupsResponse response = this.acsClientStub.request(client, request);
 
-        if (null == response || response.getSecurityGroups().isEmpty()) {
-            String msg = "Cannot retrieve security group info from AliCloud server.";
-            logger.error(msg);
-            throw new PluginException(msg);
-        }
-
-        return response;
+        return this.acsClientStub.request(client, request);
 
     }
 
