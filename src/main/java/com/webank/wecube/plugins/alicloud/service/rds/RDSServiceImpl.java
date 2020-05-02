@@ -75,6 +75,7 @@ public class RDSServiceImpl implements RDSService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                requestDto.adaptToAliCloud();
 
                 if (StringUtils.isNotEmpty(requestDto.getDBInstanceId())) {
                     final String instanceId = requestDto.getDBInstanceId();
