@@ -474,9 +474,13 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         }
 
         if (!StringUtils.isEmpty(this.getZoneId())) {
-            if (StringUtils.containsIgnoreCase(this.getZoneId(), "MAZ")) {
+            if (PluginStringUtils.isListStr(this.getZoneId()) && StringUtils.containsIgnoreCase(this.getZoneId(), "MAZ")) {
                 this.setZoneId(concatHighAvailableZoneId(this.getZoneId()));
             }
+        }
+
+        if (!StringUtils.isEmpty(this.getSecurityIPList()) && PluginStringUtils.isListStr(this.getSecurityIPList())) {
+            this.setSecurityIPList(PluginStringUtils.removeSquareBracket(this.getSecurityIPList()));
         }
     }
 
