@@ -13,6 +13,9 @@ import javax.validation.constraints.NotEmpty;
  */
 public class CoreCreateSnatEntryRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateSnatEntryRequest> {
 
+    @NotEmpty(message = "natId field is mandatory")
+    private String natId;
+
     private String resourceOwnerId;
 
     private String clientToken;
@@ -37,6 +40,14 @@ public class CoreCreateSnatEntryRequestDto extends CoreRequestInputDto implement
 
 
     public CoreCreateSnatEntryRequestDto() {
+    }
+
+    public String getNatId() {
+        return natId;
+    }
+
+    public void setNatId(String natId) {
+        this.natId = natId;
     }
 
     public String getResourceOwnerId() {
@@ -123,6 +134,7 @@ public class CoreCreateSnatEntryRequestDto extends CoreRequestInputDto implement
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
+                .append("natId", natId)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("clientToken", clientToken)
                 .append("sourceCIDR", sourceCIDR)
