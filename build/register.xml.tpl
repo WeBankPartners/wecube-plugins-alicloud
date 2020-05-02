@@ -551,6 +551,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vServerGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostIds</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostPorts</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">deleteListener</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -715,19 +716,11 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">actionType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrIp</parameter>
-                    <!-- in -->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policy</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
-                    <!-- egress -->
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerAccount</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourcePortRange</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">priority</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">nicType</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -741,21 +734,12 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">actionType</parameter>
-                    <!-- in -->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceCidrIp</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destCidrIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policy</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
-                    <!-- egress -->
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">destGroupOwnerAccount</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourcePortRange</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">priority</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">nicType</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -808,6 +792,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceVSwitchId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceCIDR</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">snatEntryName</parameter>
@@ -826,6 +811,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatEntryId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natId</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -841,6 +827,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">allocationId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cbpName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">bandwidth</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceChargeType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">internetChargeType</parameter>
@@ -852,6 +839,8 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">eipAddress</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cbpId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -862,6 +851,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">allocationId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cbpName</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>

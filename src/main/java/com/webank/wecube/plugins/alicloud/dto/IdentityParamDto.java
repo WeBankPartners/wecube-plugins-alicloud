@@ -1,5 +1,6 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.utils.PluginMapUtils;
 
 import java.util.Map;
@@ -19,7 +20,7 @@ public class IdentityParamDto {
     public IdentityParamDto() {
     }
 
-    public static IdentityParamDto convertFromString(String paramStr) {
+    public static IdentityParamDto convertFromString(String paramStr) throws PluginException {
         final Map<String, String> map = PluginMapUtils.fromCoreParamString(paramStr);
         return new IdentityParamDto(map.get("accessKeyId"), map.get("secret"));
     }

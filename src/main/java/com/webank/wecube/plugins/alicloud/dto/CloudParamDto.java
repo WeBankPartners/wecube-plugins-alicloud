@@ -1,5 +1,6 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.utils.PluginMapUtils;
 
 import java.util.Map;
@@ -15,7 +16,7 @@ public class CloudParamDto {
         this.regionId = regionId;
     }
 
-    public static CloudParamDto convertFromString(String paramStr) {
+    public static CloudParamDto convertFromString(String paramStr) throws PluginException {
         final Map<String, String> map = PluginMapUtils.fromCoreParamString(paramStr);
         return new CloudParamDto(map.get("regionId"));
     }
