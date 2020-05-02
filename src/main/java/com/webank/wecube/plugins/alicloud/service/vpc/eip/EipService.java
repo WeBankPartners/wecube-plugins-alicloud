@@ -25,4 +25,10 @@ public interface EipService {
     List<CoreUnAssociateEipResponseDto> unAssociateEipAddress(List<CoreUnAssociateEipRequestDto> requestDtoList);
 
     boolean ifEipIsAvailable(IAcsClient client, String regionId, String associatedInstanceType, String associatedInstanceId) throws PluginException, AliCloudException;
+
+    void bindIpToInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException;
+
+    void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException;
+
+
 }

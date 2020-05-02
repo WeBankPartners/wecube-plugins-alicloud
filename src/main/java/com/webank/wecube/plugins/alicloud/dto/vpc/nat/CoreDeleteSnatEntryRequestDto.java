@@ -12,6 +12,9 @@ import javax.validation.constraints.NotEmpty;
  * @author howechen
  */
 public class CoreDeleteSnatEntryRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteSnatEntryRequest> {
+    @NotEmpty(message = "natId field is mandatory")
+    private String natId;
+
     private String resourceOwnerId;
 
     private String clientToken;
@@ -29,6 +32,14 @@ public class CoreDeleteSnatEntryRequestDto extends CoreRequestInputDto implement
     private String ownerId;
 
     public CoreDeleteSnatEntryRequestDto() {
+    }
+
+    public String getNatId() {
+        return natId;
+    }
+
+    public void setNatId(String natId) {
+        this.natId = natId;
     }
 
     public String getResourceOwnerId() {
@@ -91,6 +102,7 @@ public class CoreDeleteSnatEntryRequestDto extends CoreRequestInputDto implement
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
+                .append("natId", natId)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("clientToken", clientToken)
                 .append("snatEntryId", snatEntryId)
@@ -100,4 +112,6 @@ public class CoreDeleteSnatEntryRequestDto extends CoreRequestInputDto implement
                 .append("ownerId", ownerId)
                 .toString();
     }
+
+
 }

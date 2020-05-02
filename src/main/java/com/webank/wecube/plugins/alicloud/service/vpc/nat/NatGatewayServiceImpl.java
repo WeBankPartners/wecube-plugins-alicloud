@@ -169,6 +169,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
+                bindEipToNat(client, regionId, requestDto.getNatId(), requestDto.getSnatIp());
                 final String listStr = PluginStringUtils.handleCoreListStr(requestDto.getSnatIp(), true);
                 requestDto.setSnatIp(listStr);
 
@@ -212,6 +213,9 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 DeleteSnatEntryResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
 
+                // unbind snat ip from nat
+                unbindSnatIpFromNat(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId(), requestDto.getNatId());
+
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
@@ -245,5 +249,33 @@ public class NatGatewayServiceImpl implements NatGatewayService {
 
         logger.info("Retrieving NAT gateway info...");
         return this.acsClientStub.request(client, request);
+    }
+
+    /**
+     * Check if EIP bind NAT, if not, bind them
+     *
+     * @param client   alicloud client
+     * @param regionId regionId
+     * @param natId    natId
+     * @param snatIp   could be list snatIp
+     */
+    private void bindEipToNat(IAcsClient client, String regionId, String natId, String snatIp) {
+        final String[] ipArray = PluginStringUtils.splitStringList(snatIp).toArray(new String[0]);
+        eipService.bindIpToInstance(client, regionId, natId, ipArray);
+    }
+
+    private void unbindSnatIpFromNat(IAcsClient client, String regionId, String snatTableId, String snatEntryId, String natId) throws PluginException, AliCloudException {
+        DescribeSnatTableEntriesRequest request = new DescribeSnatTableEntriesRequest();
+        request.setRegionId(regionId);
+        request.setSnatTableId(snatTableId);
+        request.setSnatEntryId(snatEntryId);
+
+        final DescribeSnatTableEntriesResponse response = acsClientStub.request(client, request);
+        if (response.getSnatTableEntries().isEmpty()) {
+            throw new PluginException("Cannot find SNAT table entry by given info");
+        }
+        final DescribeSnatTableEntriesResponse.SnatTableEntry foundSnatEntry = response.getSnatTableEntries().get(0);
+        final String[] ips = foundSnatEntry.getSnatIp().split(",");
+        eipService.unbindIpFromInstance(client, regionId, natId, ips);
     }
 }

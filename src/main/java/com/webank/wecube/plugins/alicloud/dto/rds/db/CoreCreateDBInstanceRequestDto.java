@@ -2,12 +2,21 @@ package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.CreateDBInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author howechen
@@ -457,4 +466,49 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
                 .append("dBIsIgnoreCase", dBIsIgnoreCase)
                 .toString();
     }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (!StringUtils.isEmpty(this.getPeriod())) {
+            this.setPeriod(StringUtils.capitalize(this.getPeriod()));
+        }
+
+        if (!StringUtils.isEmpty(this.getZoneId())) {
+            if (PluginStringUtils.isListStr(this.getZoneId()) && StringUtils.containsIgnoreCase(this.getZoneId(), "MAZ")) {
+                this.setZoneId(concatHighAvailableZoneId(this.getZoneId()));
+            }
+        }
+
+        if (!StringUtils.isEmpty(this.getSecurityIPList()) && PluginStringUtils.isListStr(this.getSecurityIPList())) {
+            this.setSecurityIPList(PluginStringUtils.removeSquareBracket(this.getSecurityIPList()));
+        }
+    }
+
+    private String concatHighAvailableZoneId(String zoneId) {
+        final String HIGH_AVAILABLE_ZONE_PATTERN = "^(.*MAZ\\d+)-(.+)$";
+        final List<String> zoneIdList = PluginStringUtils.splitStringList(zoneId);
+        final Pattern pattern = Pattern.compile(HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
+        String prefix = StringUtils.EMPTY;
+        List<String> postFixList = new ArrayList<>();
+        // find prefix, store postfix
+        for (String zone : zoneIdList) {
+            final Matcher matcher = pattern.matcher(zone);
+            while (matcher.find()) {
+                if (StringUtils.isEmpty(prefix)) {
+                    prefix = matcher.group(1);
+                }
+                postFixList.add(matcher.group(2));
+            }
+        }
+        Collections.sort(postFixList);
+
+        // assembling postfix
+        StringJoiner joiner = new StringJoiner(",", "(", ")");
+
+        for (String postFix : postFixList) {
+            joiner.add(postFix);
+        }
+        return prefix.concat(joiner.toString());
+    }
+
 }

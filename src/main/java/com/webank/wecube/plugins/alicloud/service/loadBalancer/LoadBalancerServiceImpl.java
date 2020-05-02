@@ -205,7 +205,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final String backendServersString = getBackendServersString(requestDto.getHostIds(), requestDto.getHostPorts());
                 requestDto.setBackendServers(backendServersString);
 
-                if (!EnumUtils.isValidEnumIgnoreCase(listenerProtocolType.class, listenerProtocol.toUpperCase())) {
+                if (!EnumUtils.isValidEnumIgnoreCase(ListenerProtocolType.class, listenerProtocol.toUpperCase())) {
                     throw new PluginException("The listenerProtocol is an invalid type.");
                 }
 
@@ -288,15 +288,20 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final String backendServersString = getBackendServersString(requestDto.getHostIds(), requestDto.getHostPorts());
                 requestDto.setBackendServers(backendServersString);
                 String vServerGroupId = requestDto.getvServerGroupId();
+                Integer listenerPort;
+                try {
+                    listenerPort = Integer.parseInt(requestDto.getListenerPort());
+                } catch (NumberFormatException ex) {
+                    throw new PluginException(String.format("Cannot format [%s] to integer.", requestDto.getListenerPort()));
+                }
+
+                final ListenerProtocolType listenerProtocolType = EnumUtils.getEnumIgnoreCase(ListenerProtocolType.class, requestDto.getListenerProtocol());
+                if (null == listenerProtocolType) {
+                    throw new PluginException("Invalid listener protocol");
+                }
 
                 if (StringUtils.isEmpty(requestDto.getvServerGroupId())) {
 
-                    Integer listenerPort;
-                    try {
-                        listenerPort = Integer.parseInt(requestDto.getListenerPort());
-                    } catch (NumberFormatException ex) {
-                        throw new PluginException(String.format("Cannot format [%s] to integer.", requestDto.getListenerPort()));
-                    }
 
                     final String listenerProtocol = requestDto.getListenerProtocol();
                     final String loadBalancerId = requestDto.getLoadBalancerId();
@@ -328,6 +333,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
                 result = result.fromSdk(response);
 
+                // delete listener according to the request
+                if (requestDto.ifDeleteListener()) {
+                    deleteListener(requestDto, regionId, client, listenerPort);
+                }
+
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
@@ -339,6 +349,15 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             }
         }
         return resultList;
+    }
+
+    private void deleteListener(CoreRemoveBackendServerRequestDto requestDto, String regionId, IAcsClient client, Integer listenerPort) throws AliCloudException {
+        DeleteLoadBalancerListenerRequest deleteLoadBalancerListenerRequest = new DeleteLoadBalancerListenerRequest();
+        deleteLoadBalancerListenerRequest.setRegionId(regionId);
+        deleteLoadBalancerListenerRequest.setListenerPort(listenerPort);
+        deleteLoadBalancerListenerRequest.setListenerProtocol(requestDto.getListenerProtocol());
+
+        acsClientStub.request(client, deleteLoadBalancerListenerRequest);
     }
 
     private String getBackendServersString(String hostIds, String hostPorts) throws PluginException, AliCloudException {
@@ -388,7 +407,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     private String retrieveVServerGroupId(IAcsClient client, String regionId, Integer listenerPort, String loadBalancerId, String listenerProtocol) throws AliCloudException {
         String vServerGroupId = StringUtils.EMPTY;
-        switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, listenerProtocol)) {
+        final ListenerProtocolType listenerProtocolType = EnumUtils.getEnumIgnoreCase(ListenerProtocolType.class, listenerProtocol);
+        if (null == listenerProtocolType) {
+            throw new PluginException("Invalid listener protocol");
+        }
+        switch (listenerProtocolType) {
             case HTTP:
                 break;
             case UDP:
@@ -423,9 +446,12 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     private void createNewListener(IAcsClient client, String regionId, CoreAddBackendServerRequestDto requestDto, String vServerGroupId) throws PluginException, AliCloudException {
         AcsRequest<?> request = null;
-
+        final ListenerProtocolType listenerProtocolType = EnumUtils.getEnumIgnoreCase(ListenerProtocolType.class, requestDto.getListenerProtocol());
+        if (null == listenerProtocolType) {
+            throw new PluginException("Invalid listener protocol");
+        }
         try {
-            switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, requestDto.getListenerProtocol())) {
+            switch (listenerProtocolType) {
                 case HTTP:
                     request = PluginSdkBridge.toSdk(requestDto, CreateLoadBalancerHTTPListenerRequest.class);
                     break;
@@ -462,9 +488,12 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     private void bindVServerGroupToListener(IAcsClient client, String regionId, CoreAddBackendServerRequestDto requestDto, String vServerGroupId) throws PluginException, AliCloudException {
         AcsRequest<?> request = null;
-
+        final ListenerProtocolType listenerProtocolType = EnumUtils.getEnumIgnoreCase(ListenerProtocolType.class, requestDto.getListenerProtocol());
+        if (null == listenerProtocolType) {
+            throw new PluginException("Invalid listener protocol");
+        }
         try {
-            switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, requestDto.getListenerProtocol())) {
+            switch (listenerProtocolType) {
                 case HTTP:
                     SetLoadBalancerHTTPListenerAttributeRequest setLoadBalancerHTTPListenerAttributeRequest = new SetLoadBalancerHTTPListenerAttributeRequest();
                     setLoadBalancerHTTPListenerAttributeRequest.setListenerPort(Integer.parseInt(requestDto.getListenerPort()));
@@ -507,8 +536,12 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     private boolean checkIfListenerExists(IAcsClient client, String regionId, Integer listenerPort, String loadBalancerId, String listenerProtocol) throws AliCloudException {
         boolean ifListenerExists = true;
+        final ListenerProtocolType listenerProtocolType = EnumUtils.getEnumIgnoreCase(ListenerProtocolType.class, listenerProtocol);
+        if (null == listenerProtocolType) {
+            throw new PluginException("Invalid listener protocol");
+        }
         try {
-            switch (EnumUtils.getEnumIgnoreCase(listenerProtocolType.class, listenerProtocol)) {
+            switch (listenerProtocolType) {
                 case HTTP:
                     DescribeLoadBalancerHTTPListenerAttributeRequest httpListenerAttributeRequest = new DescribeLoadBalancerHTTPListenerAttributeRequest();
                     httpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
@@ -570,5 +603,5 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         this.acsClientStub.request(client, request);
     }
 
-    public enum listenerProtocolType {TCP, UDP, HTTP, HTTPS}
+    public enum ListenerProtocolType {TCP, UDP, HTTP, HTTPS}
 }
