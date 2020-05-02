@@ -551,6 +551,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vServerGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostIds</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostPorts</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">deleteListener</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
