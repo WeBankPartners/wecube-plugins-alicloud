@@ -10,10 +10,15 @@ import java.util.stream.Collectors;
  */
 public class PluginMapUtils {
 
-    public static Map<String, String> fromCoreParamString(String paramString) {
-        return Arrays.stream(paramString.split(";"))
-                .map(entry -> entry.split("="))
-                .collect(Collectors.toMap(entry -> entry[0], entry -> entry[1]));
+    public static Map<String, String> fromCoreParamString(String paramString) throws PluginException {
+        try {
+            return Arrays.stream(paramString.split(";"))
+                    .map(entry -> entry.split("="))
+                    .collect(Collectors.toMap(entry -> entry[0], entry -> entry[1]));
+        } catch (Exception ex) {
+            throw new PluginException("Cannot extract param from param string.");
+        }
+
     }
 
     public static <K, V> Map<K, V> zipToMap(List<K> keyList, List<V> valueList) throws PluginException {
