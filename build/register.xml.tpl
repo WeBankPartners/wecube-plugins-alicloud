@@ -791,6 +791,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceVSwitchId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">sourceCIDR</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">snatEntryName</parameter>
@@ -809,6 +810,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatEntryId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natId</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
