@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -14,6 +15,8 @@ import javax.validation.constraints.NotEmpty;
  * @author howechen
  */
 public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<RemoveVServerGroupBackendServersRequest> {
+    // if delete listener
+    private String deleteListener;
 
     // fields from core
     @NotEmpty(message = "hostIds field is mandatory.")
@@ -127,11 +130,24 @@ public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto imple
         this.hostPorts = hostPorts;
     }
 
+    public String getDeleteListener() {
+        return deleteListener;
+    }
+
+    public void setDeleteListener(String deleteListener) {
+        this.deleteListener = deleteListener;
+    }
+
+    public boolean ifDeleteListener() {
+        return StringUtils.equalsIgnoreCase("Y", this.getDeleteListener());
+    }
+
 
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
+                .append("deleteListener", deleteListener)
                 .append("hostIds", hostIds)
                 .append("hostPorts", hostPorts)
                 .append("listenerPort", listenerPort)
