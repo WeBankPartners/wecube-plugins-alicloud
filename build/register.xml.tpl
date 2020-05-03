@@ -396,10 +396,10 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityIps</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceIPArrayName</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">whitelistNetworkType</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">modifyMode</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">backupStrategy</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">backupMethod</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">backupType</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
