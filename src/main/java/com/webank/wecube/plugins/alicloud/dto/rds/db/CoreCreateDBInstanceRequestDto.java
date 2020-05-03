@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -481,6 +483,27 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
         if (!StringUtils.isEmpty(this.getSecurityIPList()) && PluginStringUtils.isListStr(this.getSecurityIPList())) {
             this.setSecurityIPList(PluginStringUtils.removeSquareBracket(this.getSecurityIPList()));
+        }
+
+        if (!StringUtils.isEmpty(this.getEngine())) {
+            switch (EnumUtils.getEnumIgnoreCase(RDSResourceSeeker.RDSEngine.class, this.getEngine())) {
+                case MARIADB:
+                    this.setEngine(RDSResourceSeeker.RDSEngine.MARIADB.getEngine());
+                    break;
+                case MYSQL:
+                    this.setEngine(RDSResourceSeeker.RDSEngine.MYSQL.getEngine());
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (!StringUtils.isEmpty(this.getPayType())) {
+            this.setPayType(StringUtils.capitalize(this.getPayType().toLowerCase()));
+        }
+
+        if (!StringUtils.isEmpty(this.getPeriod())) {
+            this.setPeriod(StringUtils.capitalize(this.getPeriod().toLowerCase()));
         }
     }
 
