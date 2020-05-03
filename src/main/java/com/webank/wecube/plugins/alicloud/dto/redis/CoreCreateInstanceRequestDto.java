@@ -2,8 +2,10 @@ package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.CreateInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -387,5 +389,12 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
                 .append("chargeType", chargeType)
                 .append("config", config)
                 .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (StringUtils.isEmpty(this.getChargeType())) {
+            this.setChargeType(StringUtils.capitalize(this.getChargeType().toLowerCase()));
+        }
     }
 }
