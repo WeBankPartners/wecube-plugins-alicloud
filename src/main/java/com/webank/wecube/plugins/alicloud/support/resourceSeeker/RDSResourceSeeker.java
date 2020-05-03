@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class RDSResourceSeeker {
-    private enum RDSEngine {
+    public enum RDSEngine {
         // MySQL
         MYSQL("MySQL"),
         // MariaDB
