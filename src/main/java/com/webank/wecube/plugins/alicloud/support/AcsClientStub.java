@@ -62,4 +62,10 @@ public class AcsClientStub {
         }
         return response;
     }
+
+
+    public <T extends AcsResponse> T request(IAcsClient client, AcsRequest<T> request, String regionId) throws AliCloudException {
+        request.setSysRegionId(regionId);
+        return request(client, request);
+    }
 }
