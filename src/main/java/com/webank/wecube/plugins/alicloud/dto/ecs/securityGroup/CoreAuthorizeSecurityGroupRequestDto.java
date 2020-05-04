@@ -22,8 +22,8 @@ import java.util.NoSuchElementException;
  */
 public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AuthorizeSecurityGroupRequest>, ForkableDto<CoreAuthorizeSecurityGroupRequestDto> {
 
-    private static final String CORE_PORT_RANGE_DELIMITER = "-";
-    private static final String ALICLOUD_PORT_RANGE_DELIMITER = "/";
+    public static final String CORE_PORT_RANGE_DELIMITER = "-";
+    public static final String ALICLOUD_PORT_RANGE_DELIMITER = "/";
 
     @NotEmpty(message = "actionType field is mandatory")
     private String actionType;
