@@ -55,10 +55,10 @@ public class AcsClientStub {
             response = client.getAcsResponse(request);
         } catch (ServerException serverEx) {
             logger.error("AliCloud server error! Error type: [{}], code: [{}], msg: [{}], description: [{}]", serverEx.getErrorType(), serverEx.getErrCode(), serverEx.getMessage(), serverEx.getErrorDescription());
-            throw new AliCloudException(String.format("AliCloud server error: [%s]", PluginStringUtils.formatStr(serverEx.getMessage())));
+            throw new AliCloudException(serverEx.getRequestId(), serverEx.getErrCode(), PluginStringUtils.formatStr(serverEx.getErrMsg()), serverEx.getErrorType(), serverEx.getErrorDescription());
         } catch (ClientException clientEx) {
             logger.error("AliCloud local client error! Error type: [{}], code: [{}], msg: [{}], description: [{}]", clientEx.getErrorType(), clientEx.getErrCode(), clientEx.getMessage(), clientEx.getErrorDescription());
-            throw new AliCloudException(String.format("AliCloud local client error: [%s]", PluginStringUtils.formatStr(clientEx.getMessage())));
+            throw new AliCloudException(clientEx.getRequestId(), clientEx.getErrCode(), PluginStringUtils.formatStr(clientEx.getErrMsg()), clientEx.getErrorType(), clientEx.getErrorDescription());
         }
         return response;
     }
