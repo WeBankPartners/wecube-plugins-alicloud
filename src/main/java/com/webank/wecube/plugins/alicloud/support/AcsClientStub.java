@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AcsClientStub {
     private final static Logger logger = LoggerFactory.getLogger(AcsClientStub.class);
-    private static final int DEFAULT_TIMEOUT_IN_MILLISECONDS = 5000;
+    private static final int DEFAULT_TIMEOUT_IN_MILLISECONDS = 10000;
 
 
     public IAcsClient generateAcsClient(IdentityParamDto identityParamDto, CloudParamDto cloudParamDto) throws PluginException {
