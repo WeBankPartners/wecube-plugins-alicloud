@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class RDSServiceImpl implements RDSService {
+    private static final String TOLERABLE_DB_NOT_FOUND_CODE = "InvalidDBInstanceId.NotFound";
 
     private static final Logger logger = LoggerFactory.getLogger(RDSService.class);
 
@@ -79,12 +80,21 @@ public class RDSServiceImpl implements RDSService {
 
                 if (StringUtils.isNotEmpty(requestDto.getDBInstanceId())) {
                     final String instanceId = requestDto.getDBInstanceId();
-                    final DescribeDBInstancesResponse retrieveDBInstance = this.retrieveDBInstance(client, regionId, instanceId);
-                    if (1 == retrieveDBInstance.getTotalRecordCount()) {
-                        final DescribeDBInstancesResponse.DBInstance dbInstance = retrieveDBInstance.getItems().get(0);
-                        result = result.fromSdkCrossLineage(dbInstance);
-                        result.setRequestId(retrieveDBInstance.getRequestId());
-                        continue;
+                    DescribeDBInstancesResponse retrieveDBInstance;
+                    try {
+                        retrieveDBInstance = this.retrieveDBInstance(client, regionId, instanceId);
+                        if (!retrieveDBInstance.getItems().isEmpty()) {
+                            final DescribeDBInstancesResponse.DBInstance dbInstance = retrieveDBInstance.getItems().get(0);
+                            result = result.fromSdkCrossLineage(dbInstance);
+                            result.setRequestId(retrieveDBInstance.getRequestId());
+                            continue;
+                        }
+                    } catch (AliCloudException ex) {
+                        if (TOLERABLE_DB_NOT_FOUND_CODE.equalsIgnoreCase(ex.getErrCode())) {
+                            continue;
+                        } else {
+                            throw ex;
+                        }
                     }
 
                 }
