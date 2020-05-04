@@ -370,6 +370,7 @@ public class EipServiceImpl implements EipService {
     }
 
     private boolean ifIpAddressBindInstance(IAcsClient client, String regionId, String ipAddress, String instanceId) throws PluginException, AliCloudException {
+        logger.info("Retrieving if the ip address: {} bind the instance: {}", ipAddress, instanceId);
         final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ipAddress);
 
         return StringUtils.equals(instanceId, eipAddress.getInstanceId());
@@ -379,14 +380,21 @@ public class EipServiceImpl implements EipService {
     public void bindIpToInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException {
         for (String ip : ipAddress) {
             if (ifIpAddressBindInstance(client, regionId, ip, instanceId)) {
+                logger.info("The ip address: {} has already bound to that instance: {}", ipAddress, instanceId);
                 continue;
             }
+
+            logger.info("Ip address: {} hasn't bound to the instance: {}, will create an association.", ip, instanceId);
+
             final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
             final String allocationId = eipAddress.getAllocationId();
             AssociateEipAddressRequest request = new AssociateEipAddressRequest();
             request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
+
+            logger.info("Associating EIP: {} to the instance: {}", allocationId, instanceId);
+
             acsClientStub.request(client, request);
         }
 
@@ -404,6 +412,9 @@ public class EipServiceImpl implements EipService {
             request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
+
+            logger.info("Unbind EIP: {} from isntance: {}", allocationId, instanceId);
+
             acsClientStub.request(client, request);
         }
     }
