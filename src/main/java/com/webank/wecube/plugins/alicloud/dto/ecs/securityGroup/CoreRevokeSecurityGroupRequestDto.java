@@ -17,6 +17,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import static com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.CoreAuthorizeSecurityGroupRequestDto.ALICLOUD_PORT_RANGE_DELIMITER;
+import static com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.CoreAuthorizeSecurityGroupRequestDto.CORE_PORT_RANGE_DELIMITER;
+
 /**
  * @author howechen
  */
@@ -262,7 +265,11 @@ public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto imple
     @Override
     public void adaptToAliCloud() {
         if (!StringUtils.isEmpty(this.getPortRange())) {
-            this.setPortRange(this.getPortRange().replace('-', '/'));
+            if (StringUtils.containsAny(this.getPortRange(), CORE_PORT_RANGE_DELIMITER, ALICLOUD_PORT_RANGE_DELIMITER)) {
+                this.setPortRange(this.getPortRange().replace(CORE_PORT_RANGE_DELIMITER, ALICLOUD_PORT_RANGE_DELIMITER));
+            } else {
+                this.setPortRange(this.getPortRange().concat(ALICLOUD_PORT_RANGE_DELIMITER).concat(this.getPortRange()));
+            }
         }
 
         if (!StringUtils.isEmpty(this.getIpProtocol())) {
@@ -271,10 +278,6 @@ public class CoreRevokeSecurityGroupRequestDto extends CoreRequestInputDto imple
 
         if (!StringUtils.isEmpty(this.getPolicy())) {
             this.setPolicy(this.getPolicy().toLowerCase());
-        }
-
-        if (!StringUtils.isEmpty(this.getIpProtocol())) {
-            this.setIpProtocol(this.getIpProtocol().toLowerCase());
         }
 
         if (!StringUtils.isEmpty(this.getCidrIp())) {
