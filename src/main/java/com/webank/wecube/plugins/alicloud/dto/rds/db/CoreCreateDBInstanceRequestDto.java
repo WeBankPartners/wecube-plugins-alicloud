@@ -486,7 +486,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         }
 
         if (!StringUtils.isEmpty(this.getEngine())) {
-            switch (EnumUtils.getEnumIgnoreCase(RDSResourceSeeker.RDSEngine.class, this.getEngine())) {
+            final RDSResourceSeeker.RDSEngine engineType = EnumUtils.getEnumIgnoreCase(RDSResourceSeeker.RDSEngine.class, this.getEngine());
+            if (null == engineType) {
+                throw new PluginException("Invalid engine type.");
+            }
+            switch (engineType) {
                 case MARIADB:
                     this.setEngine(RDSResourceSeeker.RDSEngine.MARIADB.getEngine());
                     break;
