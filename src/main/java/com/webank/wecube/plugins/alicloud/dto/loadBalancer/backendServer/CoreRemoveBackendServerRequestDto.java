@@ -25,6 +25,7 @@ public class CoreRemoveBackendServerRequestDto extends CoreRequestInputDto imple
     private String hostPorts;
 
     // alicloud fields
+    @NotEmpty(message = "listenerPort field is mandatory")
     private String listenerPort;
     private String loadBalancerId;
     private String listenerProtocol;
