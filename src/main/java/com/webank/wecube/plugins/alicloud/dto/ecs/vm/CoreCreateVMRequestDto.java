@@ -660,5 +660,9 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
             }
             this.setTags(tags);
         }
+
+        if (!StringUtils.isEmpty(this.getInstanceChargeType())) {
+            this.setInstanceChargeType(StringUtils.capitalize(this.getInstanceChargeType().toLowerCase()));
+        }
     }
 }

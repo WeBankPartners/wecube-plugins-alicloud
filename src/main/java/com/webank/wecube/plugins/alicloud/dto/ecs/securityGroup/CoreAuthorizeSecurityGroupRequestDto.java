@@ -22,6 +22,9 @@ import java.util.NoSuchElementException;
  */
 public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AuthorizeSecurityGroupRequest>, ForkableDto<CoreAuthorizeSecurityGroupRequestDto> {
 
+    public static final String CORE_PORT_RANGE_DELIMITER = "-";
+    public static final String ALICLOUD_PORT_RANGE_DELIMITER = "/";
+
     @NotEmpty(message = "actionType field is mandatory")
     private String actionType;
     @NotEmpty(message = "cidrIp field is mandatory")
@@ -261,7 +264,11 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     @Override
     public void adaptToAliCloud() throws PluginException {
         if (!StringUtils.isEmpty(this.getPortRange())) {
-            this.setPortRange(this.getPortRange().replace('-', '/'));
+            if (StringUtils.containsAny(this.getPortRange(), CORE_PORT_RANGE_DELIMITER, ALICLOUD_PORT_RANGE_DELIMITER)) {
+                this.setPortRange(this.getPortRange().replace(CORE_PORT_RANGE_DELIMITER, ALICLOUD_PORT_RANGE_DELIMITER));
+            } else {
+                this.setPortRange(this.getPortRange().concat(ALICLOUD_PORT_RANGE_DELIMITER).concat(this.getPortRange()));
+            }
         }
 
         if (!StringUtils.isEmpty(this.getIpProtocol())) {
@@ -270,10 +277,6 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
 
         if (!StringUtils.isEmpty(this.getPolicy())) {
             this.setPolicy(this.getPolicy().toLowerCase());
-        }
-
-        if (!StringUtils.isEmpty(this.getIpProtocol())) {
-            this.setIpProtocol(this.getIpProtocol().toLowerCase());
         }
 
         if (!StringUtils.isEmpty(this.getCidrIp())) {
@@ -297,7 +300,6 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
                         break;
                 }
             }
-
         }
     }
 
