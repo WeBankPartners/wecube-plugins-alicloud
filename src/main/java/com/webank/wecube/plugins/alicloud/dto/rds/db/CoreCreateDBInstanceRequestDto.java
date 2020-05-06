@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.rds.RDSCategory;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -13,10 +14,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +22,8 @@ import java.util.regex.Pattern;
  * @author howechen
  */
 public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateDBInstanceRequest> {
+
+    static final String HIGH_AVAILABLE_ZONE_PATTERN = "^(.*)(MAZ|maz)(\\d+)-(.+)$";
 
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
@@ -476,8 +476,26 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         }
 
         if (!StringUtils.isEmpty(this.getZoneId())) {
-            if (PluginStringUtils.isListStr(this.getZoneId()) && StringUtils.containsIgnoreCase(this.getZoneId(), "MAZ")) {
-                this.setZoneId(concatHighAvailableZoneId(this.getZoneId()));
+            String resultZoneId = null;
+            final List<String> strings = PluginStringUtils.splitStringList(this.getZoneId());
+            if (StringUtils.equalsIgnoreCase(RDSCategory.Basic.toString(), this.getCategory())) {
+                // basic RDS category
+                if (strings.size() != 1) {
+                    throw new PluginException("RDS basic category support one zone only.");
+                } else {
+                    final String rawStr = strings.get(0);
+                    if (StringUtils.containsIgnoreCase(rawStr, "MAZ")) {
+                        resultZoneId = removeMAZField(rawStr);
+                    }
+                }
+            } else {
+                // other RDS categories
+                resultZoneId = concatHighAvailableZoneId(strings);
+            }
+            if (null == resultZoneId) {
+                throw new PluginException("Error while handling zoneId");
+            } else {
+                this.setZoneId(resultZoneId);
             }
         }
 
@@ -511,22 +529,82 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         }
     }
 
-    private String concatHighAvailableZoneId(String zoneId) {
-        final String HIGH_AVAILABLE_ZONE_PATTERN = "^(.*MAZ\\d+)-(.+)$";
-        final List<String> zoneIdList = PluginStringUtils.splitStringList(zoneId);
+    /**
+     * Remove MAZ field from given zoneId
+     * example:
+     * ap-southeast-MAZ2-b -> ap-southeast-2b
+     *
+     * @param s rawZoneId string
+     * @return result string
+     * @throws PluginException plugin exception
+     */
+    private String removeMAZField(String s) throws PluginException {
         final Pattern pattern = Pattern.compile(HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
-        String prefix = StringUtils.EMPTY;
-        List<String> postFixList = new ArrayList<>();
-        // find prefix, store postfix
-        for (String zone : zoneIdList) {
-            final Matcher matcher = pattern.matcher(zone);
-            while (matcher.find()) {
-                if (StringUtils.isEmpty(prefix)) {
-                    prefix = matcher.group(1);
-                }
-                postFixList.add(matcher.group(2));
+        final Matcher matcher = pattern.matcher(s);
+        String result = StringUtils.EMPTY;
+
+        /*
+         * ap-southeast-1MAZ2-a
+         * group 0: full word
+         * group 1: ap-southeast-1
+         * group 2: MAZ
+         * group 3: 2
+         * group 4: a
+         */
+        while (matcher.find()) {
+            try {
+                result = result.concat(matcher.group(1)).concat(matcher.group(4));
+            } catch (IndexOutOfBoundsException ex) {
+                throw new PluginException(ex.getMessage());
             }
         }
+        return result;
+    }
+
+    /**
+     * Concat dhigh available zone ID to alicloud's requirement
+     * example:
+     * [ap-southeast-1MAZ2-a, ap-southeast-1MAZ2-b] -> ap-southeast-1MAZ2(a,b)
+     *
+     * @param rawZoneStringList raw zone string list
+     * @return concat result
+     * @throws PluginException plugin exception
+     */
+    private String concatHighAvailableZoneId(List<String> rawZoneStringList) throws PluginException {
+        final Pattern pattern = Pattern.compile(HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
+        Set<String> prefixSet = new HashSet<>();
+        Set<String> indexSet = new HashSet<>();
+        Set<String> postFixSet = new HashSet<>();
+        // find prefix, store postfix
+        for (String rawStr : rawZoneStringList) {
+            /*
+             * ap-southeast-1MAZ2-a
+             * group 0: full word
+             * group 1: ap-southeast-1
+             * group 2: MAZ
+             * group 3: 2
+             * group 4: a
+             */
+            final Matcher matcher = pattern.matcher(rawStr);
+            while (matcher.find()) {
+                try {
+                    prefixSet.add(matcher.group(1).concat(matcher.group(2).toUpperCase()));
+                    indexSet.add(matcher.group(3));
+                    postFixSet.add(matcher.group(4));
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new PluginException(ex.getMessage());
+                }
+            }
+        }
+
+        if (prefixSet.size() != 1) {
+            throw new PluginException("Given multiple prefixes while handling zoneId.");
+        }
+
+        if (indexSet.size() != 1) {
+            throw new PluginException("Given multiple indexes while handling zoneId");
+        }
+        List<String> postFixList = new ArrayList<>(postFixSet);
         Collections.sort(postFixList);
 
         // assembling postfix
@@ -535,7 +613,10 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         for (String postFix : postFixList) {
             joiner.add(postFix);
         }
-        return prefix.concat(joiner.toString());
+
+        String prefix = prefixSet.iterator().next();
+        String index = indexSet.iterator().next();
+        return prefix.concat(index).concat(joiner.toString());
     }
 
 }
