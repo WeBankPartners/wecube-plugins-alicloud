@@ -552,7 +552,8 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostIds</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostPorts</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">listenerPort</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">deleteListener</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">listenerProtocol</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">deleteListener</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
