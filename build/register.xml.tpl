@@ -786,6 +786,8 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
+        </plugin>
+        <plugin name="NatSnat">
             <interface action="create_snat_entry" path="/alicloud/v1/vpc/nat/snat_entry/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
