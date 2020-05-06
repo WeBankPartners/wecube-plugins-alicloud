@@ -10,6 +10,8 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.eip.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author howechen
@@ -233,10 +236,14 @@ public class EipServiceImpl implements EipService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-
                 AssociateEipAddressRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 AssociateEipAddressResponse response = this.acsClientStub.request(client, request);
+
+                // wait till the eip is not in associating status
+                Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, requestDto.getAllocationId(), EipStatus.Associating);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -271,6 +278,11 @@ public class EipServiceImpl implements EipService {
                 UnassociateEipAddressRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 UnassociateEipAddressResponse response = this.acsClientStub.request(client, request);
+
+                // wait till the eip is not in un-associating status
+                Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, requestDto.getAllocationId(), EipStatus.Unassociating);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -307,6 +319,59 @@ public class EipServiceImpl implements EipService {
         DescribeEipAddressesResponse response;
         response = this.acsClientStub.request(client, request);
         return response.getTotalCount().equals(0);
+    }
+
+    @Override
+    public void bindIpToInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
+        for (String ip : ipAddress) {
+            if (ifIpAddressBindInstance(client, regionId, ip, instanceId, instanceType)) {
+                logger.info("The ip address: {} has already bound to that instance: {}", ipAddress, instanceId);
+                continue;
+            }
+
+            logger.info("Ip address: {} hasn't bound to the instance: {}, will create an association.", ip, instanceId);
+
+            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
+            final String allocationId = eipAddress.getAllocationId();
+            AssociateEipAddressRequest request = new AssociateEipAddressRequest();
+            request.setRegionId(regionId);
+            request.setAllocationId(allocationId);
+            request.setInstanceId(instanceId);
+            request.setInstanceType(instanceType.toString());
+
+            logger.info("Associating EIP: {} to the instance: {}", allocationId, instanceId);
+
+            acsClientStub.request(client, request);
+
+            // wait till the eip is not in associating status
+            Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, allocationId, EipStatus.Associating);
+            PluginTimer.runTask(new PluginTimerTask(func));
+        }
+
+    }
+
+    @Override
+    public void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
+        for (String ip : ipAddress) {
+            if (!ifIpAddressBindInstance(client, regionId, ip, instanceId, instanceType)) {
+                continue;
+            }
+            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
+            final String allocationId = eipAddress.getAllocationId();
+            UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
+            request.setRegionId(regionId);
+            request.setAllocationId(allocationId);
+            request.setInstanceId(instanceId);
+            request.setInstanceType(instanceType.toString());
+
+            logger.info("Unbind EIP: {} from isntance: {}", allocationId, instanceId);
+
+            acsClientStub.request(client, request);
+
+            // wait till the eip not in un-associating status
+            Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, allocationId, EipStatus.Unassociating);
+            PluginTimer.runTask(new PluginTimerTask(func));
+        }
     }
 
     private DescribeEipAddressesResponse retrieveEipAddress(IAcsClient client, DescribeEipAddressesRequest request) throws AliCloudException, PluginException {
@@ -363,48 +428,31 @@ public class EipServiceImpl implements EipService {
         return StringUtils.equals(instanceId, eipAddress.getInstanceId()) && StringUtils.equals(instanceType.toString(), eipAddress.getInstanceType());
     }
 
-    @Override
-    public void bindIpToInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
-        for (String ip : ipAddress) {
-            if (ifIpAddressBindInstance(client, regionId, ip, instanceId, instanceType)) {
-                logger.info("The ip address: {} has already bound to that instance: {}", ipAddress, instanceId);
-                continue;
-            }
+    private boolean ifEipInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) {
+        DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
+        request.setAllocationId(allocationId);
 
-            logger.info("Ip address: {} hasn't bound to the instance: {}, will create an association.", ip, instanceId);
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, request, regionId);
 
-            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
-            final String allocationId = eipAddress.getAllocationId();
-            AssociateEipAddressRequest request = new AssociateEipAddressRequest();
-            request.setRegionId(regionId);
-            request.setAllocationId(allocationId);
-            request.setInstanceId(instanceId);
-            request.setInstanceType(instanceType.toString());
-
-            logger.info("Associating EIP: {} to the instance: {}", allocationId, instanceId);
-
-            acsClientStub.request(client, request);
+        if (response.getEipAddresses().isEmpty()) {
+            throw new PluginException(String.format("Cannot find EIP by given allocation Id: [%s]", allocationId));
         }
 
+        return StringUtils.equals(status.toString(), response.getEipAddresses().get(0).getStatus());
     }
 
-    @Override
-    public void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
-        for (String ip : ipAddress) {
-            if (!ifIpAddressBindInstance(client, regionId, ip, instanceId, instanceType)) {
-                continue;
-            }
-            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
-            final String allocationId = eipAddress.getAllocationId();
-            UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
-            request.setRegionId(regionId);
-            request.setAllocationId(allocationId);
-            request.setInstanceId(instanceId);
-            request.setInstanceType(instanceType.toString());
+    private boolean ifEipNotInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) {
+        DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
+        request.setAllocationId(allocationId);
 
-            logger.info("Unbind EIP: {} from isntance: {}", allocationId, instanceId);
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, request, regionId);
 
-            acsClientStub.request(client, request);
+        if (response.getEipAddresses().isEmpty()) {
+            throw new PluginException(String.format("Cannot find EIP by given allocation Id: [%s]", allocationId));
         }
+
+        return !StringUtils.equals(status.toString(), response.getEipAddresses().get(0).getStatus());
     }
+
+
 }
