@@ -354,6 +354,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     private void deleteListener(CoreRemoveBackendServerRequestDto requestDto, String regionId, IAcsClient client, Integer listenerPort) throws AliCloudException {
         DeleteLoadBalancerListenerRequest deleteLoadBalancerListenerRequest = new DeleteLoadBalancerListenerRequest();
         deleteLoadBalancerListenerRequest.setRegionId(regionId);
+        deleteLoadBalancerListenerRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
         deleteLoadBalancerListenerRequest.setListenerPort(listenerPort);
         deleteLoadBalancerListenerRequest.setListenerProtocol(requestDto.getListenerProtocol());
 
