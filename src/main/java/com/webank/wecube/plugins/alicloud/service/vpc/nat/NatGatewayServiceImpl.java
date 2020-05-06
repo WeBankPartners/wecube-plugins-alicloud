@@ -181,6 +181,11 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 CreateSnatEntryRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
                 CreateSnatEntryResponse response = this.acsClientStub.request(client, request);
+
+                // wait till snat entry status is not pending
+                Function<?, Boolean> func = o -> ifSnatEntryNotInStatus(client, regionId, requestDto.getSnatTableId(), response.getSnatEntryId(), SnatEntryStatus.Pending);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -217,6 +222,10 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 request.setRegionId(regionId);
                 DeleteSnatEntryResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
+
+                // wait till snat entry has been deleted
+                Function<?, Boolean> func = o -> ifSnatEntryHasBeenDeleted(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId());
+                PluginTimer.runTask(new PluginTimerTask(func));
 
                 // unbind snat ip from nat
                 unbindSnatIpFromNat(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId(), requestDto.getNatId());
@@ -282,5 +291,42 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         final DescribeSnatTableEntriesResponse.SnatTableEntry foundSnatEntry = response.getSnatTableEntries().get(0);
         final String[] ips = foundSnatEntry.getSnatIp().split(",");
         eipService.unbindIpFromInstance(client, regionId, natId, AssociatedInstanceType.Nat, ips);
+    }
+
+    private DescribeSnatTableEntriesResponse.SnatTableEntry retrieveSnatEntryByEntryId(IAcsClient client, String regionId, String snatTableId, String snatEntryId) {
+
+        DescribeSnatTableEntriesRequest request = new DescribeSnatTableEntriesRequest();
+        request.setSnatTableId(snatTableId);
+        request.setSnatEntryId(snatEntryId);
+
+        final DescribeSnatTableEntriesResponse response = acsClientStub.request(client, request, regionId);
+
+        if (response.getSnatTableEntries().isEmpty()) {
+            throw new PluginException(String.format("Cannot find snat entry by given snat table Id: [%s], snat entry id: [%s]", snatTableId, snatEntryId));
+        }
+        return response.getSnatTableEntries().get(0);
+    }
+
+    private boolean ifSnatEntryInStatus(IAcsClient client, String regionId, String snatTableId, String snatEntryId, SnatEntryStatus status) {
+        final DescribeSnatTableEntriesResponse.SnatTableEntry foundEntry = retrieveSnatEntryByEntryId(client, regionId, snatTableId, snatEntryId);
+
+        return StringUtils.equals(status.toString(), foundEntry.getStatus());
+    }
+
+
+    private boolean ifSnatEntryNotInStatus(IAcsClient client, String regionId, String snatTableId, String snatEntryId, SnatEntryStatus status) {
+        final DescribeSnatTableEntriesResponse.SnatTableEntry foundEntry = retrieveSnatEntryByEntryId(client, regionId, snatTableId, snatEntryId);
+
+        return !StringUtils.equals(status.toString(), foundEntry.getStatus());
+    }
+
+    private boolean ifSnatEntryHasBeenDeleted(IAcsClient client, String regionId, String snatTableId, String snatEntryId) {
+        DescribeSnatTableEntriesRequest request = new DescribeSnatTableEntriesRequest();
+        request.setSnatTableId(snatTableId);
+        request.setSnatEntryId(snatEntryId);
+
+        final DescribeSnatTableEntriesResponse response = acsClientStub.request(client, request, regionId);
+
+        return response.getSnatTableEntries().isEmpty();
     }
 }
