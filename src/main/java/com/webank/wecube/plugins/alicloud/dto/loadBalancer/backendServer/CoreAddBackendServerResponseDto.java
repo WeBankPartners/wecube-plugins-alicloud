@@ -30,11 +30,11 @@ public class CoreAddBackendServerResponseDto extends CoreResponseOutputDto imple
         this.requestId = requestId;
     }
 
-    public String getVServerGroupId() {
+    public String getvServerGroupId() {
         return vServerGroupId;
     }
 
-    public void setVServerGroupId(String vServerGroupId) {
+    public void setvServerGroupId(String vServerGroupId) {
         this.vServerGroupId = vServerGroupId;
     }
 
