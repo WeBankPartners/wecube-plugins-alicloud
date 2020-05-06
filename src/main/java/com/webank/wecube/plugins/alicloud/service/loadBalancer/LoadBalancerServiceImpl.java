@@ -228,7 +228,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                         final AddVServerGroupBackendServersResponse modifyResponse = this.addBackendServerOnVServerGroup(client, regionId, requestDto.getBackendServers(), listenerBondVServerGroupId);
 
                         result.setRequestId(modifyResponse.getRequestId());
-                        result.setVServerGroupId(listenerBondVServerGroupId);
+                        result.setvServerGroupId(listenerBondVServerGroupId);
                         result.setBackendServers(PluginSdkBridge.fromSdkList(modifyResponse.getBackendServers(), CreateVServerGroupResponse.BackendServer.class));
                     } else {
                         // create VServerGroup with backendServer info
