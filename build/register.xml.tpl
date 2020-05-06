@@ -546,6 +546,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">loadBalancerId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vServerGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostIds</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">hostPorts</parameter>
