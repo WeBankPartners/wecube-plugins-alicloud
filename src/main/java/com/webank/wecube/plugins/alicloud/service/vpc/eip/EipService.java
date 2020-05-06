@@ -26,9 +26,9 @@ public interface EipService {
 
     boolean ifEipIsAvailable(IAcsClient client, String regionId, String associatedInstanceType, String associatedInstanceId) throws PluginException, AliCloudException;
 
-    void bindIpToInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException;
+    void bindIpToInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException;
 
-    void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException;
+    void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException;
 
 
 }
