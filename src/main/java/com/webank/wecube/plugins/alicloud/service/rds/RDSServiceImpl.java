@@ -99,6 +99,7 @@ public class RDSServiceImpl implements RDSService {
 
                 }
 
+                // get Parameter group from current account
                 final String parameterGroupId = fetchParameterGroupId(client, regionId, requestDto.getEngine(), requestDto.getEngineVersion());
                 requestDto.setdBParamGroupId(parameterGroupId);
 
@@ -288,10 +289,10 @@ public class RDSServiceImpl implements RDSService {
 
                 logger.info("Creating backup: {}", requestDto.toString());
 
-                final CreateBackupRequest createDBInstanceRequest = requestDto.toSdk();
-                createDBInstanceRequest.setRegionId(regionId);
+                final CreateBackupRequest createBackupRequest = requestDto.toSdk();
+                createBackupRequest.setRegionId(regionId);
                 CreateBackupResponse response;
-                response = this.acsClientStub.request(client, createDBInstanceRequest);
+                response = this.acsClientStub.request(client, createBackupRequest);
 
                 final String backupJobId = response.getBackupJobId();
 

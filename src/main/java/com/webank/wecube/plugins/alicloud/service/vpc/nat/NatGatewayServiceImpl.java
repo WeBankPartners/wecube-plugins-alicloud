@@ -7,8 +7,8 @@ import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.nat.*;
+import com.webank.wecube.plugins.alicloud.service.vpc.eip.AssociatedInstanceType;
 import com.webank.wecube.plugins.alicloud.service.vpc.eip.EipService;
-import com.webank.wecube.plugins.alicloud.service.vpc.eip.EipServiceImpl;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
@@ -130,7 +130,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 }
 
                 // setup a timer to poll whether the EIP has already un-associated with the NAT gateway
-                Function<?, Boolean> checkIfAllEipUnAssociated = o -> this.eipService.ifEipIsAvailable(client, regionId, EipServiceImpl.AssociatedInstanceType.Nat.toString(), natGatewayId);
+                Function<?, Boolean> checkIfAllEipUnAssociated = o -> this.eipService.ifEipIsAvailable(client, regionId, AssociatedInstanceType.Nat.toString(), natGatewayId);
                 PluginTimer.runTask(new PluginTimerTask(checkIfAllEipUnAssociated));
 
                 logger.info("Deleting NAT gateway...");
@@ -261,7 +261,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
      */
     private void bindEipToNat(IAcsClient client, String regionId, String natId, String snatIp) {
         final String[] ipArray = PluginStringUtils.splitStringList(snatIp).toArray(new String[0]);
-        eipService.bindIpToInstance(client, regionId, natId, ipArray);
+        eipService.bindIpToInstance(client, regionId, natId, AssociatedInstanceType.Nat, ipArray);
     }
 
     private void unbindSnatIpFromNat(IAcsClient client, String regionId, String snatTableId, String snatEntryId, String natId) throws PluginException, AliCloudException {
@@ -276,6 +276,6 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         }
         final DescribeSnatTableEntriesResponse.SnatTableEntry foundSnatEntry = response.getSnatTableEntries().get(0);
         final String[] ips = foundSnatEntry.getSnatIp().split(",");
-        eipService.unbindIpFromInstance(client, regionId, natId, ips);
+        eipService.unbindIpFromInstance(client, regionId, natId, AssociatedInstanceType.Nat, ips);
     }
 }
