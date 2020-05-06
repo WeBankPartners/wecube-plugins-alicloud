@@ -38,7 +38,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">vpcName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>-->
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -185,7 +185,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">destinationCidrBlock</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">routeTableId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">nextHopType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">nextHopType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">routeEntryName</parameter>
                 </inputParameters>
                 <outputParameters>
@@ -345,7 +345,6 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceStorageType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenew</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">category</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBParamGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBTimeZone</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBIsIgnoreCase</parameter>
                 </inputParameters>
@@ -434,14 +433,14 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">password</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">capacity</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceClass</parameter>
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceClass</parameter>-->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">zoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">chargeType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">engineVersion</parameter>
-<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seriesType</parameter>-->
-<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">architecture</parameter>-->
-<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">shardNumber</parameter>-->
-<!--                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">supportedNodeType</parameter>-->
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seriesType</parameter>-->
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">architecture</parameter>-->
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">shardNumber</parameter>-->
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">supportedNodeType</parameter>-->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">networkType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vpcId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
@@ -450,7 +449,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">backupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">privateIpAddress</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenew</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>-->
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -492,7 +491,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">masterZoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">slaveZoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">loadBalancerSpec</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>-->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">payType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">pricingCycle</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">duration</parameter>
@@ -534,7 +533,6 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">bandwidth</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">listenerPort</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">listenerProtocol</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">backendServerPort</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -686,7 +684,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">description</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupType</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>-->
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -836,7 +834,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">internetChargeType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">period</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">pricingCycle</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceGroupId</parameter>-->
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -869,7 +867,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">allocationId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceRegionId</parameter>
                 </inputParameters>
                 <outputParameters>
@@ -885,7 +883,6 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">allocationId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceType</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
