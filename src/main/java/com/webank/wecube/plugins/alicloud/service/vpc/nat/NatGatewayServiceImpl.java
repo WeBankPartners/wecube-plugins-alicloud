@@ -169,9 +169,14 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
+
+                // bind eip to nat gateway
                 bindEipToNat(client, regionId, requestDto.getNatId(), requestDto.getSnatIp());
+
+                // create snat entry
                 final String listStr = PluginStringUtils.handleCoreListStr(requestDto.getSnatIp(), true);
                 requestDto.setSnatIp(listStr);
+
 
                 CreateSnatEntryRequest request = requestDto.toSdk();
                 request.setRegionId(regionId);
