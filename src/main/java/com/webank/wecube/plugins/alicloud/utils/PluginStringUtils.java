@@ -89,8 +89,7 @@ public class PluginStringUtils {
             str = StringUtils.removeStart(rawStringList, "[");
             str = StringUtils.removeEnd(str, "]");
         }
-
-        return Arrays.asList(str.split(","));
+        return Arrays.stream(str.split(",")).map(String::trim).collect(Collectors.toList());
     }
 
     /**
