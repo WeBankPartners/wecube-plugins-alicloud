@@ -26,19 +26,6 @@ import java.util.List;
 @Service
 public class EipServiceImpl implements EipService {
 
-    public enum AssociatedInstanceType {
-        // ecs
-        EcsInstance,
-        // slb
-        SlbInstance,
-        // nat
-        Nat,
-        // HaVip
-        HaVip,
-        // network interface
-        NetworkInterface
-    }
-
     private static final Logger logger = LoggerFactory.getLogger(EipService.class);
 
     private final AcsClientStub acsClientStub;
@@ -369,17 +356,17 @@ public class EipServiceImpl implements EipService {
         return response.getEipAddresses().get(0);
     }
 
-    private boolean ifIpAddressBindInstance(IAcsClient client, String regionId, String ipAddress, String instanceId) throws PluginException, AliCloudException {
+    private boolean ifIpAddressBindInstance(IAcsClient client, String regionId, String ipAddress, String instanceId, AssociatedInstanceType instanceType) throws PluginException, AliCloudException {
         logger.info("Retrieving if the ip address: {} bind the instance: {}", ipAddress, instanceId);
         final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ipAddress);
 
-        return StringUtils.equals(instanceId, eipAddress.getInstanceId());
+        return StringUtils.equals(instanceId, eipAddress.getInstanceId()) && StringUtils.equals(instanceType.toString(), eipAddress.getInstanceType());
     }
 
     @Override
-    public void bindIpToInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException {
+    public void bindIpToInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
         for (String ip : ipAddress) {
-            if (ifIpAddressBindInstance(client, regionId, ip, instanceId)) {
+            if (ifIpAddressBindInstance(client, regionId, ip, instanceId, instanceType)) {
                 logger.info("The ip address: {} has already bound to that instance: {}", ipAddress, instanceId);
                 continue;
             }
@@ -392,6 +379,7 @@ public class EipServiceImpl implements EipService {
             request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
+            request.setInstanceType(instanceType.toString());
 
             logger.info("Associating EIP: {} to the instance: {}", allocationId, instanceId);
 
@@ -401,9 +389,9 @@ public class EipServiceImpl implements EipService {
     }
 
     @Override
-    public void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, String... ipAddress) throws PluginException, AliCloudException {
+    public void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
         for (String ip : ipAddress) {
-            if (!ifIpAddressBindInstance(client, regionId, ip, instanceId)) {
+            if (!ifIpAddressBindInstance(client, regionId, ip, instanceId, instanceType)) {
                 continue;
             }
             final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
@@ -412,6 +400,7 @@ public class EipServiceImpl implements EipService {
             request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
+            request.setInstanceType(instanceType.toString());
 
             logger.info("Unbind EIP: {} from isntance: {}", allocationId, instanceId);
 
