@@ -23,7 +23,8 @@ import java.util.regex.Pattern;
  */
 public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateDBInstanceRequest> {
 
-    static final String HIGH_AVAILABLE_ZONE_PATTERN = "^(.*)(MAZ|maz)(\\d+)-(.+)$";
+    static final String WECUBE_HIGH_AVAILABLE_ZONE_PATTERN = "^(.*)(MAZ|maz)(\\d+)-(.+)$";
+    static final String ALICLOUD_HIGH_AVAILABLE_ZONE_PATTERN = "^(?!\\[)+(.*)(MAZ)(\\d+)(.+)(?!])+$";
 
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
@@ -476,27 +477,29 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         }
 
         if (!StringUtils.isEmpty(this.getZoneId())) {
-            String resultZoneId = null;
+            String resultZoneId;
             final List<String> strings = PluginStringUtils.splitStringList(this.getZoneId());
             if (StringUtils.equalsIgnoreCase(RDSCategory.Basic.toString(), this.getCategory())) {
                 // basic RDS category
-                if (strings.size() != 1) {
-                    throw new PluginException("RDS basic category support one zone only.");
+                if (isValidBasicZoneId(this.getZoneId())) {
+                    resultZoneId = this.getZoneId();
                 } else {
-                    final String rawStr = strings.get(0);
-                    if (StringUtils.containsIgnoreCase(rawStr, "MAZ")) {
+                    if (strings.size() != 1) {
+                        throw new PluginException("RDS basic category support one zone only.");
+                    } else {
+                        final String rawStr = strings.get(0);
                         resultZoneId = removeMAZField(rawStr);
                     }
                 }
             } else {
                 // other RDS categories
-                resultZoneId = concatHighAvailableZoneId(strings);
+                if (isValidMAZZoneId(this.getZoneId())) {
+                    resultZoneId = this.getZoneId();
+                } else {
+                    resultZoneId = concatHighAvailableZoneId(strings);
+                }
             }
-            if (null == resultZoneId) {
-                throw new PluginException("Error while handling zoneId");
-            } else {
-                this.setZoneId(resultZoneId);
-            }
+            this.setZoneId(resultZoneId);
         }
 
         if (!StringUtils.isEmpty(this.getSecurityIPList()) && PluginStringUtils.isListStr(this.getSecurityIPList())) {
@@ -539,7 +542,7 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
      * @throws PluginException plugin exception
      */
     private String removeMAZField(String s) throws PluginException {
-        final Pattern pattern = Pattern.compile(HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
+        final Pattern pattern = Pattern.compile(WECUBE_HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(s);
         String result = StringUtils.EMPTY;
 
@@ -571,7 +574,7 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
      * @throws PluginException plugin exception
      */
     private String concatHighAvailableZoneId(List<String> rawZoneStringList) throws PluginException {
-        final Pattern pattern = Pattern.compile(HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
+        final Pattern pattern = Pattern.compile(WECUBE_HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
         Set<String> prefixSet = new HashSet<>();
         Set<String> indexSet = new HashSet<>();
         Set<String> postFixSet = new HashSet<>();
@@ -617,6 +620,14 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         String prefix = prefixSet.iterator().next();
         String index = indexSet.iterator().next();
         return prefix.concat(index).concat(joiner.toString());
+    }
+
+    private boolean isValidBasicZoneId(String zoneId) {
+        return !StringUtils.containsIgnoreCase(zoneId, "MAZ");
+    }
+
+    private boolean isValidMAZZoneId(String rawString) {
+        return rawString.matches(ALICLOUD_HIGH_AVAILABLE_ZONE_PATTERN);
     }
 
 }
