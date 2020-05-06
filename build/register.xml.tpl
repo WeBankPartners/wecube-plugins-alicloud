@@ -219,12 +219,12 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceSpec</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">imageId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">imageId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenew</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenewPeriod</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">hostName</parameter>
+                    <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">hostName</parameter>-->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">password</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">zoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskSize</parameter>
