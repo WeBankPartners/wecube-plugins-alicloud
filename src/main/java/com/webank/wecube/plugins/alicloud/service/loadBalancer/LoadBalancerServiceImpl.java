@@ -196,9 +196,14 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final Integer listenerPort = Integer.parseInt(requestDto.getListenerPort());
                 final String loadBalancerId = requestDto.getLoadBalancerId();
                 final String listenerProtocol = requestDto.getListenerProtocol();
+                final Integer listenerPort;
+                try {
+                    listenerPort = Integer.parseInt(requestDto.getListenerPort());
+                } catch (NumberFormatException ex) {
+                    throw new PluginException(ex.getMessage());
+                }
 
                 logger.info("Adding backend server to load balancer: {}", requestDto.toString());
 
