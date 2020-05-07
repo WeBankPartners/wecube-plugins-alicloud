@@ -327,6 +327,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">accountPassword</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">accountDescription</parameter>
                     <!-- db info-->
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceSpec</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceClass</parameter>
