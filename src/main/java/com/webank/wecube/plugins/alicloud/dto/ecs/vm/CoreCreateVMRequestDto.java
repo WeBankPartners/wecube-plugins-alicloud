@@ -2,9 +2,12 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 
 import com.aliyuncs.ecs.model.v20140526.CreateInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.ecs.vm.InstanceChargeType;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -661,8 +664,12 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
             this.setTags(tags);
         }
 
-        if (!StringUtils.isEmpty(this.getInstanceChargeType())) {
-            this.setInstanceChargeType(StringUtils.capitalize(this.getInstanceChargeType().toLowerCase()));
+        if (!StringUtils.isEmpty(instanceChargeType)) {
+            final InstanceChargeType type = EnumUtils.getEnumIgnoreCase(InstanceChargeType.class, instanceChargeType);
+            if (null == type) {
+                throw new PluginException("Invalid instance charge type");
+            }
+            instanceChargeType = type.toString();
         }
     }
 }
