@@ -116,10 +116,15 @@ public class RedisServiceImpl implements RedisService {
 
 
                 // append security ips to the created instance
-                appendSecurityIps(client, regionId, requestDto.getSecurityIps(), response.getInstanceId(), requestDto.getModifyMode());
+                if (StringUtils.isNotEmpty(requestDto.getSecurityIps())) {
+                    appendSecurityIps(client, regionId, requestDto.getSecurityIps(), response.getInstanceId(), requestDto.getModifyMode());
+                }
 
                 // bind security group to the created instance
-                bindSecurityGroup(client, regionId, requestDto.getSecurityGroupId(), response.getInstanceId());
+                if (StringUtils.isNotEmpty(requestDto.getSecurityGroupId())) {
+                    bindSecurityGroup(client, regionId, requestDto.getSecurityGroupId(), response.getInstanceId());
+                }
+
 
                 result = result.fromSdk(response, encryptedPassword);
 
