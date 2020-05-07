@@ -110,7 +110,8 @@ public class RDSServiceImpl implements RDSService {
                     final String foundDBInstanceClass = rdsResourceSeeker.findAvailableResource(client,
                             requestDto.getEngine(),
                             requestDto.getdBInstanceSpec(),
-                            regionId, requestDto.getZoneId(),
+                            regionId,
+                            requestDto.getZoneId(),
                             requestDto.getEngineVersion(),
                             requestDto.getPayType(),
                             requestDto.getDBInstanceStorageType(),
@@ -145,6 +146,9 @@ public class RDSServiceImpl implements RDSService {
                 createAccountRequest.setDBInstanceId(createdDBInstanceId);
                 createRDSAccount(client, createAccountRequest);
 
+                // bind security group to the created RDS instance
+                bindSecurityGroupToInstance(client, regionId, requestDto.getSecurityGroupId(), response.getDBInstanceId());
+
                 // return result
                 result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword);
 
@@ -162,6 +166,14 @@ public class RDSServiceImpl implements RDSService {
 
         }
         return resultList;
+    }
+
+    private void bindSecurityGroupToInstance(IAcsClient client, String regionId, String securityGroupId, String dbInstanceId) {
+        ModifySecurityGroupConfigurationRequest request = new ModifySecurityGroupConfigurationRequest();
+        request.setSecurityGroupId(securityGroupId);
+        request.setDBInstanceId(dbInstanceId);
+
+        acsClientStub.request(client, request, regionId);
     }
 
     @Override
