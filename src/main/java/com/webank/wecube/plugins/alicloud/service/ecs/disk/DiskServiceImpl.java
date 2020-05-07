@@ -196,7 +196,7 @@ public class DiskServiceImpl implements DiskService {
         }
 
         final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
-        final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
+        final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         // scp diskScripts
         final List<String> resourceAbsolutePathList = PluginResourceUtils.getResourceAbsolutePath(UNFORMATTED_DISK_INFO_SCRIPT_PATH, MOUNT_SCRIPT_PATH);
@@ -243,7 +243,7 @@ public class DiskServiceImpl implements DiskService {
 
 
         final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
-        final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
+        final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         final DetachDiskRequest request = requestDto.toSdkCrossLineage(DetachDiskRequest.class);
         request.setRegionId(regionId);
