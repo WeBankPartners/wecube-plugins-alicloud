@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateDBInstanceResponseDto, CreateDBInstanceResponse> {
 
     private String requestId;
+    @JsonProperty(value = "dBInstanceId")
     private String dBInstanceId;
     private String orderId;
     private String connectionString;
