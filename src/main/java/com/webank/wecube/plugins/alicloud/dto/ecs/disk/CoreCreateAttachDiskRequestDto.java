@@ -53,6 +53,8 @@ public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implemen
     private String mountDir;
     @NotEmpty(message = "Seed field is mandatory.")
     private String seed;
+    @NotEmpty(message = "instanceGuid field is mandatory")
+    private String instanceGuid;
 
     private String keyPairName;
     private String bootable;
@@ -302,6 +304,15 @@ public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implemen
         this.device = device;
     }
 
+
+    public String getInstanceGuid() {
+        return instanceGuid;
+    }
+
+    public void setInstanceGuid(String instanceGuid) {
+        this.instanceGuid = instanceGuid;
+    }
+
     @Override
     public CreateDiskRequest toSdk() {
         if (null != this.getZoneId()) {
@@ -341,10 +352,12 @@ public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implemen
                 .append("fileSystemType", fileSystemType)
                 .append("mountDir", mountDir)
                 .append("seed", seed)
+                .append("instanceGuid", instanceGuid)
                 .append("keyPairName", keyPairName)
                 .append("bootable", bootable)
                 .append("deleteWithInstance", deleteWithInstance)
                 .append("device", device)
                 .toString();
     }
+
 }
