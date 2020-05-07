@@ -147,7 +147,9 @@ public class RDSServiceImpl implements RDSService {
                 createRDSAccount(client, createAccountRequest);
 
                 // bind security group to the created RDS instance
-                bindSecurityGroupToInstance(client, regionId, requestDto.getSecurityGroupId(), response.getDBInstanceId());
+                if (StringUtils.isNotEmpty(requestDto.getSecurityGroupId())) {
+                    bindSecurityGroupToInstance(client, regionId, requestDto.getSecurityGroupId(), response.getDBInstanceId());
+                }
 
                 // return result
                 result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword);
