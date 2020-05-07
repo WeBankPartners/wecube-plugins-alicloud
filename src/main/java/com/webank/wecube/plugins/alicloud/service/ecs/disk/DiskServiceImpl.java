@@ -20,6 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -52,6 +54,12 @@ public class DiskServiceImpl implements DiskService {
     private final PluginSshdClient pluginSshdClient;
     private final PasswordManager passwordManager;
 
+    @Value(MOUNT_SCRIPT_PATH)
+    Resource mountScriptResource;
+    @Value(UNMOUNT_SCRIPT_PATH)
+    Resource unmountScriptResource;
+    @Value(UNFORMATTED_DISK_INFO_SCRIPT_PATH)
+    Resource unFormattedDiskScriptResource;
 
     @Autowired
     public DiskServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, VMService vmService, PluginScpClient pluginScpClient, PluginSshdClient pluginSshdClient, PasswordManager passwordManager) {
@@ -199,7 +207,7 @@ public class DiskServiceImpl implements DiskService {
         final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         // scp diskScripts
-        final List<String> resourceAbsolutePathList = PluginResourceUtils.getResourceAbsolutePath(UNFORMATTED_DISK_INFO_SCRIPT_PATH, MOUNT_SCRIPT_PATH);
+        final List<String> resourceAbsolutePathList = PluginResourceUtils.getResourceAbsolutePath(unFormattedDiskScriptResource, mountScriptResource);
         for (String resourceAbsolutePath : resourceAbsolutePathList) {
             pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
         }
@@ -253,8 +261,8 @@ public class DiskServiceImpl implements DiskService {
         }
 
         // scp the unmount script to target server
-        final String resourceAbsolutePath = PluginResourceUtils.getResourceAbsolutePath(UNMOUNT_SCRIPT_PATH);
-        pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
+        final String absPath = PluginResourceUtils.getResourceAbsolutePath(unmountScriptResource);
+        pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, absPath, DEFAULT_REMOTE_DIRECTORY_PATH);
 
         // ssh to host and execute the unmount script
         unmountDisk(vmInstanceIp, password, requestDto.getVolumeName(), requestDto.getUnmountDir());
