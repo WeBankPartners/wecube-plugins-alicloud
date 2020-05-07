@@ -14,17 +14,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
+
+import static com.webank.wecube.plugins.alicloud.support.ZoneIdHelper.*;
 
 /**
  * @author howechen
  */
 public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateDBInstanceRequest> {
-
-    static final String WECUBE_HIGH_AVAILABLE_ZONE_PATTERN = "^(.*)(MAZ|maz)(\\d+)-(.+)$";
-    static final String ALICLOUD_HIGH_AVAILABLE_ZONE_PATTERN = "^(?!\\[)+(.*)(MAZ)(\\d+)(.+)(?!])+$";
 
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
@@ -484,18 +481,16 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     @Override
     public void adaptToAliCloud() throws PluginException {
-        if (!StringUtils.isEmpty(this.getPeriod())) {
-            this.setPeriod(StringUtils.capitalize(this.getPeriod()));
+        if (!StringUtils.isEmpty(period)) {
+            period = StringUtils.capitalize(period);
         }
 
-        if (!StringUtils.isEmpty(this.getZoneId())) {
-            String resultZoneId;
-            final List<String> strings = PluginStringUtils.splitStringList(this.getZoneId());
-            if (StringUtils.equalsIgnoreCase(RDSCategory.Basic.toString(), this.getCategory())) {
+        if (!StringUtils.isEmpty(zoneId)) {
+            String resultZoneId = zoneId;
+            final List<String> strings = PluginStringUtils.splitStringList(zoneId);
+            if (StringUtils.equalsIgnoreCase(RDSCategory.Basic.toString(), category)) {
                 // basic RDS category
-                if (isValidBasicZoneId(this.getZoneId())) {
-                    resultZoneId = this.getZoneId();
-                } else {
+                if (!isValidBasicZoneId(this.getZoneId())) {
                     if (strings.size() != 1) {
                         throw new PluginException("RDS basic category support one zone only.");
                     } else {
@@ -505,144 +500,44 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
                 }
             } else {
                 // other RDS categories
-                if (isValidMAZZoneId(this.getZoneId())) {
-                    resultZoneId = this.getZoneId();
-                } else {
+                if (!isValidMAZZoneId(this.getZoneId())) {
                     resultZoneId = concatHighAvailableZoneId(strings);
                 }
             }
-            this.setZoneId(resultZoneId);
+            zoneId = resultZoneId;
         }
 
-        if (!StringUtils.isEmpty(this.getSecurityIPList()) && PluginStringUtils.isListStr(this.getSecurityIPList())) {
-            this.setSecurityIPList(PluginStringUtils.removeSquareBracket(this.getSecurityIPList()));
+        if (!StringUtils.isEmpty(securityIPList) && PluginStringUtils.isListStr(securityIPList)) {
+            securityIPList = PluginStringUtils.removeSquareBracket(securityIPList);
         }
 
-        if (!StringUtils.isEmpty(this.getEngine())) {
-            final RDSResourceSeeker.RDSEngine engineType = EnumUtils.getEnumIgnoreCase(RDSResourceSeeker.RDSEngine.class, this.getEngine());
+        if (!StringUtils.isEmpty(engine)) {
+            final RDSResourceSeeker.RDSEngine engineType = EnumUtils.getEnumIgnoreCase(RDSResourceSeeker.RDSEngine.class, engine);
             if (null == engineType) {
                 throw new PluginException("Invalid engine type.");
             }
             switch (engineType) {
                 case MARIADB:
-                    this.setEngine(RDSResourceSeeker.RDSEngine.MARIADB.getEngine());
+                    engine = RDSResourceSeeker.RDSEngine.MARIADB.getEngine();
                     break;
                 case MYSQL:
-                    this.setEngine(RDSResourceSeeker.RDSEngine.MYSQL.getEngine());
+                    engine = RDSResourceSeeker.RDSEngine.MYSQL.getEngine();
                     break;
                 default:
                     break;
             }
         }
 
-        if (!StringUtils.isEmpty(this.getPayType())) {
-            this.setPayType(StringUtils.capitalize(this.getPayType().toLowerCase()));
+        if (!StringUtils.isEmpty(payType)) {
+            payType = StringUtils.capitalize(payType.toLowerCase());
         }
 
-        if (!StringUtils.isEmpty(this.getPeriod())) {
-            this.setPeriod(StringUtils.capitalize(this.getPeriod().toLowerCase()));
+        if (!StringUtils.isEmpty(period)) {
+            period = StringUtils.capitalize(period.toLowerCase());
         }
 
         if (!StringUtils.isEmpty(securityGroupId)) {
-            this.setSecurityGroupId(PluginStringUtils.removeSquareBracket(securityGroupId));
+            securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
         }
-    }
-
-    /**
-     * Remove MAZ field from given zoneId
-     * example:
-     * ap-southeast-MAZ2-b -> ap-southeast-2b
-     *
-     * @param s rawZoneId string
-     * @return result string
-     * @throws PluginException plugin exception
-     */
-    private String removeMAZField(String s) throws PluginException {
-        final Pattern pattern = Pattern.compile(WECUBE_HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(s);
-        String result = StringUtils.EMPTY;
-
-        /*
-         * ap-southeast-1MAZ2-a
-         * group 0: full word
-         * group 1: ap-southeast-1
-         * group 2: MAZ
-         * group 3: 2
-         * group 4: a
-         */
-        while (matcher.find()) {
-            try {
-                result = result.concat(matcher.group(1)).concat(matcher.group(4));
-            } catch (IndexOutOfBoundsException ex) {
-                throw new PluginException(ex.getMessage());
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Concat dhigh available zone ID to alicloud's requirement
-     * example:
-     * [ap-southeast-1MAZ2-a, ap-southeast-1MAZ2-b] -> ap-southeast-1MAZ2(a,b)
-     *
-     * @param rawZoneStringList raw zone string list
-     * @return concat result
-     * @throws PluginException plugin exception
-     */
-    private String concatHighAvailableZoneId(List<String> rawZoneStringList) throws PluginException {
-        final Pattern pattern = Pattern.compile(WECUBE_HIGH_AVAILABLE_ZONE_PATTERN, Pattern.MULTILINE);
-        Set<String> prefixSet = new HashSet<>();
-        Set<String> indexSet = new HashSet<>();
-        Set<String> postFixSet = new HashSet<>();
-        // find prefix, store postfix
-        for (String rawStr : rawZoneStringList) {
-            /*
-             * ap-southeast-1MAZ2-a
-             * group 0: full word
-             * group 1: ap-southeast-1
-             * group 2: MAZ
-             * group 3: 2
-             * group 4: a
-             */
-            final Matcher matcher = pattern.matcher(rawStr);
-            while (matcher.find()) {
-                try {
-                    prefixSet.add(matcher.group(1).concat(matcher.group(2).toUpperCase()));
-                    indexSet.add(matcher.group(3));
-                    postFixSet.add(matcher.group(4));
-                } catch (IndexOutOfBoundsException ex) {
-                    throw new PluginException(ex.getMessage());
-                }
-            }
-        }
-
-        if (prefixSet.size() != 1) {
-            throw new PluginException("Given multiple prefixes while handling zoneId.");
-        }
-
-        if (indexSet.size() != 1) {
-            throw new PluginException("Given multiple indexes while handling zoneId");
-        }
-        List<String> postFixList = new ArrayList<>(postFixSet);
-        Collections.sort(postFixList);
-
-        // assembling postfix
-        StringJoiner joiner = new StringJoiner(",", "(", ")");
-
-        for (String postFix : postFixList) {
-            joiner.add(postFix);
-        }
-
-        String prefix = prefixSet.iterator().next();
-        String index = indexSet.iterator().next();
-        return prefix.concat(index).concat(joiner.toString());
-    }
-
-    private boolean isValidBasicZoneId(String zoneId) {
-        return !StringUtils.containsIgnoreCase(zoneId, "MAZ");
-    }
-
-    private boolean isValidMAZZoneId(String rawString) {
-        return rawString.matches(ALICLOUD_HIGH_AVAILABLE_ZONE_PATTERN);
     }
 }

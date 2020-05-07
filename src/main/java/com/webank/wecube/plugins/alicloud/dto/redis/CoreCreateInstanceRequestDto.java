@@ -11,6 +11,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
+
+import static com.webank.wecube.plugins.alicloud.support.ZoneIdHelper.*;
 
 /**
  * @author howechen
@@ -428,8 +431,8 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
     @Override
     public void adaptToAliCloud() throws PluginException {
-        if (StringUtils.isEmpty(this.getChargeType())) {
-            this.setChargeType(StringUtils.capitalize(this.getChargeType().toLowerCase()));
+        if (!StringUtils.isEmpty(chargeType)) {
+            chargeType = StringUtils.capitalize(this.getChargeType().toLowerCase());
         }
 
         if (!StringUtils.isEmpty(securityIps)) {
@@ -438,6 +441,24 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
         if (!StringUtils.isEmpty(securityGroupId)) {
             securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
+        }
+
+        if (!StringUtils.isEmpty(zoneId)) {
+            String resultZoneId = zoneId;
+            final List<String> zoneIdList = PluginStringUtils.splitStringList(zoneId);
+            if (zoneIdList.size() == 1) {
+                // basic RDS category
+                if (!isValidBasicZoneId(zoneId)) {
+                    final String rawStr = zoneIdList.get(0);
+                    resultZoneId = removeMAZField(rawStr);
+                }
+            } else {
+                // other RDS categories
+                if (!isValidMAZZoneId(zoneId)) {
+                    resultZoneId = concatHighAvailableZoneId(zoneIdList);
+                }
+            }
+            zoneId = resultZoneId;
         }
     }
 
