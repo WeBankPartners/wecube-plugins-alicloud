@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.redis.ChargeType;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -432,7 +434,11 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
     @Override
     public void adaptToAliCloud() throws PluginException {
         if (!StringUtils.isEmpty(chargeType)) {
-            chargeType = StringUtils.capitalize(this.getChargeType().toLowerCase());
+            final ChargeType type = EnumUtils.getEnumIgnoreCase(ChargeType.class, chargeType);
+            if (type == null) {
+                throw new PluginException("Invalid charge type");
+            }
+            chargeType = type.toString();
         }
 
         if (!StringUtils.isEmpty(securityIps)) {
