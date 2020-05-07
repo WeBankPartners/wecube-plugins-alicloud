@@ -32,6 +32,9 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     @JsonProperty("dBInstanceSpec")
     private String dBInstanceSpec;
 
+    // security group config
+    private String securityGroupId;
+
     // RDS user management
     private String seed;
     private String accountType = "Super";
@@ -422,12 +425,21 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         this.dBParamGroupId = dBParamGroupId;
     }
 
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("dBInstanceId", dBInstanceId)
                 .append("dBInstanceSpec", dBInstanceSpec)
+                .append("securityGroupId", securityGroupId)
                 .append("seed", seed)
                 .append("accountType", accountType)
                 .append("accountDescription", accountDescription)
@@ -530,6 +542,10 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
         if (!StringUtils.isEmpty(this.getPeriod())) {
             this.setPeriod(StringUtils.capitalize(this.getPeriod().toLowerCase()));
         }
+
+        if (!StringUtils.isEmpty(securityGroupId)) {
+            this.setSecurityGroupId(PluginStringUtils.removeSquareBracket(securityGroupId));
+        }
     }
 
     /**
@@ -629,5 +645,4 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private boolean isValidMAZZoneId(String rawString) {
         return rawString.matches(ALICLOUD_HIGH_AVAILABLE_ZONE_PATTERN);
     }
-
 }
