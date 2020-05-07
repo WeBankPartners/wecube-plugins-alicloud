@@ -432,7 +432,7 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
             this.setChargeType(StringUtils.capitalize(this.getChargeType().toLowerCase()));
         }
 
-        if (StringUtils.isEmpty(securityIps)) {
+        if (!StringUtils.isEmpty(securityIps)) {
             securityIps = PluginStringUtils.removeSquareBracket(securityIps);
         }
 
