@@ -359,9 +359,13 @@ public class VMServiceImpl implements VMService {
                     throw new PluginException(msg);
                 }
 
+                // current list - target list
                 final DescribeInstancesResponse.Instance foundInstance = retrieveVMResponse.getInstances().get(0);
                 List<String> currentSecurityGroupIdList = foundInstance.getSecurityGroupIds();
                 currentSecurityGroupIdList.removeAll(securityGroupIdList);
+                if (currentSecurityGroupIdList.isEmpty()) {
+                    throw new PluginException("At least one security group should be remained.");
+                }
                 currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
 
                 logger.info("Unbinding security group with VM instance: {}", requestDto.toString());
