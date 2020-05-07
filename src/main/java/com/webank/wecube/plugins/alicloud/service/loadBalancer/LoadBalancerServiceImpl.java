@@ -339,8 +339,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 result = result.fromSdk(response);
 
                 // delete listener according to the request
+                // if delete listener, delete the vServerGroup as well
                 if (requestDto.ifDeleteListener()) {
                     deleteListener(requestDto, regionId, client, listenerPort);
+                    deleteVSwitchGroup(client, regionId, requestDto.getvServerGroupId());
                 }
 
             } catch (PluginException | AliCloudException ex) {
@@ -354,6 +356,13 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             }
         }
         return resultList;
+    }
+
+    private void deleteVSwitchGroup(IAcsClient client, String regionId, String vServerGroupId) throws AliCloudException {
+        DeleteVServerGroupRequest request = new DeleteVServerGroupRequest();
+        request.setVServerGroupId(vServerGroupId);
+
+        acsClientStub.request(client, request, regionId);
     }
 
     private void deleteListener(CoreRemoveBackendServerRequestDto requestDto, String regionId, IAcsClient client, Integer listenerPort) throws AliCloudException {
