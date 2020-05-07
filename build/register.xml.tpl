@@ -572,6 +572,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <!-- instance password -->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceGuid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">password</parameter>
                     <!-- attach disk to instance -->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">fileSystemType</parameter>
@@ -601,6 +602,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">diskId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceGuid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">unmountDir</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">password</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">volumeName</parameter>
