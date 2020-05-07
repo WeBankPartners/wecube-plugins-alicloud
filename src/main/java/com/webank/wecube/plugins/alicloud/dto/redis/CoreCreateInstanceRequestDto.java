@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -65,6 +66,13 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
     @NotEmpty(message = "chargeType field is mandatory")
     private String chargeType;
     private String config;
+
+    // securityIp config
+    private String modifyMode = "Append";
+    private String securityIps;
+
+    // security group config
+    private String securityGroupId;
 
     public CoreCreateInstanceRequestDto() {
     }
@@ -316,6 +324,30 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
     public void setSeed(String seed) {
         this.seed = seed;
     }
+
+    public String getModifyMode() {
+        return modifyMode;
+    }
+
+    public void setModifyMode(String modifyMode) {
+        this.modifyMode = modifyMode;
+    }
+
+    public String getSecurityIps() {
+        return securityIps;
+    }
+
+    public void setSecurityIps(String securityIps) {
+        this.securityIps = securityIps;
+    }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
 //
 //    public String getSeriesType() {
 //        return seriesType;
@@ -388,6 +420,9 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
                 .append("vpcId", vpcId)
                 .append("chargeType", chargeType)
                 .append("config", config)
+                .append("modifyMode", modifyMode)
+                .append("securityIps", securityIps)
+                .append("securityGroupId", securityGroupId)
                 .toString();
     }
 
@@ -396,5 +431,15 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
         if (StringUtils.isEmpty(this.getChargeType())) {
             this.setChargeType(StringUtils.capitalize(this.getChargeType().toLowerCase()));
         }
+
+        if (StringUtils.isEmpty(securityIps)) {
+            securityIps = PluginStringUtils.removeSquareBracket(securityIps);
+        }
+
+        if (!StringUtils.isEmpty(securityGroupId)) {
+            securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
+        }
     }
+
+
 }
