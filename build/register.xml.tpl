@@ -438,6 +438,8 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">zoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">chargeType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">engineVersion</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityIps</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
                     <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seriesType</parameter>-->
                     <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">architecture</parameter>-->
                     <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">shardNumber</parameter>-->
