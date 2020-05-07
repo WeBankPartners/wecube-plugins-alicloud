@@ -90,9 +90,7 @@ public class RDSServiceImpl implements RDSService {
                             continue;
                         }
                     } catch (AliCloudException ex) {
-                        if (TOLERABLE_DB_NOT_FOUND_CODE.equalsIgnoreCase(ex.getErrCode())) {
-                            continue;
-                        } else {
+                        if (!TOLERABLE_DB_NOT_FOUND_CODE.equalsIgnoreCase(ex.getErrCode())) {
                             throw ex;
                         }
                     }
