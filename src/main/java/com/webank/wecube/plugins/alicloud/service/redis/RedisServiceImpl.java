@@ -114,6 +114,13 @@ public class RedisServiceImpl implements RedisService {
                 Function<?, Boolean> func = o -> ifRedisInStatus(client, regionId, response.getInstanceId(), InstanceStatus.NORMAL);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
+
+                // append security ips to the created instance
+                appendSecurityIps(client, regionId, requestDto.getSecurityIps(), response.getInstanceId(), requestDto.getModifyMode());
+
+                // bind security group to the created instance
+                bindSecurityGroup(client, regionId, requestDto.getSecurityGroupId(), response.getInstanceId());
+
                 result = result.fromSdk(response, encryptedPassword);
 
             } catch (PluginException | AliCloudException ex) {
@@ -238,5 +245,23 @@ public class RedisServiceImpl implements RedisService {
         DescribeInstancesResponse response;
         response = this.acsClientStub.request(client, request);
         return response;
+    }
+
+
+    private void bindSecurityGroup(IAcsClient client, String regionId, String securityGroupId, String instanceId) throws AliCloudException {
+        ModifySecurityGroupConfigurationRequest request = new ModifySecurityGroupConfigurationRequest();
+        request.setSecurityGroupId(securityGroupId);
+        request.setDBInstanceId(instanceId);
+
+        acsClientStub.request(client, request, regionId);
+    }
+
+    private void appendSecurityIps(IAcsClient client, String regionId, String securityIps, String instanceId, String modifyMode) throws AliCloudException {
+        ModifySecurityIpsRequest request = new ModifySecurityIpsRequest();
+        request.setSecurityIps(securityIps);
+        request.setInstanceId(instanceId);
+        request.setModifyMode(modifyMode);
+
+        acsClientStub.request(client, request, regionId);
     }
 }
