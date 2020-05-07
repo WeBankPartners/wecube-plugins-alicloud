@@ -35,6 +35,9 @@ public class CoreDetachDeleteDiskRequestDto extends CoreRequestInputDto implemen
     @NotEmpty(message = "instanceId is mandatory.")
     private String instanceId;
 
+    @NotEmpty(message = "instanceGuid field is mandatory")
+    private String instanceGuid;
+
     public CoreDetachDeleteDiskRequestDto() {
     }
 
@@ -126,6 +129,14 @@ public class CoreDetachDeleteDiskRequestDto extends CoreRequestInputDto implemen
         this.instanceId = instanceId;
     }
 
+    public String getInstanceGuid() {
+        return instanceGuid;
+    }
+
+    public void setInstanceGuid(String instanceGuid) {
+        this.instanceGuid = instanceGuid;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
@@ -141,6 +152,7 @@ public class CoreDetachDeleteDiskRequestDto extends CoreRequestInputDto implemen
                 .append("volumeName", volumeName)
                 .append("deleteWithInstance", deleteWithInstance)
                 .append("instanceId", instanceId)
+                .append("instanceGuid", instanceGuid)
                 .toString();
     }
 }
