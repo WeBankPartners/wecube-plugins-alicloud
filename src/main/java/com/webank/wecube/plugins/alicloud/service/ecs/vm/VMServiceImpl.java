@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 @Service
 public class VMServiceImpl implements VMService {
 
-    private static final String VM_INSTANCE_PENDING = "Pending";
 
     private static final Logger logger = LoggerFactory.getLogger(VMService.class);
 
