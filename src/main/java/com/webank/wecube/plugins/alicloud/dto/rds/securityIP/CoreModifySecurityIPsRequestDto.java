@@ -2,8 +2,11 @@ package com.webank.wecube.plugins.alicloud.dto.rds.securityIP;
 
 import com.aliyuncs.rds.model.v20140815.ModifySecurityIpsRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -22,7 +25,6 @@ public class CoreModifySecurityIPsRequestDto extends CoreRequestInputDto impleme
     @NotEmpty(message = "dBInstanceId field is mandatory.")
     @JsonProperty(value = "dBInstanceId")
     private String dBInstanceId;
-    @NotEmpty(message = "modifyMode field is mandatory.")
     private String modifyMode;
     @JsonProperty(value = "dBInstanceIPArrayAttribute")
     private String dBInstanceIPArrayAttribute;
@@ -107,5 +109,12 @@ public class CoreModifySecurityIPsRequestDto extends CoreRequestInputDto impleme
                 .append("modifyMode", modifyMode)
                 .append("dBInstanceIPArrayAttribute", dBInstanceIPArrayAttribute)
                 .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (StringUtils.isNotEmpty(securityIps)) {
+            securityIps = PluginStringUtils.handleCoreListStr(securityIps, true);
+        }
     }
 }
