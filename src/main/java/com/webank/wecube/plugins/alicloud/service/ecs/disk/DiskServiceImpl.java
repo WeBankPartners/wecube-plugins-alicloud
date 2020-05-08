@@ -307,7 +307,7 @@ public class DiskServiceImpl implements DiskService {
         String command = "python "
                 .concat(DEFAULT_REMOTE_DIRECTORY_PATH).concat(MOUNT_SCRIPT_NAME)
                 .concat(" -d ").concat(volumeName)
-                .concat(" -f ").concat(fileSystemType)
+                .concat(" -f ").concat(fileSystemType.toLowerCase())
                 .concat(" -m ").concat(mountDir);
         pluginSshdClient.runWithReturn(vmInstanceIp, PluginSshdClient.DEFAULT_USER, password, PluginSshdClient.PORT, command);
     }
