@@ -4,8 +4,10 @@ import com.aliyuncs.rds.model.v20140815.CreateDBInstanceResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author howechen
@@ -23,8 +25,8 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
     private String accountName;
     @JsonProperty(value = "accountPassword")
     private String accountEncryptedPassword;
-    @JsonProperty("dBInstanceSpec")
-    private String dBInstanceSpec;
+    private String cpu;
+    private String memory;
 
     public CoreCreateDBInstanceResponseDto() {
     }
@@ -85,20 +87,30 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
         this.accountEncryptedPassword = accountEncryptedPassword;
     }
 
-
-    public String getdBInstanceSpec() {
-        return dBInstanceSpec;
+    public String getCpu() {
+        return cpu;
     }
 
-    public void setdBInstanceSpec(String dBInstanceSpec) {
-        this.dBInstanceSpec = dBInstanceSpec;
+    public void setCpu(String cpu) {
+        this.cpu = cpu;
     }
+
+    public String getMemory() {
+        return memory;
+    }
+
+    public void setMemory(String memory) {
+        this.memory = memory;
+    }
+
 
     public CoreCreateDBInstanceResponseDto fromSdk(CreateDBInstanceResponse response, String accountName, String accountEncryptedPassword, String dBInstanceSpec) {
+        final Pair<String, String> cpuMemoryPair = PluginStringUtils.splitCoreAndMemory(dBInstanceSpec);
         final CoreCreateDBInstanceResponseDto result = this.fromSdk(response);
         result.setAccountName(accountName);
         result.setAccountEncryptedPassword(accountEncryptedPassword);
-        result.setdBInstanceSpec(dBInstanceSpec);
+        result.setCpu(cpuMemoryPair.getKey());
+        result.setMemory(cpuMemoryPair.getValue());
         return result;
     }
 
@@ -113,8 +125,10 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
                 .append("port", port)
                 .append("accountName", accountName)
                 .append("accountEncryptedPassword", accountEncryptedPassword)
-                .append("dBInstanceSpec", dBInstanceSpec)
+                .append("cpu", cpu)
+                .append("memory", memory)
                 .toString();
     }
+
 
 }
