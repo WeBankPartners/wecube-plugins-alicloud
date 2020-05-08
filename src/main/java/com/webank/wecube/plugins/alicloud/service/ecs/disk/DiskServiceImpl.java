@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.ecs.disk;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
+import com.google.common.collect.Lists;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
@@ -13,21 +14,21 @@ import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginObjectUtils;
-import com.webank.wecube.plugins.alicloud.utils.PluginResourceUtils;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+
+import static com.webank.wecube.plugins.alicloud.service.ecs.disk.DiskScriptHelper.*;
 
 /**
  * @author howechen
@@ -37,15 +38,6 @@ public class DiskServiceImpl implements DiskService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiskService.class);
 
-    private static final String DISK_SCRIPT_PATH = "classpath:diskScript/";
-    private static final String MOUNT_SCRIPT_PATH = "classpath:diskScript/formatAndMountDisk.py";
-    private static final String MOUNT_SCRIPT_NAME = "formatAndMountDisk.py";
-    private static final String UNMOUNT_SCRIPT_PATH = "classpath:diskScript/unmountDisk.py";
-    private static final String UNMOUNT_SCRIPT_NAME = "unmountDisk.py";
-    private static final String UNFORMATTED_DISK_INFO_SCRIPT_PATH = "classpath:diskScript/getUnformatedDisk.py";
-    private static final String UNFORMATTED_DISK_INFO_SCRIPT_NAME = "getUnformatedDisk.py";
-    private static final String DEFAULT_REMOTE_DIRECTORY_PATH = "/tmp/";
-
 
     private final AcsClientStub acsClientStub;
     private final DtoValidator dtoValidator;
@@ -53,22 +45,18 @@ public class DiskServiceImpl implements DiskService {
     private final PluginScpClient pluginScpClient;
     private final PluginSshdClient pluginSshdClient;
     private final PasswordManager passwordManager;
+    private final DiskScriptHelper diskScriptHelper;
 
-    @Value(MOUNT_SCRIPT_PATH)
-    Resource mountScriptResource;
-    @Value(UNMOUNT_SCRIPT_PATH)
-    Resource unmountScriptResource;
-    @Value(UNFORMATTED_DISK_INFO_SCRIPT_PATH)
-    Resource unFormattedDiskScriptResource;
 
     @Autowired
-    public DiskServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, VMService vmService, PluginScpClient pluginScpClient, PluginSshdClient pluginSshdClient, PasswordManager passwordManager) {
+    public DiskServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, VMService vmService, PluginScpClient pluginScpClient, PluginSshdClient pluginSshdClient, PasswordManager passwordManager, DiskScriptHelper diskScriptHelper) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
         this.vmService = vmService;
         this.pluginScpClient = pluginScpClient;
         this.pluginSshdClient = pluginSshdClient;
         this.passwordManager = passwordManager;
+        this.diskScriptHelper = diskScriptHelper;
     }
 
     @Override
@@ -207,9 +195,14 @@ public class DiskServiceImpl implements DiskService {
         final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         // scp diskScripts
-        final List<String> resourceAbsolutePathList = PluginResourceUtils.getResourceAbsolutePath(unFormattedDiskScriptResource, mountScriptResource);
-        for (String resourceAbsolutePath : resourceAbsolutePathList) {
-            pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
+        @SuppressWarnings("unchecked") final ArrayList<Pair<String, byte[]>> nameToDataPairList = Lists.newArrayList(
+                diskScriptHelper.getUnFormattedDiskScriptPair(),
+                diskScriptHelper.getMountDiskScriptPair()
+        );
+        for (Pair<String, byte[]> nameToDataPair : nameToDataPairList) {
+            final String fileName = nameToDataPair.getKey();
+            final byte[] data = nameToDataPair.getValue();
+            pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, data, fileName, DEFAULT_REMOTE_DIRECTORY_PATH);
         }
 
         // ssh to host and execute the getUnformattedDiskInfo script
@@ -261,8 +254,10 @@ public class DiskServiceImpl implements DiskService {
         }
 
         // scp the unmount script to target server
-        final String absPath = PluginResourceUtils.getResourceAbsolutePath(unmountScriptResource);
-        pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, absPath, DEFAULT_REMOTE_DIRECTORY_PATH);
+        final Pair<String, byte[]> nameToDataPair = diskScriptHelper.getUnmountDiskScriptPair();
+        final String fileName = nameToDataPair.getKey();
+        final byte[] data = nameToDataPair.getValue();
+        pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, data, fileName, DEFAULT_REMOTE_DIRECTORY_PATH);
 
         // ssh to host and execute the unmount script
         unmountDisk(vmInstanceIp, password, requestDto.getVolumeName(), requestDto.getUnmountDir());
