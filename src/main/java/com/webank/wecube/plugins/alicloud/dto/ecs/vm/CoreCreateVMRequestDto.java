@@ -652,7 +652,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
 
     @Override
     public void adaptToAliCloud() {
-        if (!StringUtils.isEmpty(this.getResourceTag())) {
+        if (StringUtils.isNotEmpty(this.getResourceTag())) {
             final List<Pair<String, String>> pairs = PluginStringUtils.splitResourceTag(this.getResourceTag());
             List<CreateInstanceRequest.Tag> tags = new ArrayList<>();
             for (Pair<String, String> pair : pairs) {
@@ -664,12 +664,16 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
             this.setTags(tags);
         }
 
-        if (!StringUtils.isEmpty(instanceChargeType)) {
+        if (StringUtils.isNotEmpty(instanceChargeType)) {
             final InstanceChargeType type = EnumUtils.getEnumIgnoreCase(InstanceChargeType.class, instanceChargeType);
             if (null == type) {
                 throw new PluginException("Invalid instance charge type");
             }
             instanceChargeType = type.toString();
+        }
+
+        if (StringUtils.isNotEmpty(periodUnit)) {
+            periodUnit = StringUtils.capitalize(periodUnit.toLowerCase());
         }
     }
 }
