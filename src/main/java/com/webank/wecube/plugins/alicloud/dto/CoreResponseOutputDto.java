@@ -31,6 +31,10 @@ public class CoreResponseOutputDto {
         this.errorMessage = errorMessage;
     }
 
+    public void setUnhandledErrorMessage(String errorMessage) {
+        this.errorMessage = "Plugin not properly handled error: " + errorMessage;
+    }
+
     public String getGuid() {
         return guid;
     }
