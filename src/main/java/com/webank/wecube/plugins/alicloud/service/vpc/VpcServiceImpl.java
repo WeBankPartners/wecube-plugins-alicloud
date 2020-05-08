@@ -73,9 +73,8 @@ public class VpcServiceImpl implements VpcService {
 
                 // if vpc id is empty or cannot find VPC by given vpcId, create vpc
                 final CreateVpcRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 CreateVpcResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -105,10 +104,9 @@ public class VpcServiceImpl implements VpcService {
 
         // create new request
         DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
-        describeVpcsRequest.setRegionId(regionId);
         describeVpcsRequest.setVpcId(vpcId);
         // send the request and handle the error, then return the response
-        return this.acsClientStub.request(client, describeVpcsRequest);
+        return this.acsClientStub.request(client, describeVpcsRequest, regionId);
     }
 
     @Override

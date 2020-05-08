@@ -64,8 +64,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 if (StringUtils.isNotEmpty(requestDto.getNatGatewayId())) {
                     DescribeNatGatewaysRequest retrieveNatGatewayRequest = new DescribeNatGatewaysRequest();
                     retrieveNatGatewayRequest.setNatGatewayId(requestDto.getNatGatewayId());
-                    retrieveNatGatewayRequest.setRegionId(regionId);
-                    final DescribeNatGatewaysResponse describeNatGatewaysResponse = this.retrieveNatGateway(client, retrieveNatGatewayRequest);
+                    final DescribeNatGatewaysResponse describeNatGatewaysResponse = this.retrieveNatGateway(client, retrieveNatGatewayRequest, regionId);
 
                     if (!describeNatGatewaysResponse.getNatGateways().isEmpty()) {
                         result = result.fromSdkCrossLineage(describeNatGatewaysResponse.getNatGateways().get(0));
@@ -77,8 +76,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 logger.info("Creating NAT gateway...");
 
                 CreateNatGatewayRequest createNatGatewayRequest = requestDto.toSdk();
-                createNatGatewayRequest.setRegionId(regionId);
-                CreateNatGatewayResponse response = this.acsClientStub.request(client, createNatGatewayRequest);
+                CreateNatGatewayResponse response = this.acsClientStub.request(client, createNatGatewayRequest, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -139,8 +137,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 logger.info("Deleting NAT gateway...");
 
                 DeleteNatGatewayRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                DeleteNatGatewayResponse response = this.acsClientStub.request(client, request);
+                DeleteNatGatewayResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -185,8 +182,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
 
 
                 CreateSnatEntryRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                CreateSnatEntryResponse response = this.acsClientStub.request(client, request);
+                CreateSnatEntryResponse response = this.acsClientStub.request(client, request, regionId);
 
                 // wait till snat entry status is not pending
                 Function<?, Boolean> func = o -> ifSnatEntryNotInStatus(client, regionId, requestDto.getSnatTableId(), response.getSnatEntryId(), SnatEntryStatus.Pending);
@@ -231,8 +227,7 @@ public class NatGatewayServiceImpl implements NatGatewayService {
                 final String[] ips = retrieveSnatIpsFromEntryId(requestDto, client, regionId);
 
                 DeleteSnatEntryRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                DeleteSnatEntryResponse response = this.acsClientStub.request(client, request);
+                DeleteSnatEntryResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
                 // wait till snat entry has been deleted
@@ -270,19 +265,18 @@ public class NatGatewayServiceImpl implements NatGatewayService {
 
         DescribeNatGatewaysRequest request = new DescribeNatGatewaysRequest();
         request.setNatGatewayId(natGatewayId);
-        request.setRegionId(regionId);
 
-        return this.retrieveNatGateway(client, request);
+        return this.retrieveNatGateway(client, request, regionId);
     }
 
-    private DescribeNatGatewaysResponse retrieveNatGateway(IAcsClient client, DescribeNatGatewaysRequest request) throws AliCloudException, PluginException {
+    private DescribeNatGatewaysResponse retrieveNatGateway(IAcsClient client, DescribeNatGatewaysRequest request, String regionId) throws AliCloudException, PluginException {
 
-        if (StringUtils.isAnyEmpty(request.getRegionId(), request.getNatGatewayId())) {
+        if (StringUtils.isAnyEmpty(regionId, request.getNatGatewayId())) {
             throw new PluginException("Either regionId or natGatewayId cannot be null or empty.");
         }
 
         logger.info("Retrieving NAT gateway info...");
-        return this.acsClientStub.request(client, request);
+        return this.acsClientStub.request(client, request, regionId);
     }
 
     /**

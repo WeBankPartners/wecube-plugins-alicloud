@@ -118,9 +118,8 @@ public class RDSServiceImpl implements RDSService {
                 }
 
                 final CreateDBInstanceRequest createDBInstanceRequest = requestDto.toSdk();
-                createDBInstanceRequest.setRegionId(regionId);
                 CreateDBInstanceResponse response;
-                response = this.acsClientStub.request(client, createDBInstanceRequest);
+                response = this.acsClientStub.request(client, createDBInstanceRequest, regionId);
 
                 // set up Plugin Timer to check if the resource is not creating any more
                 final String createdDBInstanceId = response.getDBInstanceId();
@@ -140,7 +139,7 @@ public class RDSServiceImpl implements RDSService {
 
                 final String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), password);
 
-                createAccountRequest.setRegionId(regionId);
+                createAccountRequest.setSysRegionId(regionId);
                 createAccountRequest.setDBInstanceId(createdDBInstanceId);
                 createRDSAccount(client, createAccountRequest);
 
@@ -197,9 +196,8 @@ public class RDSServiceImpl implements RDSService {
                 logger.info("Deleting DB instance: {}", requestDto.toString());
 
                 final DeleteDBInstanceRequest deleteDBInstanceRequest = requestDto.toSdk();
-                deleteDBInstanceRequest.setRegionId(regionId);
                 DeleteDBInstanceResponse response;
-                response = this.acsClientStub.request(client, deleteDBInstanceRequest);
+                response = this.acsClientStub.request(client, deleteDBInstanceRequest, regionId);
 
 
                 // set up Plugin Timer to check if the resource has been deleted
@@ -246,9 +244,8 @@ public class RDSServiceImpl implements RDSService {
                 requestDto.setSecurityIps(formattedSecurityIps);
 
                 final ModifySecurityIpsRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 ModifySecurityIpsResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
 
                 result = result.fromSdk(response);
 
@@ -313,9 +310,8 @@ public class RDSServiceImpl implements RDSService {
                 logger.info("Creating backup: {}", requestDto.toString());
 
                 final CreateBackupRequest createBackupRequest = requestDto.toSdk();
-                createBackupRequest.setRegionId(regionId);
                 CreateBackupResponse response;
-                response = this.acsClientStub.request(client, createBackupRequest);
+                response = this.acsClientStub.request(client, createBackupRequest, regionId);
 
                 final String backupJobId = response.getBackupJobId();
 
@@ -383,9 +379,8 @@ public class RDSServiceImpl implements RDSService {
                 logger.info("Deleting backup: {}", requestDto.toString());
 
                 final DeleteBackupRequest deleteBackupRequest = requestDto.toSdk();
-                deleteBackupRequest.setRegionId(regionId);
                 deleteBackupRequest.setBackupId(backupId);
-                DeleteBackupResponse response = this.acsClientStub.request(client, deleteBackupRequest);
+                DeleteBackupResponse response = this.acsClientStub.request(client, deleteBackupRequest, regionId);
 
                 // setup a timer task to retrieve if the backup has been deleted
                 final String finalBackupId = backupId;
@@ -418,11 +413,9 @@ public class RDSServiceImpl implements RDSService {
         }
 
         DescribeDBInstancesRequest request = new DescribeDBInstancesRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
 
-
-        final DescribeDBInstancesResponse response = this.acsClientStub.request(client, request);
+        final DescribeDBInstancesResponse response = this.acsClientStub.request(client, request, regionId);
 
         final Optional<DescribeDBInstancesResponse.DBInstance> foundDBInstanceOpt = response.getItems().stream().filter(dbInstance -> StringUtils.equals(dbInstanceId, dbInstance.getDBInstanceId())).findFirst();
 
@@ -440,12 +433,11 @@ public class RDSServiceImpl implements RDSService {
         }
 
         DescribeBackupTasksRequest request = new DescribeBackupTasksRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
         request.setBackupJobId(Integer.valueOf(backupJobId));
 
 
-        final DescribeBackupTasksResponse response = this.acsClientStub.request(client, request);
+        final DescribeBackupTasksResponse response = this.acsClientStub.request(client, request, regionId);
 
         final Optional<DescribeBackupTasksResponse.BackupJob> foundBackupJobOpt = response.getItems().stream().filter(backupTask -> StringUtils.equals(backupJobId, backupTask.getBackupJobId())).findFirst();
 
@@ -461,14 +453,14 @@ public class RDSServiceImpl implements RDSService {
 
         logger.info("Creating RDS account...");
 
-        if (StringUtils.isEmpty(createAccountRequest.getRegionId())) {
+        if (StringUtils.isEmpty(createAccountRequest.getSysRegionId())) {
             throw new PluginException("The regionId cannot be null or empty.");
         }
 
         this.acsClientStub.request(client, createAccountRequest);
 
         // check if the account has been created
-        Function<?, Boolean> func = o -> ifRDSAccountCreated(client, createAccountRequest.getRegionId(), createAccountRequest.getAccountName(), createAccountRequest.getDBInstanceId());
+        Function<?, Boolean> func = o -> ifRDSAccountCreated(client, createAccountRequest.getSysRegionId(), createAccountRequest.getAccountName(), createAccountRequest.getDBInstanceId());
         PluginTimer.runTask(new PluginTimerTask(func));
     }
 
@@ -484,11 +476,10 @@ public class RDSServiceImpl implements RDSService {
         }
 
         DescribeAccountsRequest request = new DescribeAccountsRequest();
-        request.setRegionId(regionId);
         request.setAccountName(accountName);
         request.setDBInstanceId(dBInstanceId);
 
-        final DescribeAccountsResponse response = this.acsClientStub.request(client, request);
+        final DescribeAccountsResponse response = this.acsClientStub.request(client, request, regionId);
 
         final long count = response.getAccounts().stream().filter(dbInstanceAccount -> StringUtils.equals(accountName, dbInstanceAccount.getAccountName())).count();
 
@@ -570,11 +561,10 @@ public class RDSServiceImpl implements RDSService {
         logger.info("Retrieving dbInstance info...");
 
         DescribeDBInstancesRequest request = new DescribeDBInstancesRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
 
         DescribeDBInstancesResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
     }
 
@@ -586,12 +576,11 @@ public class RDSServiceImpl implements RDSService {
         logger.info("Retrieving backup info...");
 
         DescribeBackupsRequest request = new DescribeBackupsRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
         request.setBackupId(backupId);
 
         DescribeBackupsResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
     }
 
@@ -608,9 +597,8 @@ public class RDSServiceImpl implements RDSService {
         final String presetGroupName = "rds" + "_" + engine + "_" + engineVersion;
 
         DescribeParameterGroupsRequest request = new DescribeParameterGroupsRequest();
-        request.setRegionId(regionId);
 
-        final DescribeParameterGroupsResponse response = acsClientStub.request(client, request);
+        final DescribeParameterGroupsResponse response = acsClientStub.request(client, request, regionId);
         final List<DescribeParameterGroupsResponse.ParameterGroup> groupList = response.getParameterGroups();
         final List<String> foundId = groupList.stream().filter(parameterGroup -> StringUtils.equalsIgnoreCase(presetGroupName, parameterGroup.getParameterGroupName())).map(DescribeParameterGroupsResponse.ParameterGroup::getParameterGroupId).collect(Collectors.toList());
 
@@ -639,13 +627,12 @@ public class RDSServiceImpl implements RDSService {
     private void createParameterGroup(IAcsClient client, String regionId, String engine, String engineVersion, String presetGroupName) throws PluginException, AliCloudException {
 
         CreateParameterGroupRequest request = new CreateParameterGroupRequest();
-        request.setRegionId(regionId);
         request.setEngine(engine.toLowerCase());
         request.setEngineVersion(engineVersion);
         request.setParameterGroupName(presetGroupName);
         request.setParameters(PluginObjectUtils.mapObjectToJsonStr(new RdsParameterGroupTemplate()));
 
-        acsClientStub.request(client, request);
+        acsClientStub.request(client, request, regionId);
     }
 
     private void bindSecurityGroupToInstance(IAcsClient client, String regionId, String securityGroupId, String dbInstanceId) {

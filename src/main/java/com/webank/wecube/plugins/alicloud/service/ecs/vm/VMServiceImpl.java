@@ -84,7 +84,7 @@ public class VMServiceImpl implements VMService {
                 }
 
                 // seek available resource when instanceType is not designated
-                String availableInstanceType = StringUtils.EMPTY;
+                String availableInstanceType;
                 if (!StringUtils.isEmpty(requestDto.getInstanceSpec()) && StringUtils.isEmpty(requestDto.getInstanceType())) {
                     availableInstanceType = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec());
                     requestDto.setInstanceType(availableInstanceType);
@@ -95,10 +95,9 @@ public class VMServiceImpl implements VMService {
                 logger.info("Creating VM instance: {}", requestDto.toString());
 
                 final CreateInstanceRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
 
                 CreateInstanceResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
 
                 // wait till VM instance finish its create process
                 Function<?, Boolean> checkIfVMFinishCreation = o -> !this.checkIfVMInStatus(client, regionId, response.getInstanceId(), InstanceStatus.PENDING);
@@ -141,11 +140,10 @@ public class VMServiceImpl implements VMService {
         logger.info(String.format("Retrieving VM instance info, region ID: [%s], VM instance ID: [%s]", regionId, instanceId));
 
         DescribeInstancesRequest request = new DescribeInstancesRequest();
-        request.setRegionId(regionId);
         request.setInstanceIds(PluginStringUtils.stringifyList(instanceId));
 
         DescribeInstancesResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
     }
 
@@ -176,9 +174,8 @@ public class VMServiceImpl implements VMService {
                 logger.info("Deleting VM instance: {}", requestDto.toString());
 
                 DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk();
-                deleteInstanceRequest.setRegionId(regionId);
                 DeleteInstanceResponse response;
-                response = this.acsClientStub.request(client, deleteInstanceRequest);
+                response = this.acsClientStub.request(client, deleteInstanceRequest, regionId);
 
 
                 // re-check if VM instance has already been deleted
@@ -224,9 +221,8 @@ public class VMServiceImpl implements VMService {
                 logger.info("Starting VM instance: {}", requestDto.toString());
 
                 final StartInstanceRequest startInstanceRequest = requestDto.toSdk();
-                startInstanceRequest.setRegionId(regionId);
                 StartInstanceResponse response;
-                response = this.acsClientStub.request(client, startInstanceRequest);
+                response = this.acsClientStub.request(client, startInstanceRequest, regionId);
 
                 Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, requestDto.getInstanceId(), InstanceStatus.RUNNING);
                 PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
@@ -266,10 +262,9 @@ public class VMServiceImpl implements VMService {
                 logger.info("Stopping VM instance: {}", requestDto.toString());
 
                 final StopInstanceRequest stopInstanceRequest = requestDto.toSdk();
-                stopInstanceRequest.setRegionId(regionId);
 
                 StopInstanceResponse response;
-                response = this.acsClientStub.request(client, stopInstanceRequest);
+                response = this.acsClientStub.request(client, stopInstanceRequest, regionId);
 
                 Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, requestDto.getInstanceId(), InstanceStatus.STOPPED);
                 PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
@@ -324,11 +319,10 @@ public class VMServiceImpl implements VMService {
                 logger.info("Binding security group with VM instance: {}", requestDto.toString());
 
                 ModifyInstanceAttributeRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 request.setSecurityGroupIdss(currentSecurityGroupIdList);
 
                 ModifyInstanceAttributeResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -385,11 +379,10 @@ public class VMServiceImpl implements VMService {
                 logger.info("Unbinding security group with VM instance: {}", requestDto.toString());
 
                 ModifyInstanceAttributeRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 request.setSecurityGroupIdss(currentSecurityGroupIdList);
 
                 ModifyInstanceAttributeResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -420,11 +413,10 @@ public class VMServiceImpl implements VMService {
         logger.info("Retrieve if VM: [{}] instance in status: [{}]...", instanceId, status.getStatus());
 
         DescribeInstanceStatusRequest request = new DescribeInstanceStatusRequest();
-        request.setRegionId(regionId);
         request.setInstanceIds(Collections.singletonList(instanceId));
 
         DescribeInstanceStatusResponse foundInstance;
-        foundInstance = this.acsClientStub.request(client, request);
+        foundInstance = this.acsClientStub.request(client, request, regionId);
 
         final Optional<DescribeInstanceStatusResponse.InstanceStatus> first = foundInstance.getInstanceStatuses().stream().filter(instance -> StringUtils.equals(instanceId, instance.getInstanceId())).findFirst();
 
@@ -442,10 +434,9 @@ public class VMServiceImpl implements VMService {
         logger.info("Starting VM instance...");
 
         StartInstanceRequest request = new StartInstanceRequest();
-        request.setRegionId(regionId);
         request.setInstanceId(instanceId);
 
-        this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
 
         Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, instanceId, InstanceStatus.RUNNING);
         PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));

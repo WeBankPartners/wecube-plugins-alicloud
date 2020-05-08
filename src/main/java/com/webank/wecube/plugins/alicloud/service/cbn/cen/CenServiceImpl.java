@@ -72,8 +72,7 @@ public class CenServiceImpl implements CenService {
                 logger.info("Creating Cen: {}", requestDto.toString());
 
                 CreateCenRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                CreateCenResponse response = this.acsClientStub.request(client, request);
+                CreateCenResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -130,7 +129,7 @@ public class CenServiceImpl implements CenService {
                 logger.info("Deleting Cen: {}", requestDto.toString());
 
                 final DeleteCenRequest deleteCenRequest = requestDto.toSdk();
-                final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest);
+                final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest, regionId);
                 result = result.fromSdk(response);
 
                 // check if cen has already been deleted
@@ -189,8 +188,7 @@ public class CenServiceImpl implements CenService {
                 logger.info("Attaching Cen child instance: {}", requestDto.toString());
 
                 AttachCenChildInstanceRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                AttachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
+                AttachCenChildInstanceResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -231,8 +229,7 @@ public class CenServiceImpl implements CenService {
                 logger.info("Detaching Cen child instance: {}", requestDto.toString());
 
                 DetachCenChildInstanceRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                DetachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
+                DetachCenChildInstanceResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
