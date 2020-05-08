@@ -18,12 +18,12 @@ public class CoreDetachCenChildRequestDto extends CoreRequestInputDto implements
     @NotEmpty(message = "cenId field is mandatory")
     private String cenId;
     private String cenOwnerId;
-    @NotEmpty(message = "childInstanceRegionId field is mandatory")
+//    @NotEmpty(message = "childInstanceRegionId field is mandatory")
     private String childInstanceRegionId;
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
-    @NotEmpty(message = "childInstanceType field is mandatory")
+//    @NotEmpty(message = "childInstanceType field is mandatory")
     private String childInstanceType;
     private String childInstanceOwnerId;
     @NotEmpty(message = "childInstanceId field is mandatory")
