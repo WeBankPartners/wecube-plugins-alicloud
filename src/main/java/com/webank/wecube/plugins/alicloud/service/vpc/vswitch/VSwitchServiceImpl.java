@@ -77,9 +77,8 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                 // create VSwitch
                 final CreateVSwitchRequest aliCloudRequest = requestDto.toSdk();
-                aliCloudRequest.setRegionId(regionId);
 
-                CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest);
+                CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest, regionId);
                 vSwitchId = createVSwitchResponse.getVSwitchId();
 
                 // wait till vSwitch is available
@@ -134,18 +133,16 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                 // create VSwitch
                 final CreateVSwitchRequest aliCloudRequest = requestDto.toSdk();
-                aliCloudRequest.setRegionId(regionId);
 
-                CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest);
+                CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest, regionId);
                 vSwitchId = createVSwitchResponse.getVSwitchId();
 
 
                 // create route table
                 CreateRouteTableRequest createRouteTableRequest = new CreateRouteTableRequest();
-                createRouteTableRequest.setRegionId(regionId);
                 createRouteTableRequest.setRouteTableName("Bind_by_" + requestDto.getvSwitchName());
                 createRouteTableRequest.setVpcId(requestDto.getVpcId());
-                final CreateRouteTableResponse createRouteTableResponse = this.routeTableService.createRouteTable(client, createRouteTableRequest);
+                final CreateRouteTableResponse createRouteTableResponse = this.routeTableService.createRouteTable(client, createRouteTableRequest, regionId);
                 final String createdRouteTableId = createRouteTableResponse.getRouteTableId();
 
                 // wait till both route table and vSwitch are available to be configured
@@ -155,11 +152,10 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                 // associate route table with VSwitch
                 AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest();
-                associateRouteTableRequest.setRegionId(regionId);
                 associateRouteTableRequest.setRouteTableId(createdRouteTableId);
                 associateRouteTableRequest.setVSwitchId(createVSwitchResponse.getVSwitchId());
 
-                this.routeTableService.associateRouteTable(client, associateRouteTableRequest);
+                this.routeTableService.associateRouteTable(client, associateRouteTableRequest, regionId);
 
                 result = result.fromSdk(createVSwitchResponse);
                 result.setRouteTableId(createdRouteTableId);
@@ -192,9 +188,8 @@ public class VSwitchServiceImpl implements VSwitchService {
 
         DescribeVSwitchesResponse response;
         DescribeVSwitchesRequest request = new DescribeVSwitchesRequest();
-        request.setRegionId(regionId);
         request.setVSwitchId(vSwitchId);
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
 
         return response;
     }
@@ -227,8 +222,7 @@ public class VSwitchServiceImpl implements VSwitchService {
                 logger.info("Deleting VSwitch: {}", requestDto.toString());
 
                 final DeleteVSwitchRequest deleteVSwitchRequest = requestDto.toSdk();
-                deleteVSwitchRequest.setRegionId(regionId);
-                final DeleteVSwitchResponse deleteVSwitchResponse = this.acsClientStub.request(client, deleteVSwitchRequest);
+                final DeleteVSwitchResponse deleteVSwitchResponse = this.acsClientStub.request(client, deleteVSwitchRequest, regionId);
 
                 // re-check if VSwitch has already been deleted
                 if (0 != this.retrieveVSwitch(client, regionId, vSwitchId).getTotalCount()) {
@@ -297,27 +291,24 @@ public class VSwitchServiceImpl implements VSwitchService {
 
                         // un-associate route table and vSwitch
                         UnassociateRouteTableRequest unassociateRouteTableRequest = new UnassociateRouteTableRequest();
-                        unassociateRouteTableRequest.setRegionId(regionId);
                         unassociateRouteTableRequest.setRouteTableId(routeTableId);
                         unassociateRouteTableRequest.setVSwitchId(foundVSwitchId);
-                        this.routeTableService.unAssociateRouteTable(client, unassociateRouteTableRequest);
+                        this.routeTableService.unAssociateRouteTable(client, unassociateRouteTableRequest, regionId);
 
                         // wait till both route table and vSwitch are available to be configured
                         PluginTimer.runTask(checkRouteTableStatusTask);
 
                         // delete route table
                         DeleteRouteTableRequest deleteRouteTableRequest = new DeleteRouteTableRequest();
-                        deleteRouteTableRequest.setRegionId(regionId);
                         deleteRouteTableRequest.setRouteTableId(routeTableId);
-                        this.routeTableService.deleteRouteTable(client, deleteRouteTableRequest);
+                        this.routeTableService.deleteRouteTable(client, deleteRouteTableRequest, regionId);
                     }
                 }
 
                 // delete VSwitch
                 logger.info("Deleting VSwitch: [{}]", foundVSwitchId);
                 final DeleteVSwitchRequest deleteVSwitchRequest = requestDto.toSdk();
-                deleteVSwitchRequest.setRegionId(regionId);
-                final DeleteVSwitchResponse deleteVSwitchResponse = this.acsClientStub.request(client, deleteVSwitchRequest);
+                final DeleteVSwitchResponse deleteVSwitchResponse = this.acsClientStub.request(client, deleteVSwitchRequest, regionId);
 
                 // re-check if VSwitch has already been deleted
                 if (0 != this.retrieveVSwitch(client, regionId, foundVSwitchId).getTotalCount()) {
@@ -353,9 +344,8 @@ public class VSwitchServiceImpl implements VSwitchService {
 
         DescribeVSwitchesResponse response;
         DescribeVSwitchesRequest request = new DescribeVSwitchesRequest();
-        request.setRegionId(regionId);
         request.setVSwitchId(vSwitchId);
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
 
         if (0 == response.getTotalCount()) {
             throw new PluginException(String.format("Cannot find any vSwtich by given regionId: [{%s}] and vSwitchId: [{%s}]", regionId, vSwitchId));
@@ -373,8 +363,6 @@ public class VSwitchServiceImpl implements VSwitchService {
     }
 
     private Function<?, Boolean> ifVSwitchAvailable(IAcsClient client, String regionId, String vSwitchId) throws PluginException {
-        return o -> {
-            return this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
-        };
+        return o -> this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
     }
 }

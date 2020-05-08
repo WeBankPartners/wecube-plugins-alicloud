@@ -86,9 +86,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
                 // if load balancer id is empty, create load balancer
                 final CreateLoadBalancerRequest createLoadBalancerRequest = requestDto.toSdk();
-                createLoadBalancerRequest.setRegionId(regionId);
                 CreateLoadBalancerResponse response;
-                response = this.acsClientStub.request(client, createLoadBalancerRequest);
+                response = this.acsClientStub.request(client, createLoadBalancerRequest, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -119,11 +118,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         logger.info("Retriving load balancer info, regionId: [{}], loadBalancerId: [{}]", regionId, loadBalancerId);
 
         DescribeLoadBalancersRequest request = new DescribeLoadBalancersRequest();
-        request.setRegionId(regionId);
         request.setLoadBalancerId(loadBalancerId);
 
         DescribeLoadBalancersResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
     }
 
@@ -157,8 +155,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 logger.info("Deleting load balancer, load balancer ID: [{}], regionID" +
                         ":[{}]", requestDto.getLoadBalancerId(), regionId);
                 final DeleteLoadBalancerRequest deleteLoadBalancerRequest = requestDto.toSdk();
-                deleteLoadBalancerRequest.setRegionId(regionId);
-                final DeleteLoadBalancerResponse response = this.acsClientStub.request(client, deleteLoadBalancerRequest);
+                final DeleteLoadBalancerResponse response = this.acsClientStub.request(client, deleteLoadBalancerRequest, regionId);
 
                 // re-check if VPC has already been deleted
                 if (0 != this.retrieveLoadBalancer(client, regionId, loadBalancerId).getTotalCount()) {
@@ -339,11 +336,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 logger.info("The vServerGroupId found: [{}], removing backendServers from that vServerGroup", vServerGroupId);
 
                 RemoveVServerGroupBackendServersRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 request.setVServerGroupId(vServerGroupId);
                 request.setBackendServers(requestDto.getBackendServers());
                 RemoveVServerGroupBackendServersResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
 
                 result = result.fromSdk(response);
 
@@ -379,12 +375,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     private void deleteListener(CoreRemoveBackendServerRequestDto requestDto, String regionId, IAcsClient client, Integer listenerPort) throws AliCloudException {
         DeleteLoadBalancerListenerRequest deleteLoadBalancerListenerRequest = new DeleteLoadBalancerListenerRequest();
-        deleteLoadBalancerListenerRequest.setRegionId(regionId);
         deleteLoadBalancerListenerRequest.setLoadBalancerId(requestDto.getLoadBalancerId());
         deleteLoadBalancerListenerRequest.setListenerPort(listenerPort);
         deleteLoadBalancerListenerRequest.setListenerProtocol(requestDto.getListenerProtocol());
 
-        acsClientStub.request(client, deleteLoadBalancerListenerRequest);
+        acsClientStub.request(client, deleteLoadBalancerListenerRequest, regionId);
     }
 
     private String getBackendServersString(String hostIds, String hostPorts) throws PluginException, AliCloudException {
@@ -422,12 +417,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         }
 
         AddVServerGroupBackendServersRequest request = new AddVServerGroupBackendServersRequest();
-        request.setRegionId(regionId);
         request.setBackendServers(backendServers);
         request.setVServerGroupId(vServerGroupId);
 
         AddVServerGroupBackendServersResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
 
     }
@@ -447,9 +441,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 DescribeLoadBalancerTCPListenerAttributeRequest tcpListenerAttributeRequest = new DescribeLoadBalancerTCPListenerAttributeRequest();
                 tcpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
                 tcpListenerAttributeRequest.setListenerPort(listenerPort);
-                tcpListenerAttributeRequest.setRegionId(regionId);
                 DescribeLoadBalancerTCPListenerAttributeResponse describeLoadBalancerTCPListenerAttributeResponse;
-                describeLoadBalancerTCPListenerAttributeResponse = this.acsClientStub.request(client, tcpListenerAttributeRequest);
+                describeLoadBalancerTCPListenerAttributeResponse = this.acsClientStub.request(client, tcpListenerAttributeRequest, regionId);
                 vServerGroupId = describeLoadBalancerTCPListenerAttributeResponse.getVServerGroupId();
                 break;
             case HTTPS:
@@ -463,10 +456,9 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     private CreateVServerGroupResponse createVServerGroup(CoreAddBackendServerRequestDto requestDto, IAcsClient client, String regionId) throws AliCloudException {
         CreateVServerGroupRequest createVServerGroupRequest = requestDto.toSdk();
         createVServerGroupRequest.setBackendServers(requestDto.getBackendServers());
-        createVServerGroupRequest.setRegionId(regionId);
 
         CreateVServerGroupResponse createVServerGroupResponse;
-        createVServerGroupResponse = this.acsClientStub.request(client, createVServerGroupRequest);
+        createVServerGroupResponse = this.acsClientStub.request(client, createVServerGroupRequest, regionId);
 
         return createVServerGroupResponse;
     }
@@ -508,9 +500,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             throw new PluginException("Cannot create new listener, the request is null.");
         }
 
-        request.setRegionId(regionId);
 
-        this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
     }
 
     private void bindVServerGroupToListener(IAcsClient client, String regionId, CoreAddBackendServerRequestDto requestDto, String vServerGroupId) throws PluginException, AliCloudException {
@@ -556,9 +547,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             throw new PluginException("The listenerPort should be valid integer value.");
         }
 
-        request.setRegionId(regionId);
 
-        this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
     }
 
     private boolean checkIfListenerExists(IAcsClient client, String regionId, Integer listenerPort, String loadBalancerId, String listenerProtocol) throws AliCloudException {
@@ -573,29 +563,25 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     DescribeLoadBalancerHTTPListenerAttributeRequest httpListenerAttributeRequest = new DescribeLoadBalancerHTTPListenerAttributeRequest();
                     httpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
                     httpListenerAttributeRequest.setListenerPort(listenerPort);
-                    httpListenerAttributeRequest.setRegionId(regionId);
-                    this.acsClientStub.request(client, httpListenerAttributeRequest);
+                    this.acsClientStub.request(client, httpListenerAttributeRequest, regionId);
                     break;
                 case UDP:
                     DescribeLoadBalancerUDPListenerAttributeRequest udpListenerAttributeRequest = new DescribeLoadBalancerUDPListenerAttributeRequest();
                     udpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
                     udpListenerAttributeRequest.setListenerPort(listenerPort);
-                    udpListenerAttributeRequest.setRegionId(regionId);
-                    this.acsClientStub.request(client, udpListenerAttributeRequest);
+                    this.acsClientStub.request(client, udpListenerAttributeRequest, regionId);
                     break;
                 case TCP:
                     DescribeLoadBalancerTCPListenerAttributeRequest tcpListenerAttributeRequest = new DescribeLoadBalancerTCPListenerAttributeRequest();
                     tcpListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
                     tcpListenerAttributeRequest.setListenerPort(listenerPort);
-                    tcpListenerAttributeRequest.setRegionId(regionId);
-                    this.acsClientStub.request(client, tcpListenerAttributeRequest);
+                    this.acsClientStub.request(client, tcpListenerAttributeRequest, regionId);
                     break;
                 case HTTPS:
                     DescribeLoadBalancerHTTPSListenerAttributeRequest httpsListenerAttributeRequest = new DescribeLoadBalancerHTTPSListenerAttributeRequest();
                     httpsListenerAttributeRequest.setLoadBalancerId(loadBalancerId);
                     httpsListenerAttributeRequest.setListenerPort(listenerPort);
-                    httpsListenerAttributeRequest.setRegionId(regionId);
-                    this.acsClientStub.request(client, httpsListenerAttributeRequest);
+                    this.acsClientStub.request(client, httpsListenerAttributeRequest, regionId);
                     break;
                 default:
                     break;
@@ -623,12 +609,20 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         logger.info("Starting load balancer listener, listener port: [{}], loadBalancerId: [{}], regionId: [{}]", listenerPort, loadBalancerId, regionId);
 
         StartLoadBalancerListenerRequest request = new StartLoadBalancerListenerRequest();
-        request.setRegionId(regionId);
         request.setListenerPort(listenerPort);
         request.setLoadBalancerId(loadBalancerId);
 
-        this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
     }
 
-    public enum ListenerProtocolType {TCP, UDP, HTTP, HTTPS}
+    public enum ListenerProtocolType {
+        // tcp
+        TCP,
+        // udp
+        UDP,
+        // http
+        HTTP,
+        // https
+        HTTPS
+    }
 }

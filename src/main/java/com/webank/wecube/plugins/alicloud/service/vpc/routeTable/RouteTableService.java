@@ -29,9 +29,10 @@ public interface RouteTableService {
      * Create route table internally
      *
      * @param createRouteTableRequest create route table request
+     * @param regionId                region id
      * @return response from ali cloud server
      */
-    CreateRouteTableResponse createRouteTable(IAcsClient client, CreateRouteTableRequest createRouteTableRequest) throws PluginException, AliCloudException;
+    CreateRouteTableResponse createRouteTable(IAcsClient client, CreateRouteTableRequest createRouteTableRequest, String regionId) throws PluginException, AliCloudException;
 
     /**
      * Retrieve the route table data from ali cloud
@@ -58,11 +59,12 @@ public interface RouteTableService {
      *
      * @param client                  generated alicloud client
      * @param deleteRouteTableRequest delete route table request
+     * @param regionId                regionId
      * @return DeleteRouteTableResponse
      * @throws PluginException   when deleting the route table
      * @throws AliCloudException when deleting the route table
      */
-    DeleteRouteTableResponse deleteRouteTable(IAcsClient client, DeleteRouteTableRequest deleteRouteTableRequest) throws PluginException, AliCloudException;
+    DeleteRouteTableResponse deleteRouteTable(IAcsClient client, DeleteRouteTableRequest deleteRouteTableRequest, String regionId) throws PluginException, AliCloudException;
 
     /**
      * Associate VSwtich with route table
@@ -74,23 +76,25 @@ public interface RouteTableService {
     /**
      * Associate VSwtich with route table
      *
-     * @param client  AWS client
-     * @param request associate route table request
+     * @param client   AWS client
+     * @param request  associate route table request
+     * @param regionId regionId
      * @throws PluginException   while associate VSwitch with route table
      * @throws AliCloudException while associate VSwitch with route table
      */
-    void associateRouteTable(IAcsClient client, AssociateRouteTableRequest request) throws PluginException, AliCloudException;
+    void associateRouteTable(IAcsClient client, AssociateRouteTableRequest request, String regionId) throws PluginException, AliCloudException;
 
     /**
      * Un-associate VSwtich with route table
      *
      * @param client                       AWS client
      * @param unassociateRouteTableRequest un-associate route table request
+     * @param regionId                     regionId
      * @return UnassociateRouteTableResponse
      * @throws PluginException   while un-associate VSwitch with route table
      * @throws AliCloudException while un-associate VSwitch with route table
      */
-    UnassociateRouteTableResponse unAssociateRouteTable(IAcsClient client, UnassociateRouteTableRequest unassociateRouteTableRequest) throws PluginException, AliCloudException;
+    UnassociateRouteTableResponse unAssociateRouteTable(IAcsClient client, UnassociateRouteTableRequest unassociateRouteTableRequest, String regionId) throws PluginException, AliCloudException;
 
     /**
      * Check if route table is available for subsequent operation

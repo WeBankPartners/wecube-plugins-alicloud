@@ -68,9 +68,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 }
 
                 CreateSecurityGroupRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 CreateSecurityGroupResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -114,8 +113,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
                 }
 
                 DeleteSecurityGroupRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                final DeleteSecurityGroupResponse response = this.acsClientStub.request(client, request);
+                final DeleteSecurityGroupResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -260,17 +258,15 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             case EGRESS:
                 // egress authorization
                 AuthorizeSecurityGroupEgressRequest egressRequest = singleRequestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
-                egressRequest.setRegionId(regionId);
                 AuthorizeSecurityGroupEgressResponse egressResponse;
-                egressResponse = this.acsClientStub.request(client, egressRequest);
+                egressResponse = this.acsClientStub.request(client, egressRequest, regionId);
                 result = result.fromSdkCrossLineage(egressResponse);
                 break;
             case INGRESS:
                 // ingress authorization
                 AuthorizeSecurityGroupRequest request = singleRequestDto.toSdk();
-                request.setRegionId(regionId);
                 AuthorizeSecurityGroupResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
                 break;
             default:
@@ -291,14 +287,12 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             case EGRESS:
                 // egress authorization
                 AuthorizeSecurityGroupEgressRequest egressRequest = singleRequestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
-                egressRequest.setRegionId(regionId);
-                this.acsClientStub.request(client, egressRequest);
+                this.acsClientStub.request(client, egressRequest, regionId);
                 break;
             case INGRESS:
                 // ingress authorization
                 AuthorizeSecurityGroupRequest request = singleRequestDto.toSdkCrossLineage(AuthorizeSecurityGroupRequest.class);
-                request.setRegionId(regionId);
-                this.acsClientStub.request(client, request);
+                this.acsClientStub.request(client, request, regionId);
                 break;
             default:
                 break;
@@ -316,10 +310,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         logger.info("Retrieving security group info... The region ID is: [{}] and security group ID is: [{}]", regionId, securityGroupId);
 
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest();
-        request.setRegionId(regionId);
         request.setSecurityGroupId(securityGroupId);
 
-        return this.acsClientStub.request(client, request);
+        return this.acsClientStub.request(client, request, regionId);
 
     }
 
@@ -334,14 +327,12 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             case EGRESS:
                 // egress authorization
                 RevokeSecurityGroupEgressRequest egressRequest = rollBackDto.toSdkCrossLineage(RevokeSecurityGroupEgressRequest.class);
-                egressRequest.setRegionId(regionId);
-                this.acsClientStub.request(client, egressRequest);
+                this.acsClientStub.request(client, egressRequest, regionId);
                 break;
             case INGRESS:
                 // ingress authorization
                 RevokeSecurityGroupRequest request = rollBackDto.toSdkCrossLineage(RevokeSecurityGroupRequest.class);
-                request.setRegionId(regionId);
-                this.acsClientStub.request(client, request);
+                this.acsClientStub.request(client, request, regionId);
                 break;
             default:
                 break;
@@ -359,14 +350,12 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             case EGRESS:
                 // egress authorization
                 RevokeSecurityGroupEgressRequest egressRequest = requestDto.toSdkCrossLineage(RevokeSecurityGroupEgressRequest.class);
-                egressRequest.setRegionId(regionId);
-                this.acsClientStub.request(client, egressRequest);
+                this.acsClientStub.request(client, egressRequest, regionId);
                 break;
             case INGRESS:
                 // ingress authorization
                 RevokeSecurityGroupRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                this.acsClientStub.request(client, request);
+                this.acsClientStub.request(client, request, regionId);
                 break;
             default:
                 break;

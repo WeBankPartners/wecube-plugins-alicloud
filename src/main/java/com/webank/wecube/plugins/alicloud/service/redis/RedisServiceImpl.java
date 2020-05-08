@@ -69,7 +69,7 @@ public class RedisServiceImpl implements RedisService {
                 if (StringUtils.isNotEmpty(instanceId)) {
                     // retrieve InstanceInfo as result;
                     DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
-                    describeInstancesRequest.setRegionId(regionId);
+                    describeInstancesRequest.setSysRegionId(regionId);
                     describeInstancesRequest.setInstanceIds(instanceId);
                     final DescribeInstancesResponse describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
                     if (describeInstancesResponse.getTotalCount() == 1) {
@@ -105,9 +105,8 @@ public class RedisServiceImpl implements RedisService {
 //                requestDto.setInstanceClass(foundAvailableResource);
 
                 final CreateInstanceRequest createInstanceRequest = requestDto.toSdk();
-                createInstanceRequest.setRegionId(regionId);
                 CreateInstanceResponse response;
-                response = this.acsClientStub.request(client, createInstanceRequest);
+                response = this.acsClientStub.request(client, createInstanceRequest, regionId);
 
                 logger.info("Retrieving created redis until it's available to be used.");
 
@@ -162,7 +161,7 @@ public class RedisServiceImpl implements RedisService {
                 final String instanceId = requestDto.getInstanceId();
 
                 DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
-                describeInstancesRequest.setRegionId(regionId);
+                describeInstancesRequest.setSysRegionId(regionId);
                 describeInstancesRequest.setInstanceIds(instanceId);
                 DescribeInstancesResponse describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
                 if (0 == describeInstancesResponse.getTotalCount()) {
@@ -175,9 +174,8 @@ public class RedisServiceImpl implements RedisService {
                 logger.info("Deleting instance: {}", requestDto.toString());
 
                 final DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk();
-                deleteInstanceRequest.setRegionId(regionId);
                 DeleteInstanceResponse response;
-                response = this.acsClientStub.request(client, deleteInstanceRequest);
+                response = this.acsClientStub.request(client, deleteInstanceRequest, regionId);
 
                 describeInstancesResponse = this.retrieveInstance(client, describeInstancesRequest);
                 if (0 != describeInstancesResponse.getTotalCount()) {
@@ -217,11 +215,10 @@ public class RedisServiceImpl implements RedisService {
         }
 
         DescribeInstancesRequest request = new DescribeInstancesRequest();
-        request.setRegionId(regionId);
         request.setInstanceIds(instanceId);
 
 
-        final DescribeInstancesResponse response = this.acsClientStub.request(client, request);
+        final DescribeInstancesResponse response = this.acsClientStub.request(client, request, regionId);
 
         final Optional<DescribeInstancesResponse.KVStoreInstance> foundRedisOpt = response.getInstances().stream().filter(instance -> StringUtils.equals(instanceId, instance.getInstanceId())).findFirst();
 
@@ -238,18 +235,17 @@ public class RedisServiceImpl implements RedisService {
         }
 
         DescribeInstancesRequest request = new DescribeInstancesRequest();
-        request.setRegionId(regionId);
         request.setInstanceIds(instanceId);
 
 
-        final DescribeInstancesResponse response = this.acsClientStub.request(client, request);
+        final DescribeInstancesResponse response = this.acsClientStub.request(client, request, regionId);
 
         return response.getTotalCount() == 0;
 
     }
 
     private DescribeInstancesResponse retrieveInstance(IAcsClient client, DescribeInstancesRequest request) throws PluginException, AliCloudException {
-        if (StringUtils.isEmpty(request.getRegionId())) {
+        if (StringUtils.isEmpty(request.getSysRegionId())) {
             logger.error("Cannot retrieve redis instance while regionId is null or empty");
         }
 

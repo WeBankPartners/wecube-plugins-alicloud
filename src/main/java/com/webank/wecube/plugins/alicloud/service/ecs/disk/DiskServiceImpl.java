@@ -97,9 +97,8 @@ public class DiskServiceImpl implements DiskService {
                 // if disk id is empty, create disk
                 // this toSdk() method would set instanceId to null due to the collision between zoneId and instanceId
                 final CreateDiskRequest createDiskRequest = requestDto.toSdk();
-                createDiskRequest.setRegionId(regionId);
                 CreateDiskResponse response;
-                response = this.acsClientStub.request(client, createDiskRequest);
+                response = this.acsClientStub.request(client, createDiskRequest, regionId);
                 result = result.fromSdk(response);
 
                 // setup a task to poll the the status of created disk until it is available
@@ -163,8 +162,7 @@ public class DiskServiceImpl implements DiskService {
                 // delete disk
                 logger.info("Deleting disk, disk ID: [{}], disk region:[{}]", diskId, regionId);
                 DeleteDiskRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                final DeleteDiskResponse response = this.acsClientStub.request(client, request);
+                final DeleteDiskResponse response = this.acsClientStub.request(client, request, regionId);
 
                 // re-check if disk has already been deleted
                 if (0 != this.retrieveDisk(client, regionId, diskId).getTotalCount()) {
@@ -216,12 +214,11 @@ public class DiskServiceImpl implements DiskService {
 
         // attach disk request
         final AttachDiskRequest request = requestDto.toSdkCrossLineage(AttachDiskRequest.class);
-        request.setRegionId(regionId);
         if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
             throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
         }
 
-        this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
 
         // check if the disk is in use
         Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.IN_USE);
@@ -253,7 +250,6 @@ public class DiskServiceImpl implements DiskService {
         final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         final DetachDiskRequest request = requestDto.toSdkCrossLineage(DetachDiskRequest.class);
-        request.setRegionId(regionId);
 
         if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
             throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
@@ -268,7 +264,7 @@ public class DiskServiceImpl implements DiskService {
         // ssh to host and execute the unmount script
         unmountDisk(vmInstanceIp, password, requestDto.getVolumeName(), requestDto.getUnmountDir());
 
-        DetachDiskResponse response = this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
 
         // wait detaching process to finish
         Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.AVAILABLE);
@@ -286,10 +282,9 @@ public class DiskServiceImpl implements DiskService {
 
         // create new request
         DescribeDisksRequest retrieveDiskRequest = new DescribeDisksRequest();
-        retrieveDiskRequest.setRegionId(regionId);
         retrieveDiskRequest.setDiskIds(PluginStringUtils.stringifyList(diskId));
         // send the request and handle the error, then return the response
-        return this.acsClientStub.request(client, retrieveDiskRequest);
+        return this.acsClientStub.request(client, retrieveDiskRequest, regionId);
     }
 
     @Override

@@ -73,16 +73,14 @@ public class EipServiceImpl implements EipService {
                 String cbpId = StringUtils.EMPTY;
                 if (!StringUtils.isEmpty(requestDto.getName())) {
                     DescribeCommonBandwidthPackagesRequest queryCBPRequest = new DescribeCommonBandwidthPackagesRequest();
-                    queryCBPRequest.setRegionId(regionId);
                     queryCBPRequest.setName(requestDto.getName());
-                    cbpId = queryCBP(client, queryCBPRequest);
+                    cbpId = queryCBP(client, queryCBPRequest, regionId);
                 }
 
                 if (StringUtils.isEmpty(cbpId)) {
                     final CreateCommonBandwidthPackageRequest createCommonBandwidthPackageRequest = requestDto.toSdkCrossLineage(CreateCommonBandwidthPackageRequest.class);
-                    createCommonBandwidthPackageRequest.setRegionId(regionId);
                     createCommonBandwidthPackageRequest.setName(requestDto.getName());
-                    cbpId = createCBP(client, createCommonBandwidthPackageRequest);
+                    cbpId = createCBP(client, createCommonBandwidthPackageRequest, regionId);
                 }
 
                 final String allocationId = createEipResponse.getAllocationId();
@@ -133,12 +131,11 @@ public class EipServiceImpl implements EipService {
                 }
 
                 // remove eip from cbp
-                String foundCBPId = StringUtils.EMPTY;
+                String foundCBPId;
                 if (!StringUtils.isEmpty(requestDto.getName())) {
                     DescribeCommonBandwidthPackagesRequest queryCBP = new DescribeCommonBandwidthPackagesRequest();
-                    queryCBP.setRegionId(regionId);
                     queryCBP.setName(requestDto.getName());
-                    foundCBPId = queryCBP(client, queryCBP);
+                    foundCBPId = queryCBP(client, queryCBP, regionId);
                 } else {
                     foundCBPId = queryCBPByEip(client, regionId, requestDto.getAllocationId());
                 }
@@ -149,8 +146,7 @@ public class EipServiceImpl implements EipService {
 
                 // release eip
                 ReleaseEipAddressRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                ReleaseEipAddressResponse response = this.acsClientStub.request(client, request);
+                ReleaseEipAddressResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -173,9 +169,8 @@ public class EipServiceImpl implements EipService {
     private String queryCBPByEip(IAcsClient client, String regionId, String allocationId) throws PluginException, AliCloudException {
         DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
         request.setAllocationId(allocationId);
-        request.setRegionId(regionId);
 
-        final DescribeEipAddressesResponse response = acsClientStub.request(client, request);
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, request, regionId);
         if (response.getEipAddresses().isEmpty()) {
             return StringUtils.EMPTY;
         } else {
@@ -186,11 +181,10 @@ public class EipServiceImpl implements EipService {
 
     private void removeFromCBP(IAcsClient client, String ipInstanceId, String regionId, String foundCBPId) throws AliCloudException {
         RemoveCommonBandwidthPackageIpRequest removeCommonBandwidthPackageIpRequest = new RemoveCommonBandwidthPackageIpRequest();
-        removeCommonBandwidthPackageIpRequest.setRegionId(regionId);
         removeCommonBandwidthPackageIpRequest.setBandwidthPackageId(foundCBPId);
         removeCommonBandwidthPackageIpRequest.setIpInstanceId(ipInstanceId);
 
-        acsClientStub.request(client, removeCommonBandwidthPackageIpRequest);
+        acsClientStub.request(client, removeCommonBandwidthPackageIpRequest, regionId);
     }
 
     @Override
@@ -200,9 +194,8 @@ public class EipServiceImpl implements EipService {
             logger.info("Releasing EIP address...");
 
             ReleaseEipAddressRequest request = new ReleaseEipAddressRequest();
-            request.setRegionId(regionId);
             request.setAllocationId(allocationId);
-            this.acsClientStub.request(client, request);
+            this.acsClientStub.request(client, request, regionId);
         }
     }
 
@@ -213,11 +206,10 @@ public class EipServiceImpl implements EipService {
             logger.info("Un-associating EIP address with the instance...");
 
             UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
-            request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
             request.setInstanceType(instanceType);
-            this.acsClientStub.request(client, request);
+            this.acsClientStub.request(client, request, regionId);
         }
     }
 
@@ -237,8 +229,7 @@ public class EipServiceImpl implements EipService {
                 final String regionId = cloudParamDto.getRegionId();
 
                 AssociateEipAddressRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                AssociateEipAddressResponse response = this.acsClientStub.request(client, request);
+                AssociateEipAddressResponse response = this.acsClientStub.request(client, request, regionId);
 
                 // wait till the eip is not in associating status
                 Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, requestDto.getAllocationId(), EipStatus.Associating);
@@ -279,8 +270,7 @@ public class EipServiceImpl implements EipService {
                 final String regionId = cloudParamDto.getRegionId();
 
                 UnassociateEipAddressRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                UnassociateEipAddressResponse response = this.acsClientStub.request(client, request);
+                UnassociateEipAddressResponse response = this.acsClientStub.request(client, request, regionId);
 
                 // wait till the eip is not in un-associating status
                 Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, requestDto.getAllocationId(), EipStatus.Unassociating);
@@ -318,12 +308,11 @@ public class EipServiceImpl implements EipService {
         logger.info("Retrieving if the given resource have no Eip bound.");
 
         DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
-        request.setRegionId(regionId);
         request.setAssociatedInstanceType(associatedInstanceType);
         request.setAssociatedInstanceId(associatedInstanceId);
 
         DescribeEipAddressesResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response.getTotalCount().equals(0);
     }
 
@@ -346,14 +335,13 @@ public class EipServiceImpl implements EipService {
             logger.info("Ip address: {} hasn't bound to the instance: {}, will create an association.", ip, instanceId);
 
             AssociateEipAddressRequest request = new AssociateEipAddressRequest();
-            request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
             request.setInstanceType(instanceType.toString());
 
             logger.info("Associating EIP: {} to the instance: {}", allocationId, instanceId);
 
-            acsClientStub.request(client, request);
+            acsClientStub.request(client, request, regionId);
 
             // wait till the eip is not in associating status
             Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, allocationId, EipStatus.Associating);
@@ -377,14 +365,13 @@ public class EipServiceImpl implements EipService {
             }
 
             UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
-            request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
             request.setInstanceType(instanceType.toString());
 
             logger.info("Unbind EIP: {} from isntance: {}", allocationId, instanceId);
 
-            acsClientStub.request(client, request);
+            acsClientStub.request(client, request, regionId);
 
             // wait till the eip not in un-associating status
             Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, allocationId, EipStatus.Unassociating);
@@ -415,8 +402,8 @@ public class EipServiceImpl implements EipService {
         acsClientStub.request(client, request);
     }
 
-    private String queryCBP(IAcsClient client, DescribeCommonBandwidthPackagesRequest queryCBPRequest) throws PluginException, AliCloudException {
-        final DescribeCommonBandwidthPackagesResponse response = acsClientStub.request(client, queryCBPRequest);
+    private String queryCBP(IAcsClient client, DescribeCommonBandwidthPackagesRequest queryCBPRequest, String regionId) throws PluginException, AliCloudException {
+        final DescribeCommonBandwidthPackagesResponse response = acsClientStub.request(client, queryCBPRequest, regionId);
         if (response.getCommonBandwidthPackages().isEmpty()) {
             return StringUtils.EMPTY;
         }
@@ -425,9 +412,9 @@ public class EipServiceImpl implements EipService {
 
     }
 
-    private String createCBP(IAcsClient client, CreateCommonBandwidthPackageRequest createCommonBandwidthPackageRequest) throws AliCloudException {
+    private String createCBP(IAcsClient client, CreateCommonBandwidthPackageRequest createCommonBandwidthPackageRequest, String regionId) throws AliCloudException {
 
-        final CreateCommonBandwidthPackageResponse response = acsClientStub.request(client, createCommonBandwidthPackageRequest);
+        final CreateCommonBandwidthPackageResponse response = acsClientStub.request(client, createCommonBandwidthPackageRequest, regionId);
         return response.getBandwidthPackageId();
 
     }
@@ -438,10 +425,9 @@ public class EipServiceImpl implements EipService {
         }
 
         DescribeEipAddressesRequest queryEipRequest = new DescribeEipAddressesRequest();
-        queryEipRequest.setRegionId(regionId);
         queryEipRequest.setEipAddress(ipAddress);
 
-        final DescribeEipAddressesResponse response = acsClientStub.request(client, queryEipRequest);
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, queryEipRequest, regionId);
         if (response.getEipAddresses().isEmpty()) {
             throw new PluginException(String.format("Cannot find EIP by given ip address: [%s]", ipAddress));
         }
