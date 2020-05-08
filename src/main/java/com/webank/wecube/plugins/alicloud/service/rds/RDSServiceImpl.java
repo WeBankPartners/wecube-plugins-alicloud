@@ -150,7 +150,7 @@ public class RDSServiceImpl implements RDSService {
                 }
 
                 // return result
-                result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword);
+                result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword, requestDto.getdBInstanceSpec());
 
 
             } catch (PluginException | AliCloudException ex) {
