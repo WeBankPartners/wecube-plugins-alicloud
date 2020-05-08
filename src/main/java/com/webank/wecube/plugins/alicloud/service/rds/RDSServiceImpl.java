@@ -62,7 +62,7 @@ public class RDSServiceImpl implements RDSService {
     }
 
     @Override
-    public List<CoreCreateDBInstanceResponseDto> createDB(List<CoreCreateDBInstanceRequestDto> requestDtoList) throws PluginException {
+    public List<CoreCreateDBInstanceResponseDto> createDB(List<CoreCreateDBInstanceRequestDto> requestDtoList) {
         List<CoreCreateDBInstanceResponseDto> resultList = new ArrayList<>();
         for (CoreCreateDBInstanceRequestDto requestDto : requestDtoList) {
 
@@ -162,22 +162,12 @@ public class RDSServiceImpl implements RDSService {
                 logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
-
-
         }
         return resultList;
     }
 
-    private void bindSecurityGroupToInstance(IAcsClient client, String regionId, String securityGroupId, String dbInstanceId) {
-        ModifySecurityGroupConfigurationRequest request = new ModifySecurityGroupConfigurationRequest();
-        request.setSecurityGroupId(securityGroupId);
-        request.setDBInstanceId(dbInstanceId);
-
-        acsClientStub.request(client, request, regionId);
-    }
-
     @Override
-    public List<CoreDeleteDBInstanceResponseDto> deleteDB(List<CoreDeleteDBInstanceRequestDto> requestDtoList) throws PluginException {
+    public List<CoreDeleteDBInstanceResponseDto> deleteDB(List<CoreDeleteDBInstanceRequestDto> requestDtoList) {
         List<CoreDeleteDBInstanceResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteDBInstanceRequestDto requestDto : requestDtoList) {
 
@@ -229,7 +219,7 @@ public class RDSServiceImpl implements RDSService {
     }
 
     @Override
-    public List<CoreModifySecurityIPsResponseDto> modifySecurityIPs(List<CoreModifySecurityIPsRequestDto> requestDtoList) throws PluginException {
+    public List<CoreModifySecurityIPsResponseDto> modifySecurityIPs(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
         List<CoreModifySecurityIPsResponseDto> resultList = new ArrayList<>();
         for (CoreModifySecurityIPsRequestDto requestDto : requestDtoList) {
 
@@ -270,7 +260,19 @@ public class RDSServiceImpl implements RDSService {
     }
 
     @Override
-    public List<CoreCreateBackupResponseDto> createBackup(List<CoreCreateBackupRequestDto> requestDtoList) throws PluginException {
+    public List<CoreModifySecurityIPsResponseDto> appendSecurityIps(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
+        requestDtoList.forEach(coreModifySecurityIPsRequestDto -> coreModifySecurityIPsRequestDto.setModifyMode("Append"));
+        return modifySecurityIPs(requestDtoList);
+    }
+
+    @Override
+    public List<CoreModifySecurityIPsResponseDto> deleteSecurityIps(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
+        requestDtoList.forEach(coreModifySecurityIPsRequestDto -> coreModifySecurityIPsRequestDto.setModifyMode("Delete"));
+        return modifySecurityIPs(requestDtoList);
+    }
+
+    @Override
+    public List<CoreCreateBackupResponseDto> createBackup(List<CoreCreateBackupRequestDto> requestDtoList) {
         List<CoreCreateBackupResponseDto> resultList = new ArrayList<>();
         for (CoreCreateBackupRequestDto requestDto : requestDtoList) {
 
@@ -631,6 +633,14 @@ public class RDSServiceImpl implements RDSService {
         acsClientStub.request(client, request);
     }
 
+    private void bindSecurityGroupToInstance(IAcsClient client, String regionId, String securityGroupId, String dbInstanceId) {
+        ModifySecurityGroupConfigurationRequest request = new ModifySecurityGroupConfigurationRequest();
+        request.setSecurityGroupId(securityGroupId);
+        request.setDBInstanceId(dbInstanceId);
+
+        acsClientStub.request(client, request, regionId);
+    }
+
 
     private static class RdsParameterGroupTemplate {
         @JsonProperty(value = "character_set_server")
@@ -647,5 +657,6 @@ public class RDSServiceImpl implements RDSService {
             this.characterSetServer = characterSetServer;
         }
     }
+
 
 }
