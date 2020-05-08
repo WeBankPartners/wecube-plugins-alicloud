@@ -331,7 +331,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceSpec</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceClass</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceStorage</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceStorage</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">engine</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">engineVersion</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">payType</parameter>
@@ -343,7 +343,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">privateIpAddress</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">usedTime</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">period</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceStorageType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceStorageType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenew</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">category</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBTimeZone</parameter>
