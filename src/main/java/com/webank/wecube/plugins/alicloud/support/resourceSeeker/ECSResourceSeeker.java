@@ -128,11 +128,15 @@ public class ECSResourceSeeker {
     private String getLastResource(IAcsClient client, DescribeAvailableResourceRequest request) throws PluginException, AliCloudException {
         final DescribeAvailableResourceResponse response = this.acsClientStub.request(client, request);
 
-        if (response.getAvailableZones().get(0).getAvailableResources().isEmpty()) {
+        final List<DescribeAvailableResourceResponse.AvailableZone.AvailableResource.SupportedResource> supportedResources;
+        try {
+            if (response.getAvailableZones().get(0).getAvailableResources().isEmpty()) {
+                throw new PluginException("Cannot find relevant instance resource.");
+            }
+            supportedResources = response.getAvailableZones().get(0).getAvailableResources().get(0).getSupportedResources();
+        } catch (IndexOutOfBoundsException ex) {
             throw new PluginException("Cannot find relevant instance resource.");
         }
-
-        final List<DescribeAvailableResourceResponse.AvailableZone.AvailableResource.SupportedResource> supportedResources = response.getAvailableZones().get(0).getAvailableResources().get(0).getSupportedResources();
         final DescribeAvailableResourceResponse.AvailableZone.AvailableResource.SupportedResource last = Iterables.getLast(supportedResources);
         return last.getValue();
     }
