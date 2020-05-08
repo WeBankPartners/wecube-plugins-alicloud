@@ -353,7 +353,8 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">accountName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">accountPassword</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">dBInstanceSpec</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cpu</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">memory</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">dBInstanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">connectionString</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">port</parameter>
