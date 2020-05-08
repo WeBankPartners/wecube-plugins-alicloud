@@ -1,8 +1,12 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 
 import com.aliyuncs.vpc.model.v20160428.CreateNatGatewayRequest;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.vpc.nat.InstanceChargeType;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -204,5 +208,20 @@ public class CoreCreateNatGatewayRequestDto extends CoreRequestInputDto implemen
                 .append("name", name)
                 .append("pricingCycle", pricingCycle)
                 .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (StringUtils.isNotEmpty(instanceChargeType)) {
+            final InstanceChargeType type = EnumUtils.getEnumIgnoreCase(InstanceChargeType.class, instanceChargeType);
+            if (type == null) {
+                throw new PluginException(String.format("Invalid instance charge type: [%s]", instanceChargeType));
+            }
+            instanceChargeType = type.toString();
+        }
+
+        if (StringUtils.isNotEmpty(pricingCycle)) {
+            pricingCycle = StringUtils.capitalize(pricingCycle.toLowerCase());
+        }
     }
 }
