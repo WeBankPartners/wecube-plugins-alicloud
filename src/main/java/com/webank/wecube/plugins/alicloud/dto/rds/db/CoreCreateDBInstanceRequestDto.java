@@ -45,7 +45,7 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     private String dBParamGroupId;
     private String resourceOwnerId;
-    @NotEmpty(message = "dBInstanceStorage field is mandatory.")
+//    @NotEmpty(message = "dBInstanceStorage field is mandatory.")
     @JsonProperty("dBInstanceStorage")
     private String dBInstanceStorage;
     private String systemDBCharset;
