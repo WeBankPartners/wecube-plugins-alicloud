@@ -23,6 +23,8 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
     private String accountName;
     @JsonProperty(value = "accountPassword")
     private String accountEncryptedPassword;
+    @JsonProperty("dBInstanceSpec")
+    private String dBInstanceSpec;
 
     public CoreCreateDBInstanceResponseDto() {
     }
@@ -83,10 +85,20 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
         this.accountEncryptedPassword = accountEncryptedPassword;
     }
 
-    public CoreCreateDBInstanceResponseDto fromSdk(CreateDBInstanceResponse response, String accountName, String accountEncryptedPassword) {
+
+    public String getdBInstanceSpec() {
+        return dBInstanceSpec;
+    }
+
+    public void setdBInstanceSpec(String dBInstanceSpec) {
+        this.dBInstanceSpec = dBInstanceSpec;
+    }
+
+    public CoreCreateDBInstanceResponseDto fromSdk(CreateDBInstanceResponse response, String accountName, String accountEncryptedPassword, String dBInstanceSpec) {
         final CoreCreateDBInstanceResponseDto result = this.fromSdk(response);
         result.setAccountName(accountName);
         result.setAccountEncryptedPassword(accountEncryptedPassword);
+        result.setdBInstanceSpec(dBInstanceSpec);
         return result;
     }
 
@@ -101,6 +113,8 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
                 .append("port", port)
                 .append("accountName", accountName)
                 .append("accountEncryptedPassword", accountEncryptedPassword)
+                .append("dBInstanceSpec", dBInstanceSpec)
                 .toString();
     }
+
 }

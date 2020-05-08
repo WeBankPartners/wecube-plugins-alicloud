@@ -20,6 +20,7 @@ import com.webank.wecube.plugins.alicloud.utils.PluginMapUtils;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author howechen
@@ -392,11 +392,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         final List<String> hostIdList = PluginStringUtils.splitStringList(hostIds);
         final List<String> hostPortList = PluginStringUtils.splitStringList(hostPorts);
 
-        final Map<String, String> hostIdToPortMap = PluginMapUtils.zipToMap(hostIdList, hostPortList);
+        final List<Pair<String, String>> hostIdToPortPairList = PluginMapUtils.zipToPairList(hostIdList, hostPortList);
         List<BackendServerDto> resultList = new ArrayList<>();
-        for (Map.Entry<String, String> hostIdToPort : hostIdToPortMap.entrySet()) {
-            final String id = hostIdToPort.getKey();
-            final String port = hostIdToPort.getValue();
+        for (Pair<String, String> hostIdToPortPair : hostIdToPortPairList) {
+            final String id = hostIdToPortPair.getKey();
+            final String port = hostIdToPortPair.getValue();
             BackendServerDto backendServerDto = new BackendServerDto(id, port);
             resultList.add(backendServerDto);
         }
