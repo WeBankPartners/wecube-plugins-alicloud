@@ -392,6 +392,38 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
+            <interface action="append_security_ip" path="/alicloud/v1/rds/security_ip/append">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityIps</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceIPArrayName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">whitelistNetworkType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete_security_ip" path="/alicloud/v1/rds/security_ip/delete">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityIps</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceIPArrayName</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">whitelistNetworkType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
             <interface action="create_backup" path="/alicloud/v1/rds/backup/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
