@@ -69,7 +69,7 @@ public class PluginStringUtils {
      * @return formatted string
      */
     public static String stringifyObjectList(List<String> strings) {
-        StringJoiner joiner = new StringJoiner(", ", "[", "]");
+        StringJoiner joiner = new StringJoiner(",", "[", "]");
 
         for (String string : strings) {
             joiner.add(string);
