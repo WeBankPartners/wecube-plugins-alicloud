@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -239,13 +240,7 @@ public class RDSServiceImpl implements RDSService {
 
                 logger.info("Modifying rds instance's security ip: {}", requestDto.toString());
 
-                // handle core's listStr
-                final String formattedSecurityIps = PluginStringUtils.handleCoreListStr(requestDto.getSecurityIps(), true);
-                requestDto.setSecurityIps(formattedSecurityIps);
-
-                final ModifySecurityIpsRequest request = requestDto.toSdk();
-                ModifySecurityIpsResponse response;
-                response = this.acsClientStub.request(client, request, regionId);
+                ModifySecurityIpsResponse response = modifySecurityIps(requestDto, client, regionId);
 
                 result = result.fromSdk(response);
 
@@ -267,14 +262,101 @@ public class RDSServiceImpl implements RDSService {
 
     @Override
     public List<CoreModifySecurityIPsResponseDto> appendSecurityIps(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
-        requestDtoList.forEach(coreModifySecurityIPsRequestDto -> coreModifySecurityIPsRequestDto.setModifyMode("Append"));
-        return modifySecurityIPs(requestDtoList);
+
+        List<CoreModifySecurityIPsResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityIPsRequestDto requestDto : requestDtoList) {
+
+            CoreModifySecurityIPsResponseDto result = new CoreModifySecurityIPsResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                final DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray foundDBInstance = queryDBInstance(requestDto.getdBInstanceId(), client, regionId);
+
+                // remove the exist element in new ip list
+                final List<String> currentIpList = Arrays.asList(foundDBInstance.getSecurityIPList().split(","));
+                final List<String> newIpList = PluginStringUtils.splitStringList(requestDto.getSecurityIps()).stream().distinct().collect(Collectors.toList());
+                newIpList.removeAll(currentIpList);
+                requestDto.setSecurityIps(PluginStringUtils.stringifyObjectList(newIpList));
+                requestDto.setModifyMode("Append");
+
+                final ModifySecurityIpsResponse response = modifySecurityIps(requestDto, client, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
     }
 
     @Override
     public List<CoreModifySecurityIPsResponseDto> deleteSecurityIps(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
-        requestDtoList.forEach(coreModifySecurityIPsRequestDto -> coreModifySecurityIPsRequestDto.setModifyMode("Delete"));
-        return modifySecurityIPs(requestDtoList);
+        List<CoreModifySecurityIPsResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityIPsRequestDto requestDto : requestDtoList) {
+
+            CoreModifySecurityIPsResponseDto result = new CoreModifySecurityIPsResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                final DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray foundDBInstance = queryDBInstance(requestDto.getdBInstanceId(), client, regionId);
+
+                // retain the common eleement in two lists
+                final List<String> currentIpList = Arrays.asList(foundDBInstance.getSecurityIPList().split(","));
+                List<String> newIpList = PluginStringUtils.splitStringList(requestDto.getSecurityIps()).stream().distinct().collect(Collectors.toList());
+                // newIpList now is the intersection of both current ip list and request ip list
+                newIpList = currentIpList.stream().filter(newIpList::contains).collect(Collectors.toList());
+
+                if (newIpList.size() == currentIpList.size()) {
+                    // AliCloud doesn't allow delete all securityIps
+                    // set a default security ip as AliCloud officially do
+                    requestDto.setSecurityIps("127.0.0.1");
+                    requestDto.setModifyMode("Cover");
+                } else {
+                    requestDto.setSecurityIps(PluginStringUtils.stringifyObjectList(newIpList));
+                    requestDto.setModifyMode("Delete");
+                }
+
+
+                final ModifySecurityIpsResponse response = modifySecurityIps(requestDto, client, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
     }
 
     @Override
@@ -660,5 +742,25 @@ public class RDSServiceImpl implements RDSService {
         }
     }
 
+
+    private ModifySecurityIpsResponse modifySecurityIps(CoreModifySecurityIPsRequestDto requestDto, IAcsClient client, String regionId) throws AliCloudException {
+        final ModifySecurityIpsRequest request = requestDto.toSdk();
+        ModifySecurityIpsResponse response;
+        response = this.acsClientStub.request(client, request, regionId);
+        return response;
+    }
+
+    private DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray queryDBInstance(String dBInstanceId, IAcsClient client, String regionId) {
+        DescribeDBInstanceIPArrayListRequest queryRequest = new DescribeDBInstanceIPArrayListRequest();
+        queryRequest.setDBInstanceId(dBInstanceId);
+        final DescribeDBInstanceIPArrayListResponse queryResponse = acsClientStub.request(client, queryRequest, regionId);
+
+
+        if (queryResponse.getItems().isEmpty()) {
+            throw new PluginException(String.format("Cannot find dBInstance by given instanceId: [%s]", dBInstanceId));
+        }
+
+        return queryResponse.getItems().get(0);
+    }
 
 }
