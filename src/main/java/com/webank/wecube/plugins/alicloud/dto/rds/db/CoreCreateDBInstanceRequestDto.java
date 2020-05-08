@@ -481,11 +481,11 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     @Override
     public void adaptToAliCloud() throws PluginException {
-        if (!StringUtils.isEmpty(period)) {
+        if (StringUtils.isNotEmpty(period)) {
             period = StringUtils.capitalize(period);
         }
 
-        if (!StringUtils.isEmpty(zoneId)) {
+        if (StringUtils.isNotEmpty(zoneId)) {
             String resultZoneId = zoneId;
             final List<String> strings = PluginStringUtils.splitStringList(zoneId);
             if (StringUtils.equalsIgnoreCase(RDSCategory.Basic.toString(), category)) {
@@ -507,36 +507,27 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
             zoneId = resultZoneId;
         }
 
-        if (!StringUtils.isEmpty(securityIPList) && PluginStringUtils.isListStr(securityIPList)) {
+        if (StringUtils.isNotEmpty(securityIPList) && PluginStringUtils.isListStr(securityIPList)) {
             securityIPList = PluginStringUtils.removeSquareBracket(securityIPList);
         }
 
-        if (!StringUtils.isEmpty(engine)) {
+        if (StringUtils.isNotEmpty(engine)) {
             final RDSResourceSeeker.RDSEngine engineType = EnumUtils.getEnumIgnoreCase(RDSResourceSeeker.RDSEngine.class, engine);
             if (null == engineType) {
                 throw new PluginException("Invalid engine type.");
             }
-            switch (engineType) {
-                case MARIADB:
-                    engine = RDSResourceSeeker.RDSEngine.MARIADB.getEngine();
-                    break;
-                case MYSQL:
-                    engine = RDSResourceSeeker.RDSEngine.MYSQL.getEngine();
-                    break;
-                default:
-                    break;
-            }
+            engine = engineType.getEngine();
         }
 
-        if (!StringUtils.isEmpty(payType)) {
+        if (StringUtils.isNotEmpty(payType)) {
             payType = StringUtils.capitalize(payType.toLowerCase());
         }
 
-        if (!StringUtils.isEmpty(period)) {
+        if (StringUtils.isNotEmpty(period)) {
             period = StringUtils.capitalize(period.toLowerCase());
         }
 
-        if (!StringUtils.isEmpty(securityGroupId)) {
+        if (StringUtils.isNotEmpty(securityGroupId)) {
             securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
         }
     }
