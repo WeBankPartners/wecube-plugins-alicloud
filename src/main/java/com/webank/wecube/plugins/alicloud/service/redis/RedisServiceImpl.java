@@ -131,6 +131,9 @@ public class RedisServiceImpl implements RedisService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
@@ -193,6 +196,9 @@ public class RedisServiceImpl implements RedisService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
