@@ -54,6 +54,20 @@ public class RDSController {
         return new CoreResponseDto<CoreModifySecurityIPsResponseDto>().withErrorCheck(result);
     }
 
+    @PostMapping(path = "/security_ip/append")
+    @ResponseBody
+    public CoreResponseDto<CoreModifySecurityIPsResponseDto> appendSecurityIp(@RequestBody CoreRequestDto<CoreModifySecurityIPsRequestDto> request) {
+        List<CoreModifySecurityIPsResponseDto> result = this.rdsServcie.appendSecurityIps(request.getInputs());
+        return new CoreResponseDto<CoreModifySecurityIPsResponseDto>().withErrorCheck(result);
+    }
+
+    @PostMapping(path = "/security_ip/delete")
+    @ResponseBody
+    public CoreResponseDto<CoreModifySecurityIPsResponseDto> deleteSecurityIp(@RequestBody CoreRequestDto<CoreModifySecurityIPsRequestDto> request) {
+        List<CoreModifySecurityIPsResponseDto> result = this.rdsServcie.deleteSecurityIps(request.getInputs());
+        return new CoreResponseDto<CoreModifySecurityIPsResponseDto>().withErrorCheck(result);
+    }
+
     @PostMapping(path = "/backup/create")
     @ResponseBody
     public CoreResponseDto<CoreCreateBackupResponseDto> createBackup(@RequestBody CoreRequestDto<CoreCreateBackupRequestDto> request) {
