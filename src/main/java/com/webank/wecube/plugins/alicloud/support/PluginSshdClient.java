@@ -36,7 +36,13 @@ public class PluginSshdClient {
 
         String result;
         try {
+            logger.info("Sending command: [{}] to target machine: [{}]", command, host);
             result = executor.execute(cmd);
+            if (StringUtils.isEmpty(result)) {
+                String msg = String.format("Error while executing the given command: [%s], the result is empty, please check the code.", cmd);
+                logger.error(msg);
+                throw new PluginException(msg);
+            }
         } finally {
             executor.destroy();
         }
@@ -59,10 +65,13 @@ public class PluginSshdClient {
 
         String result;
         try {
+            logger.info("Sending command: [{}] to target machine: [{}]", command, host);
             result = executor.execute(cmd);
             logger.info("result is: " + result);
             if (StringUtils.isEmpty(result)) {
-                throw new PluginException("return is empty, please check !");
+                String msg = String.format("Error while executing the given command: [%s], the result is empty, please check the code.", cmd);
+                logger.error(msg);
+                throw new PluginException(msg);
             }
         } finally {
             executor.destroy();
