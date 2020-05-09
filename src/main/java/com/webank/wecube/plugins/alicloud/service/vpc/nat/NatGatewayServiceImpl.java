@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.vpc.nat;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.*;
+import com.google.common.collect.Lists;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
@@ -253,6 +254,121 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         return resultList;
     }
 
+    @Override
+    public List<CoreModifySnatEntryResponseDto> appendSnatEntry(List<CoreModifySnatEntryRequestDto> requestDtoList) {
+        List<CoreModifySnatEntryResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySnatEntryRequestDto requestDto : requestDtoList) {
+            CoreModifySnatEntryResponseDto result = new CoreModifySnatEntryResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Appending SNAT entry: {}", requestDto.toString());
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+                final String natId = requestDto.getNatId();
+
+                // query the current entry's ip
+                final List<String> currentIpList = retrieveCurrentSnatIpList(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId());
+
+                // clear up the eip list, remove bound eip from request
+                final List<String> targetIpList = PluginStringUtils.splitStringList(requestDto.getSnatIp());
+                targetIpList.removeAll(currentIpList);
+
+                // bind target eip to nat gateway
+                for (String ip : targetIpList) {
+                    eipService.bindIpToInstance(client, regionId, natId, AssociatedInstanceType.Nat, ip);
+                }
+
+                // append the new-bound eip to the current list
+                currentIpList.addAll(targetIpList);
+                requestDto.setSnatIp(PluginStringUtils.stringifyListWithoutBracket(currentIpList));
+
+                // modify the snat entry
+                ModifySnatEntryRequest request = requestDto.toSdk();
+                ModifySnatEntryResponse response = this.acsClientStub.request(client, request, regionId);
+
+                // wait till snat entry status is not pending or modifying
+                Function<?, Boolean> func = o -> ifSnatEntryNotInStatus(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId(), SnatEntryStatus.Pending, SnatEntryStatus.Modifying);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifySnatEntryResponseDto> pruneSnatEntry(List<CoreModifySnatEntryRequestDto> requestDtoList) {
+        List<CoreModifySnatEntryResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySnatEntryRequestDto requestDto : requestDtoList) {
+            CoreModifySnatEntryResponseDto result = new CoreModifySnatEntryResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                logger.info("Pruning SNAT entry: {}", requestDto.toString());
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // query the current entry's ip
+                final List<String> currentIpList = retrieveCurrentSnatIpList(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId());
+
+                // calculate the intersection of current and target ip list, remove non-exist ip
+                List<String> targetIpList = PluginStringUtils.splitStringList(requestDto.getSnatIp());
+                targetIpList = currentIpList.stream().filter(targetIpList::contains).collect(Collectors.toList());
+                currentIpList.removeAll(targetIpList);
+                requestDto.setSnatIp(PluginStringUtils.stringifyListWithoutBracket(currentIpList));
+
+                // send the request
+                ModifySnatEntryRequest request = requestDto.toSdk();
+                ModifySnatEntryResponse response = this.acsClientStub.request(client, request, regionId);
+
+                // wait till snat entry status is not pending
+                Function<?, Boolean> func = o -> ifSnatEntryNotInStatus(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId(), SnatEntryStatus.Pending);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
+                // un-bind the eip from the nat
+                eipService.unbindIpFromInstance(client, regionId, requestDto.getNatId(), AssociatedInstanceType.Nat, targetIpList.toArray(new String[0]));
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
+    }
+
     private String[] retrieveSnatIpsFromEntryId(CoreDeleteSnatEntryRequestDto requestDto, IAcsClient client, String regionId) {
         final DescribeSnatTableEntriesResponse.SnatTableEntry foundSnatEntry = retrieveSnatEntryByEntryId(client, regionId, requestDto.getSnatTableId(), requestDto.getSnatEntryId());
         return foundSnatEntry.getSnatIp().split(",");
@@ -306,17 +422,18 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         return response.getSnatTableEntries().get(0);
     }
 
-    private boolean ifSnatEntryInStatus(IAcsClient client, String regionId, String snatTableId, String snatEntryId, SnatEntryStatus status) {
+    private boolean ifSnatEntryInStatus(IAcsClient client, String regionId, String snatTableId, String snatEntryId, SnatEntryStatus... statusArray) {
         final DescribeSnatTableEntriesResponse.SnatTableEntry foundEntry = retrieveSnatEntryByEntryId(client, regionId, snatTableId, snatEntryId);
 
-        return StringUtils.equals(status.toString(), foundEntry.getStatus());
+        final List<String> statusStringList = Lists.newArrayList(statusArray).stream().map(Enum::toString).collect(Collectors.toList());
+        return statusStringList.contains(foundEntry.getStatus());
     }
 
 
-    private boolean ifSnatEntryNotInStatus(IAcsClient client, String regionId, String snatTableId, String snatEntryId, SnatEntryStatus status) {
+    private boolean ifSnatEntryNotInStatus(IAcsClient client, String regionId, String snatTableId, String snatEntryId, SnatEntryStatus... statusArray) {
         final DescribeSnatTableEntriesResponse.SnatTableEntry foundEntry = retrieveSnatEntryByEntryId(client, regionId, snatTableId, snatEntryId);
-
-        return !StringUtils.equals(status.toString(), foundEntry.getStatus());
+        final List<String> statusStringList = Lists.newArrayList(statusArray).stream().map(Enum::toString).collect(Collectors.toList());
+        return !statusStringList.contains(foundEntry.getStatus());
     }
 
     private boolean ifSnatEntryHasBeenDeleted(IAcsClient client, String regionId, String snatTableId, String snatEntryId) {
@@ -327,5 +444,10 @@ public class NatGatewayServiceImpl implements NatGatewayService {
         final DescribeSnatTableEntriesResponse response = acsClientStub.request(client, request, regionId);
 
         return response.getSnatTableEntries().isEmpty();
+    }
+
+    private List<String> retrieveCurrentSnatIpList(IAcsClient client, String regionId, String snatTableId, String snatEntryId) {
+        final DescribeSnatTableEntriesResponse.SnatTableEntry foundEntry = retrieveSnatEntryByEntryId(client, regionId, snatTableId, snatEntryId);
+        return Lists.newArrayList(foundEntry.getSnatIp().split(","));
     }
 }
