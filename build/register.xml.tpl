@@ -234,6 +234,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceChargeType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">period</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">periodUnit</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">resourceTag</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
