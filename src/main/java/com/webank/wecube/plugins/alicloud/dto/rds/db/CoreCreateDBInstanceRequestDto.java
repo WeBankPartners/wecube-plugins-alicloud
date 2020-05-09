@@ -481,9 +481,6 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     @Override
     public void adaptToAliCloud() throws PluginException {
-        if (StringUtils.isNotEmpty(period)) {
-            period = StringUtils.capitalize(period);
-        }
 
         if (StringUtils.isNotEmpty(zoneId)) {
             String resultZoneId = zoneId;
