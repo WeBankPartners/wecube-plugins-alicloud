@@ -17,4 +17,7 @@ public interface NatGatewayService {
 
     List<CoreDeleteSnatEntryResponseDto> deleteSnatEntry(List<CoreDeleteSnatEntryRequestDto> requestDtoList);
 
+    List<CoreModifySnatEntryResponseDto> appendSnatEntry(List<CoreModifySnatEntryRequestDto> requestDtoList);
+
+    List<CoreModifySnatEntryResponseDto> pruneSnatEntry(List<CoreModifySnatEntryRequestDto> requestDtoList);
 }
