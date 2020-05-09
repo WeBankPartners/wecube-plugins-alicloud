@@ -861,6 +861,38 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
+            <interface action="modify_append" path="/alicloud/v1/vpc/nat/snat_entry/modify/append">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatEntryId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatIp</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="modify_prune" path="/alicloud/v1/vpc/nat/snat_entry/modify/prune">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatEntryId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatTableId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">natId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">snatIp</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
         </plugin>
         <plugin name="EIP">
             <interface action="allocate_eip" path="/alicloud/v1/vpc/eip/allocate">
