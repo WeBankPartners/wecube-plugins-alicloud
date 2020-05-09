@@ -39,6 +39,7 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
         this.requestId = requestId;
     }
 
+    @JsonProperty(value = "dBInstanceId")
     public String getDBInstanceId() {
         return dBInstanceId;
     }
