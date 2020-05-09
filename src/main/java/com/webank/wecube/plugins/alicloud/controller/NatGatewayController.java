@@ -52,5 +52,19 @@ public class NatGatewayController {
         List<CoreDeleteSnatEntryResponseDto> result = this.natGatewayService.deleteSnatEntry(request.getInputs());
         return new CoreResponseDto<CoreDeleteSnatEntryResponseDto>().withErrorCheck(result);
     }
+
+    @PostMapping(path = "/snat_entry/modify/append")
+    @ResponseBody
+    public CoreResponseDto<CoreModifySnatEntryResponseDto> appendSnatEntry(@RequestBody CoreRequestDto<CoreModifySnatEntryRequestDto> request) {
+        List<CoreModifySnatEntryResponseDto> result = this.natGatewayService.appendSnatEntry(request.getInputs());
+        return new CoreResponseDto<CoreModifySnatEntryResponseDto>().withErrorCheck(result);
+    }
+
+    @PostMapping(path = "/snat_entry/modify/prune")
+    @ResponseBody
+    public CoreResponseDto<CoreModifySnatEntryResponseDto> pruneSnatEntry(@RequestBody CoreRequestDto<CoreModifySnatEntryRequestDto> request) {
+        List<CoreModifySnatEntryResponseDto> result = this.natGatewayService.pruneSnatEntry(request.getInputs());
+        return new CoreResponseDto<CoreModifySnatEntryResponseDto>().withErrorCheck(result);
+    }
 }
 
