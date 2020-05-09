@@ -78,6 +78,21 @@ public class PluginStringUtils {
     }
 
     /**
+     * Stringify list to AliCloud's list string without square bracket
+     *
+     * @param strings String list
+     * @return formatted string
+     */
+    public static String stringifyListWithoutBracket(List<String> strings) {
+        StringJoiner joiner = new StringJoiner(",");
+
+        for (String string : strings) {
+            joiner.add(string);
+        }
+        return joiner.toString();
+    }
+
+    /**
      * Remove square bracket and split the string into list
      *
      * @param rawStringList raw String list
