@@ -139,12 +139,12 @@ public class RDSServiceImpl implements RDSService {
                     password = passwordManager.generateRDSPassword();
                     createAccountRequest.setAccountPassword(password);
                 }
-
                 final String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), password);
 
-                createAccountRequest.setSysRegionId(regionId);
                 createAccountRequest.setDBInstanceId(createdDBInstanceId);
-                createRDSAccount(client, createAccountRequest);
+                createRDSAccount(client, regionId, createAccountRequest);
+                func = o -> ifAccountIsAvailable(client, regionId, response.getDBInstanceId(), requestDto.getAccountName());
+                PluginTimer.runTask(new PluginTimerTask(func));
 
                 // bind security group to the created RDS instance
                 if (StringUtils.isNotEmpty(requestDto.getSecurityGroupId())) {
@@ -532,16 +532,11 @@ public class RDSServiceImpl implements RDSService {
         return StringUtils.equals(status.getStatus(), backupJob.getBackupStatus());
     }
 
-    @Override
-    public void createRDSAccount(IAcsClient client, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
+    public void createRDSAccount(IAcsClient client, String regionId, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
 
         logger.info("Creating RDS account...");
 
-        if (StringUtils.isEmpty(createAccountRequest.getSysRegionId())) {
-            throw new PluginException("The regionId cannot be null or empty.");
-        }
-
-        this.acsClientStub.request(client, createAccountRequest);
+        this.acsClientStub.request(client, createAccountRequest, regionId);
 
         // check if the account has been created
         Function<?, Boolean> func = o -> ifRDSAccountCreated(client, createAccountRequest.getSysRegionId(), createAccountRequest.getAccountName(), createAccountRequest.getDBInstanceId());
@@ -765,4 +760,22 @@ public class RDSServiceImpl implements RDSService {
         return queryResponse.getItems().get(0);
     }
 
+    private boolean ifAccountIsAvailable(IAcsClient client, String regionId, String dBInstanceId, String accountName) throws PluginException, AliCloudException {
+
+        logger.info("Querying account info to check the status...");
+
+        DescribeAccountsRequest request = new DescribeAccountsRequest();
+        request.setDBInstanceId(dBInstanceId);
+        request.setAccountName(accountName);
+
+        final DescribeAccountsResponse response = acsClientStub.request(client, request, regionId);
+
+        if (response.getAccounts().isEmpty()) {
+            throw new PluginException("Cannot find account info.");
+        }
+
+        final String currentStatus = response.getAccounts().get(0).getAccountStatus();
+
+        return StringUtils.equalsIgnoreCase(AccountStatus.Available.toString(), currentStatus);
+    }
 }
