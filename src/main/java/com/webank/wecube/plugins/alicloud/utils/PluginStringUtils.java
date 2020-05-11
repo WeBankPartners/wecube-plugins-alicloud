@@ -116,7 +116,7 @@ public class PluginStringUtils {
     public static Pair<String, String> splitCoreAndMemory(String coreAndMemoryString) {
 
         final Pattern pattern = Pattern.compile(CORE_MEMORY_STR_REGEX, Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(coreAndMemoryString);
+        final Matcher matcher = pattern.matcher(coreAndMemoryString.toUpperCase());
         String core = StringUtils.EMPTY;
         String memory = StringUtils.EMPTY;
         // matcher group index: 0 - full group, 1 - core, 2 - memory
