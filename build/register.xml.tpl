@@ -878,7 +878,7 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="modify_prune" path="/alicloud/v1/vpc/nat/snat_entry/modify/prune">
+            <interface action="modify_remove" path="/alicloud/v1/vpc/nat/snat_entry/modify/prune">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
