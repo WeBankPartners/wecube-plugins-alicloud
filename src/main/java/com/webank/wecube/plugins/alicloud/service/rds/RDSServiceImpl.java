@@ -23,6 +23,7 @@ import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginObjectUtils;
@@ -105,8 +106,9 @@ public class RDSServiceImpl implements RDSService {
                 logger.info("Creating DB instance: {}", requestDto.toString());
 
                 // find available resource according to AliCloud's stock and return the result that match the wecube's dBInstanceSpec
+                SpecInfo foundSpecInfo = new SpecInfo();
                 if (!StringUtils.isEmpty(requestDto.getdBInstanceSpec()) && StringUtils.isEmpty(requestDto.getDBInstanceClass())) {
-                    final String foundDBInstanceClass = rdsResourceSeeker.findAvailableResource(client,
+                    foundSpecInfo = rdsResourceSeeker.findAvailableResource(client,
                             requestDto.getEngine(),
                             requestDto.getdBInstanceSpec(),
                             regionId,
@@ -115,7 +117,7 @@ public class RDSServiceImpl implements RDSService {
                             requestDto.getPayType(),
                             requestDto.getDBInstanceStorageType(),
                             requestDto.getCategory());
-                    requestDto.setDBInstanceClass(foundDBInstanceClass);
+                    requestDto.setDBInstanceClass(foundSpecInfo.getResourceClass());
                 }
 
                 final CreateDBInstanceRequest createDBInstanceRequest = requestDto.toSdk();
@@ -150,7 +152,7 @@ public class RDSServiceImpl implements RDSService {
                 }
 
                 // return result
-                result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword, requestDto.getdBInstanceSpec());
+                result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword, foundSpecInfo);
 
 
             } catch (PluginException | AliCloudException ex) {
