@@ -60,7 +60,7 @@ public class NatGatewayController {
         return new CoreResponseDto<CoreModifySnatEntryResponseDto>().withErrorCheck(result);
     }
 
-    @PostMapping(path = "/snat_entry/modify/prune")
+    @PostMapping(path = "/snat_entry/modify/remove")
     @ResponseBody
     public CoreResponseDto<CoreModifySnatEntryResponseDto> pruneSnatEntry(@RequestBody CoreRequestDto<CoreModifySnatEntryRequestDto> request) {
         List<CoreModifySnatEntryResponseDto> result = this.natGatewayService.pruneSnatEntry(request.getInputs());
