@@ -56,7 +56,7 @@ public class EipServiceImpl implements EipService {
                 final String regionId = cloudParamDto.getRegionId();
 
                 if (StringUtils.isNotEmpty(requestDto.getAllocationId())) {
-                    final DescribeEipAddressesResponse describeEipAddressesResponse = retrieveEipByAllocationId(client, regionId, requestDto.getAllocationId());
+                    final DescribeEipAddressesResponse describeEipAddressesResponse = retrieveEipByAllocationId(client, regionId, requestDto.getAllocationId(), true);
                     if (!describeEipAddressesResponse.getEipAddresses().isEmpty()) {
                         final DescribeEipAddressesResponse.EipAddress eipAddress = describeEipAddressesResponse.getEipAddresses().get(0);
                         result = result.fromSdkCrossLineage(eipAddress);
@@ -123,7 +123,7 @@ public class EipServiceImpl implements EipService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-                final DescribeEipAddressesResponse describeEipAddressesResponse = this.retrieveEipByAllocationId(client, regionId, requestDto.getAllocationId());
+                final DescribeEipAddressesResponse describeEipAddressesResponse = this.retrieveEipByAllocationId(client, regionId, requestDto.getAllocationId(), true);
                 if (describeEipAddressesResponse.getEipAddresses().isEmpty()) {
                     result.setRequestId(describeEipAddressesResponse.getRequestId());
                     logger.info("The Eip address doesn't exist or has been released already.");
@@ -379,7 +379,7 @@ public class EipServiceImpl implements EipService {
         }
     }
 
-    private DescribeEipAddressesResponse retrieveEipByAllocationId(IAcsClient client, String regionId, String allocationId) {
+    private DescribeEipAddressesResponse retrieveEipByAllocationId(IAcsClient client, String regionId, String allocationId, boolean tolerateNotFound) {
 
         logger.info("Retrieving EIP info...");
 
@@ -388,8 +388,10 @@ public class EipServiceImpl implements EipService {
 
         final DescribeEipAddressesResponse response = acsClientStub.request(client, request, regionId);
 
-        if (response.getEipAddresses().isEmpty()) {
-            throw new PluginException(String.format("Cannot find EIP by given allocation Id: [%s]", allocationId));
+        if (!tolerateNotFound) {
+            if (response.getEipAddresses().isEmpty()) {
+                throw new PluginException(String.format("Cannot find EIP by given allocation Id: [%s]", allocationId));
+            }
         }
         return response;
     }
@@ -435,14 +437,14 @@ public class EipServiceImpl implements EipService {
         return response.getEipAddresses().get(0);
     }
 
-    private boolean ifEipInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) {
-        final DescribeEipAddressesResponse response = retrieveEipByAllocationId(client, regionId, allocationId);
+    private boolean ifEipInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) throws AliCloudException {
+        final DescribeEipAddressesResponse response = retrieveEipByAllocationId(client, regionId, allocationId, false);
 
         return StringUtils.equals(status.toString(), response.getEipAddresses().get(0).getStatus());
     }
 
-    private boolean ifEipNotInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) {
-        final DescribeEipAddressesResponse response = retrieveEipByAllocationId(client, regionId, allocationId);
+    private boolean ifEipNotInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) throws AliCloudException {
+        final DescribeEipAddressesResponse response = retrieveEipByAllocationId(client, regionId, allocationId, false);
 
         return !StringUtils.equals(status.toString(), response.getEipAddresses().get(0).getStatus());
     }
