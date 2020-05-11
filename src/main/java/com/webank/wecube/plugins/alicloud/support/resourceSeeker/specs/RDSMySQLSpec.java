@@ -1,12 +1,16 @@
 package com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs;
 
+import com.google.common.collect.Maps;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
  */
-public interface RDSMySQLSpecs {
+public interface RDSMySQLSpec {
 
     Map<String, String> CLASS_TO_SPEC_MAP = new HashMap<String, String>() {{
         put("mysql.n1.micro.1", "1C1G");
@@ -94,14 +98,17 @@ public interface RDSMySQLSpecs {
         put("mysql.st.12xlarge.25", "90C720G");
     }};
 
-    /**
-     * Given classStr return the spec of that class
-     *
-     * @param classStr db instanceClass str
-     * @return the spec of that class
-     */
-    static String matchByInstanceClass(String classStr) {
-        return CLASS_TO_SPEC_MAP.get(classStr);
-    }
+    static List<Map.Entry<String, CoreMemorySpec>> matchResource(List<String> availableResourceList, String coreMemoryString) {
+        CoreMemorySpec target = new CoreMemorySpec(coreMemoryString);
 
+        final List<Map.Entry<String, CoreMemorySpec>> matchedResourceList = CLASS_TO_SPEC_MAP.entrySet().stream()
+                .filter(entry -> availableResourceList.contains(entry.getKey()))
+                .map(entry -> Maps.immutableEntry(entry.getKey(), new CoreMemorySpec(entry.getValue())))
+                .collect(Collectors.toList());
+
+        return matchedResourceList.stream()
+                .filter(CoreMemorySpec.greaterThan(target))
+                .sorted(Map.Entry.comparingByValue(CoreMemorySpec.COMPARATOR))
+                .collect(Collectors.toList());
+    }
 }
