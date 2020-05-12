@@ -400,7 +400,7 @@ public class RDSServiceImpl implements RDSService {
                 final String backupJobId = response.getBackupJobId();
 
                 // wait for the backup job to be finished
-                Function<?, Boolean> func = o -> this.ifBackupTaskInStatus(client, regionId, dbInstanceId, backupJobId, BackupStatus.FINISHED);
+                Function<?, Boolean> func = o -> ifBackupTaskInStatus(client, regionId, dbInstanceId, backupJobId, BackupStatus.FINISHED, BackupStatus.FAILED);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
                 // retrieve backup info according to the backup job id from the AliCloud
@@ -410,6 +410,10 @@ public class RDSServiceImpl implements RDSService {
                 result = result.fromSdkCrossLineage(backupJob);
                 result.setRequestId(response.getRequestId());
                 result.setBackupJobId(backupJobId);
+
+                if (StringUtils.equals(BackupStatus.FAILED.getStatus(), result.getBackupStatus())) {
+                    throw new PluginException("Backup job failed");
+                }
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -510,8 +514,7 @@ public class RDSServiceImpl implements RDSService {
         return StringUtils.equals(status.getStatus(), dbInstance.getDBInstanceStatus());
     }
 
-    @Override
-    public Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus status) throws PluginException, AliCloudException {
+    public Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus... statusArray) throws PluginException, AliCloudException {
         if (StringUtils.isAnyEmpty(regionId, backupJobId)) {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
@@ -529,7 +532,9 @@ public class RDSServiceImpl implements RDSService {
 
         final DescribeBackupTasksResponse.BackupJob backupJob = foundBackupJobOpt.get();
 
-        return StringUtils.equals(status.getStatus(), backupJob.getBackupStatus());
+        final List<String> statusList = Arrays.stream(statusArray).map(BackupStatus::getStatus).collect(Collectors.toList());
+
+        return statusList.contains(backupJob.getBackupStatus());
     }
 
     public void createRDSAccount(IAcsClient client, String regionId, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
