@@ -67,6 +67,30 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
         this.instanceType = instanceType;
     }
 
+    public String getCpu() {
+        return cpu;
+    }
+
+    public void setCpu(String cpu) {
+        this.cpu = cpu;
+    }
+
+    public String getMemory() {
+        return memory;
+    }
+
+    public void setMemory(String memory) {
+        this.memory = memory;
+    }
+
+    public String getPrivateIpAddress() {
+        return privateIpAddress;
+    }
+
+    public void setPrivateIpAddress(String privateIpAddress) {
+        this.privateIpAddress = privateIpAddress;
+    }
+
 
     public CoreCreateVMResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String privateIpAddress, SpecInfo specInfo) {
         final CoreCreateVMResponseDto result = this.fromSdk(response);
@@ -93,29 +117,6 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
                 .toString();
     }
 
-    public String getCpu() {
-        return cpu;
-    }
-
-    public void setCpu(String cpu) {
-        this.cpu = cpu;
-    }
-
-    public String getMemory() {
-        return memory;
-    }
-
-    public void setMemory(String memory) {
-        this.memory = memory;
-    }
-
-    public String getPrivateIpAddress() {
-        return privateIpAddress;
-    }
-
-    public void setPrivateIpAddress(String privateIpAddress) {
-        this.privateIpAddress = privateIpAddress;
-    }
 
 
 }

@@ -112,7 +112,7 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                result = result.fromSdk(response, encryptedPassword, requestDto.getInstanceSpec(), fitSpec);
+                result = result.fromSdk(response, encryptedPassword, requestDto.getPrivateIpAddress(), fitSpec);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
