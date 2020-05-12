@@ -219,6 +219,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceSpec</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceFamily</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">imageId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceName</parameter>
@@ -240,6 +241,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">password</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cpu</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">memory</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIp</parameter>
