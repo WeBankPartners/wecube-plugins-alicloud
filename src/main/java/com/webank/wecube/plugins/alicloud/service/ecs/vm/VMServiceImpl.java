@@ -12,6 +12,7 @@ import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
@@ -84,10 +85,10 @@ public class VMServiceImpl implements VMService {
                 }
 
                 // seek available resource when instanceType is not designated
-                String availableInstanceType;
+                SpecInfo fitSpec = new SpecInfo();
                 if (!StringUtils.isEmpty(requestDto.getInstanceSpec()) && StringUtils.isEmpty(requestDto.getInstanceType())) {
-                    availableInstanceType = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec());
-                    requestDto.setInstanceType(availableInstanceType);
+                    fitSpec = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec(), requestDto.getInstanceFamily());
+                    requestDto.setInstanceType(fitSpec.getResourceClass());
                 }
 
 
@@ -111,7 +112,7 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                result = result.fromSdk(response, encryptedPassword, requestDto.getInstanceSpec(), requestDto.getPrivateIpAddress());
+                result = result.fromSdk(response, encryptedPassword, requestDto.getPrivateIpAddress(), fitSpec);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
