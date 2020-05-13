@@ -170,7 +170,7 @@ public class VpcServiceImpl implements VpcService {
         return resultList;
     }
 
-    private boolean ifVpcInStatus(IAcsClient client, String regionId, String vpcId, VpcStatus... statusArray) {
+    private boolean ifVpcInStatus(IAcsClient client, String regionId, String vpcId, VpcStatus... statusArray) throws PluginException, AliCloudException {
 
         DescribeVpcsRequest request = new DescribeVpcsRequest();
         request.setVpcId(vpcId);
