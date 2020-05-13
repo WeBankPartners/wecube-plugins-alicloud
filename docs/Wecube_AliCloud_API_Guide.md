@@ -1,4 +1,4 @@
- # Wecube AliCloud API Guid
+ # Wecube AliCloud API Guide
  
  提供统一接口定义，为使用者提供清晰明了的使用方法。
  
@@ -96,35 +96,76 @@
  - [弹性公网IP绑定实例](#eip-associate)
  - [弹性公网IP解绑实例](#eip-un-associate)
  
- ## API 概览及实例:
+## API 概览及实例:
  
- ### 私有网络
+### 私有网络
  
- #### <span id="vpc-create">私有网络创建</span>
+#### <span id="vpc-create">私有网络创建</span>
  
- [POST] /alicloud/v1/vpc/create
+[POST] /alicloud/v1/vpc/create
  
  ##### 输入参数：
  
- 参数名称|类型|必选|描述
- |:--:|:--:|:--:|:--:|
- guid|string|是|CI类型全局唯一ID
- identityParams|string|是|公有云远程连接参数，包括accessKeyId和secret
- cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
- vpcId|string|否|VPC实例ID，若有值，则会检查该VPC是否已存在，若已存在，则不创建
- vpcName|string|是|VPC名称
- cidrBlock|string|是|VPC网段
- description|string|是|VPC描述
+参数名称|类型|必选|描述
+|:--:|:--:|:--:|:--:|
+guid|string|是|CI类型全局唯一ID
+identityParams|string|是|公有云远程连接参数，包括accessKeyId和secret
+cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
+vpcId|string|否|VPC实例ID，若有值，则会检查该VPC是否已存在，若已存在，则不创建
+vpcName|string|是|VPC名称
+cidrBlock|string|是|VPC网段
+description|string|否|VPC描述
  
- ##### 输出参数：
+##### 输出参数：
 
- 参数名称|类型|描述
- |:--:|:--:|:--:|   
- guid|string|CI类型全局唯一ID
- vpcId|string|VPC实例ID
- routeTableId|string|路由表ID
+参数名称|类型|描述
+|:--:|:--:|:--:|   
+guid|string|CI类型全局唯一ID
+vpcId|string|VPC实例ID
+routeTableId|string|路由表ID
 
- #### <span id="vpc-delete">私有网络销毁</span>
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"vpcId": "",
+			"vpcName": "test_vpc1",
+			"cidrBlock": "xx.xx.xx.xx/xx",
+			"description": "test vpc"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "vpcId": "vpc-t4n0iti7ecd8erg63nngq",
+                "routeTableId": "vtb-t4nbzj7n8suk306n0fqto"
+            }
+        ]
+    }
+}
+```
+
+#### <span id="vpc-delete">私有网络销毁</span>
 
 [POST] /alicloud/v1/vpc/delete
 
@@ -141,6 +182,42 @@ vpcId|string|是|VPC实例ID
 参数名称|类型|描述
 :--|:--|:--    
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"vpcId": "vpc-t4n0iti7ecd8erg63nngq"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+            }
+        ]
+    }
+}
+```
 
 ### 交换机
 
@@ -170,11 +247,53 @@ guid|string|CI类型全局唯一ID
 vSwitchId|string|交换机实例ID
 routeTableId|string|交换机默认路由表ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"vSwitchName": "test_vswitch1",
+			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
+			"cidrBlock": "xx.xx.xx.xx/xx",
+			"zoneId": "ap-southeast-1b",
+			"description": "test vswitch1"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "vSwitchId": "vsw-t4n83ebdl4jvqc24rm5pt"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="vswitch-delete">交换机销毁</span>
 
 [POST] /alicloud/v1/vswitch/delete
 
 ##### 输入参数：
+
 参数名称|类型|必选|描述
 :--|:--|:--|:-- 
 guid|string|是|CI类型全局唯一ID
@@ -183,9 +302,46 @@ cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
 vSwitchId|string|是|交换机实例ID
 
 ##### 输出参数：
+
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"vSwitchId": "vsw-t4n83ebdl4jvqc24rm5pt"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="vswitch-with-route-table-create">自定义路由表交换机创建</span>
 
@@ -213,6 +369,48 @@ guid|string|CI类型全局唯一ID
 vSwitchId|string|交换机实例ID
 routeTableId|string|交换机自定义路由表ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/create/route_table/bind \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"vSwitchName": "test_vswitch2",
+			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
+			"cidrBlock": "xx.xx.xx.xx/xx",
+			"zoneId": "ap-southeast-1b",
+			"description": "test vswitch2"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "routeTableId": "vtb-t4nsx8dunbqmhmuvvcdur",
+                "vSwitchId": "vsw-t4nmkrt4iw96bzliflzy1"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="vswitch-with-route-table-delete">自定义路由表交换机删除</span>
 
 [POST] /alicloud/v1/vswitch/delete/route_table/unbind
@@ -229,6 +427,42 @@ vSwitchId|string|是|交换机实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/delete/route_table/unbind \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"vSwitchId": "vsw-t4nmkrt4iw96bzliflzy1"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 路由表
 
@@ -255,6 +489,45 @@ description|string|否|路由表描述
 guid|string|CI类型全局唯一ID
 routeTableId|string|路由表实例ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"routeTableName": "test_route_table",
+			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
+			"description": "test route table"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "routeTableId": "vtb-t4nwtmqy18tpgzhkup3m6"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="route-table-delete">路由表销毁</span>
 
 [POST] /alicloud/v1/route_table/delete
@@ -273,6 +546,42 @@ routeTableId|string|是|路由表实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"routeTableId": "vtb-t4nwtmqy18tpgzhkup3m6"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="route-table-associate-vswitch">路由表绑定交换机</span>
 
@@ -294,6 +603,43 @@ vSwitchId|string|是|交换机实例ID
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/vswitch/associate \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
+			"vSwitchId": "vsw-t4ndwyqqlxmczbyr6t3f3"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
 ### 路由策略
 
 #### <span id="route-entry-create">路由策略创建</span>
@@ -309,7 +655,7 @@ identityParams|string|是|公有云远程连接参数，包括accessKeyId和secr
 cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
 routeTableId|string|是|路由表实例ID
 destinationCidrBlock|string|是|目标网段
-nextHopType|string|否|下一跳实例类型，支持以下类型："Instance", "Nat"等
+nextHopType|string|否|下一跳实例类型，支持以下类型："Instance", "NatGateway"等
 nextHopId|string|是|下一跳实例ID
 routeEntryName|string|否|路由策略名称
 
@@ -318,6 +664,46 @@ routeEntryName|string|否|路由策略名称
 参数名称|类型|描述
 :--|:--|:--    
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/route_entry/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
+			"nextHopType": "NatGateway",
+			"destinationCidrBlock": "192.168.0.128/25",
+			"nextHopId": "ngw-t4nkybnb2eb9c1qm64wuo",
+			"routeEntryName": "test_route_entry"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="route-entry-delete">路由策略销毁</span>
 
@@ -339,6 +725,44 @@ nextHopId|string|是|下一跳实例ID
 参数名称|类型|描述
 :--|:--|:--    
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/route_entry/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
+			"destinationCidrBlock": "192.168.0.128/25",
+			"nextHopId": "ngw-t4nkybnb2eb9c1qm64wuo"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### NAT网关
 
@@ -370,6 +794,49 @@ description|string|否|NAT网关描述
 guid|string|CI类型全局唯一ID
 natGatewayId|string|NAT网关实例ID
 snatTableId|string|SNAT表的ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"name": "test_nat",
+			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
+			"vSwitchId": "vsw-t4nmkrt4iw96bzliflzy1",
+			"spec": "Small",
+			"instanceChargeType": "PostPaid",
+			"description": "test nat"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "natGatewayId": "ngw-t4nkybnb2eb9c1qm64wuo",
+                "snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="nat-gateway-delete">NAT网关销毁</span>
 
@@ -416,6 +883,47 @@ snatEntryName|string|否|SNAT条目的名称
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 snatEntryId|string|SNAT条目ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
+			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
+			"snatIp": "[47.241.116.241,161.117.5.156]",
+			"sourceVSwitchId": "vsw-t4nmkrt4iw96bzliflzy1",
+			"snatEntryName": "test_snat_entry"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "snatEntryId": "snat-t4nimzwmoc4a42rrxo6hn"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="snat-entry-delete">NAT网关SNAT规则销毁</span>
 
@@ -1231,6 +1739,65 @@ eipAddress|string|弹性公网IP
 cbpId|string|共享带宽ID
 cbpName|string|共享带宽名称
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/allocate \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"cbpName": "test_cbp",
+			"bandwidth": "5",
+			"instanceChargeType": "PostPaid",
+			"internetChargeType": "PayByBandwidth"
+		},
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"cbpName": "test_cbp",
+			"bandwidth": "5",
+			"instanceChargeType": "PostPaid",
+			"internetChargeType": "PayByBandwidth"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "allocationId": "eip-t4nxfcb1xc08dbkknjg6x",
+                "cbpId": "cbwp-t4n0wy2ovuasq46e1tc23",
+                "cbpName": "test_cbp",
+                "eipAddress": "47.241.116.241"
+            },
+            {
+                "guid": "0033_0000000001",
+                "allocationId": "eip-t4nwk9pcc41nuxwh1cgui",
+                "cbpId": "cbwp-t4n0wy2ovuasq46e1tc23",
+                "cbpName": "test_cbp",
+                "eipAddress": "161.117.5.156"
+            }
+        ]
+    }
+}
+```
+
 #### <sapn id="eip-delete">弹性公网IP销毁</sapn>
 
 [POST] /alicloud/v1/vpc/eip/release
@@ -1262,9 +1829,9 @@ guid|string|CI类型全局唯一ID
 guid|string|是|CI类型全局唯一ID
 identityParams|string|是|公有云远程连接参数，包括accessKeyId和secret
 cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
-allocationId|string|是|EIP实例ID，
+|stringallocationId|是|EIP实例ID，
 instanceId|string|是|绑定实例ID
-instanceType|string|是|绑定实例类型
+instanceType|string|是|绑定实例类型：Nat,SlbInstance,EcsInstance等
 instanceRegionId|string|否|绑定实例所在区域
 
 ##### 输出参数：
@@ -1272,6 +1839,44 @@ instanceRegionId|string|否|绑定实例所在区域
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/associate \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"cloudParams": "regionId=ap-southeast-1",
+			"allocationId": "eip-t4nxfcb1xc08dbkknjg6x",
+			"instanceId": "ngw-t4nkybnb2eb9c1qm64wuo",
+			"instanceType": "Nat"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <sapn id="eip-un-associate">弹性公网IP解绑实例</sapn>
 
