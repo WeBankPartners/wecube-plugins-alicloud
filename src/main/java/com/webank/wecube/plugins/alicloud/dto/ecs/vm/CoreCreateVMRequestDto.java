@@ -26,6 +26,8 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
 
     @NotEmpty(message = "instanceSpec field is mandatory.")
     private String instanceSpec;
+    @NotEmpty(message = "instanceFamily field is mandatory")
+    private String instanceFamily;
 
     private String instanceId;
 
@@ -582,12 +584,22 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
         this.resourceTag = resourceTag;
     }
 
+
+    public String getInstanceFamily() {
+        return instanceFamily;
+    }
+
+    public void setInstanceFamily(String instanceFamily) {
+        this.instanceFamily = instanceFamily;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
                 .append("seed", seed)
                 .append("instanceSpec", instanceSpec)
+                .append("instanceFamily", instanceFamily)
                 .append("instanceId", instanceId)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("hpcClusterId", hpcClusterId)
@@ -676,4 +688,5 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
             periodUnit = StringUtils.capitalize(periodUnit.toLowerCase());
         }
     }
+
 }

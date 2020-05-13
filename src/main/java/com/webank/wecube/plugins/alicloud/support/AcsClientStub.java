@@ -36,7 +36,9 @@ public class AcsClientStub {
                 identityParamDto.getAccessKeyId(),
                 identityParamDto.getSecret()
         );
-        defaultProfile.setLogger(logger);
+        if (logger.isDebugEnabled()) {
+            defaultProfile.setLogger(logger);
+        }
         return new DefaultAcsClient(defaultProfile);
     }
 
