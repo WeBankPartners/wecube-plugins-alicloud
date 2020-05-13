@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -74,6 +75,11 @@ public class CenServiceImpl implements CenService {
                 CreateCenRequest request = requestDto.toSdk();
                 CreateCenResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
+
+                // wait till CEN is in active status
+                Function<?, Boolean> func = o -> ifCenInStatus(client, regionId, response.getCenId(), CenStatus.Active);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -283,5 +289,28 @@ public class CenServiceImpl implements CenService {
             ifCenDeleted = true;
         }
         return ifCenDeleted;
+    }
+
+    private boolean ifCenInStatus(IAcsClient client, String regionId, String cenId, CenStatus... statusArray) {
+
+        DescribeCensRequest request = new DescribeCensRequest();
+
+        final DescribeCensResponse response = acsClientStub.request(client, request, regionId);
+        if (response.getCens().isEmpty()) {
+            throw new PluginException("Current account doesn't have any CENs");
+        }
+
+        final List<DescribeCensResponse.Cen> foundCenList = response.getCens()
+                .stream()
+                .filter(cen -> StringUtils.equals(cen.getCenId(), cenId))
+                .collect(Collectors.toList());
+
+        if (foundCenList.isEmpty()) {
+            throw new PluginException(String.format("Current account doesn't have CEN resource according to given CenID: [%s]", cenId));
+        }
+
+        final List<String> statusList = Arrays.stream(statusArray).map(Enum::toString).collect(Collectors.toList());
+
+        return statusList.contains(foundCenList.get(0).getStatus());
     }
 }
