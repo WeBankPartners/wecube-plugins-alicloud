@@ -125,7 +125,10 @@ public class RedisServiceImpl implements RedisService {
                 }
 
 
-                result = result.fromSdk(response, encryptedPassword);
+                final DescribeInstancesResponse.KVStoreInstance foundInstance = retrieveRedis(client, regionId, response.getInstanceId());
+
+                result = result.fromSdk(response, encryptedPassword, foundInstance.getPrivateIp());
+
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -214,6 +217,12 @@ public class RedisServiceImpl implements RedisService {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
 
+        final DescribeInstancesResponse.KVStoreInstance foundInstance = retrieveRedis(client, regionId, instanceId);
+
+        return StringUtils.equals(status.getStatus(), foundInstance.getInstanceStatus());
+    }
+
+    private DescribeInstancesResponse.KVStoreInstance retrieveRedis(IAcsClient client, String regionId, String instanceId) {
         DescribeInstancesRequest request = new DescribeInstancesRequest();
         request.setInstanceIds(instanceId);
 
@@ -224,9 +233,7 @@ public class RedisServiceImpl implements RedisService {
 
         foundRedisOpt.orElseThrow(() -> new PluginException(String.format("Cannot found instance by instanceId: [%s]", instanceId)));
 
-        final DescribeInstancesResponse.KVStoreInstance foundInstance = foundRedisOpt.get();
-
-        return StringUtils.equals(status.getStatus(), foundInstance.getInstanceStatus());
+        return foundRedisOpt.get();
     }
 
     public Boolean ifRedisIsDeleted(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
