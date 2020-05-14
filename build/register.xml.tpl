@@ -498,6 +498,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">password</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">port</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIpAddr</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">connectionDomain</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
