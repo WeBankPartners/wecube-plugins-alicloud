@@ -44,7 +44,7 @@
  - [云企业网创建](#cen-create)
  - [云企业网销毁](#cen-delete)
  - [云企业网添加网络](#cen-attach)
- - [云企业网移除网络](#cen-dettach)
+ - [云企业网移除网络](#cen-detach)
  
  **安全组**
  
@@ -1130,6 +1130,44 @@ description|string|否|CEN描述
 guid|string|CI类型全局唯一ID
 cenId|string|CEN实例ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/cen/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"name": "test_cen",
+			"description": "test cen"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "cenId": "cen-bfffghnat1dmt9p18o"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="cen-delete">云企业网销毁</span>
 
 [POST] /alicloud/v1/cen/delete
@@ -1148,6 +1186,42 @@ cenId|string|是|CEN实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/cen/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"cenId": "cen-bfffghnat1dmt9p18o"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="cen-attach">云企业网添加网络</span>
 
@@ -1172,9 +1246,46 @@ childInstanceOwnerId|string|否|跨账号加载网络实例场景下，网络实
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
-#### <span id="cen-dettach">云企业网移除网络</span>
+##### 示例：
 
-[POST] /alicloud/v1/cen/dettach
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/cen/attach \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"cenId": "cen-bfffghnat1dmt9p18o",
+			"childInstanceId": "vpc-t4nu397hag3n2u0cnftv7"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
+#### <span id="cen-detach">云企业网移除网络</span>
+
+[POST] /alicloud/v1/cen/detach
 
 ##### 输入参数：
 
@@ -1195,6 +1306,43 @@ cenOwnerId|string|否|CEN实例所属账号的UID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/cen/detach \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"cenId": "cen-bfffghnat1dmt9p18o",
+			"childInstanceId": "vpc-t4nu397hag3n2u0cnftv7"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 安全组
 
@@ -1223,6 +1371,44 @@ request_id|string|请求ID
 guid|string|CI类型全局唯一ID
 securityGroupId|string|安全组实例ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/security_group/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"securityGroupName": "test_security_group",
+			"description": "test security group"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "securityGroupId": "sg-t4n1d2wurvisird07abx"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="security-group-delete">安全组销毁</span>
 
 [POST] /alicloud/v1/security_group/delete
@@ -1242,6 +1428,42 @@ securityGroupId|string|是|安全组实例ID
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/security_group/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"securityGroupId": "sg-t4n1d2wurvisird07abx"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="security-group-policy-authorize">安全组规则添加</span>
 
 [POST] /alicloud/v1/security_group/authorize
@@ -1254,11 +1476,11 @@ guid|string|是|CI类型全局唯一ID
 identityParams|string|是|公有云远程连接参数，包括accessKeyId和secret
 cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
 securityGroupId|string|是|安全组实例ID
-policy|string|是|出站规则或者入站规则，取值egress 或 ingress
+policy|string|是|accept 或 drop
 cidrIp|string|是|源端IPv4 CIDR地址段。支持CIDR格式和IPv4格式的IP地址范围
 ipProtocol|string|是|传输层协议, 取值:tcp,udp,icmp,gre,all
 portRange|string|是|目的端安全组开放的传输层协议相关的端口范围
-actionType|string|是|accept 或 drop
+actionType|string|是|出站规则或者入站规则，取值egress 或 ingress
 description|string|是|安全组规则描述
 
 ##### 输出参数：
@@ -1266,6 +1488,48 @@ description|string|是|安全组规则描述
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/security_group/authorize \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"securityGroupId": "sg-t4n1d2wurvisird07abx",
+			"policy": "accept",
+			"cidrIp": "[192.168.xx.xx,192.168.xx.192/26,192.168.xx.193]",
+			"ipProtocol": "[tcp,tcp,udp]",
+			"portRange": "[8080,22-8000,8888]",
+			"actionType": "egress",
+			"description": "test security group rule"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="security-group-policy-revoke">安全组规则删除</span>
 
@@ -1284,13 +1548,53 @@ cidrIp|string|是|源端IPv4 CIDR地址段。支持CIDR格式和IPv4格式的IP�
 ipProtocol|string|是|传输层协议, 取值:tcp,udp,icmp,gre,all
 portRange|string|是|目的端安全组开放的传输层协议相关的端口范围
 actionType|string|是|accept 或 drop
-description|string|是|安全组规则描述
 
 ##### 输出参数：
 
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/security_group/revoke \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"securityGroupId": "sg-t4n1d2wurvisird07abx",
+			"policy": "accept",
+			"cidrIp": "[192.168.xx.xx,192.168.xx.192/26]",
+			"ipProtocol": "[tcp,tcp]",
+			"portRange": "[8080,22-8000]",
+			"actionType": "egress"
+        }
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 云服务器
 
@@ -1310,13 +1614,14 @@ seed|string|是|云服务器实例密钥种子
 password|string|否|实例的密码
 instanceName|string|否|云服务器实例名称
 instanceSpec|string|是|创建实例机型，如1C1G
+instanceFamily|string|是|创建实例规则族，如c5
 systemDiskSize|string|否|实例系统盘大小(G)
 systemDiskCategory|string|否|实例系统盘类型：cloud_efficiency,cloud_ssd,cloud,ephemeral_ssd
 imageId|string|是|镜像文件ID，启动实例时选择的镜像资源
 vSwitchId|string|否|交换机实例ID
 privateIpAddress|string|否|实例私网IP地址
 securityGroupId|string|否|指定新创建实例所属于的安全组ID，同一个安全组内的实例之间可以互相访问
-zoneId|string|否|实例所属的可用区ID
+zoneId|string|是|实例所属的可用区ID
 instanceChargeType|string|否|实例的付费方式：PrePaid,PostPaid(默认)
 period|string|否|购买资源的时长
 periodUnit|string|否|购买资源的时长：Week,Month(默认)
@@ -1334,6 +1639,60 @@ cpu|string|云服务器CPU核数
 memory|string|云服务器内存大小
 password|string|云服务器root密码
 privateIp|string|云服务器私有IP
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vm/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"seed": "seed123",
+			"password": "Abcd1234",
+			"instanceName": "test_vm",
+			"instanceSpec": "1c1g",
+			"instanceFamily": "c5",
+			"systemDiskSize": "40",
+			"systemDiskCategory": "cloud_ssd",
+			"imageId": "ubuntu_18_04_64_20G_alibase_20190624.vhd",
+			"vSwitchId": "vsw-t4n1d7ng0b37kv2a6od11",
+			"privateIpAddress": "10.128.64.xx",
+			"zoneId": "ap-southeast-1b",
+			"instanceChargeType": "PostPaid",
+			"resourceTag": "[key1=value1;key2=value2]"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "instanceId": "i-t4n7rbtfeh1si9quyw94",
+                "instanceType": "ecs.c5.large",
+                "cpu": "2",
+                "memory": "4",
+                "privateIp": "10.128.64.xx",
+                "password": "{cipher_a}9b28cb58bd8aca2a1f0cef1ea58f6756"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="vm-delete">云服务器销毁</span>
 
@@ -1353,6 +1712,42 @@ instanceId|string|是|云服务器实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vm/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"instanceId": "i-t4n7rbtfeh1si9quyw94"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="vm-start">云服务器启动</span>
 
@@ -1379,6 +1774,42 @@ guid|string|CI类型全局唯一ID
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vm/start \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"instanceId": "i-t4n7rbtfeh1si9quyw94"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="vm-stop">云服务器停机</span>
 
 [POST] /alicloud/v1/vm/stop
@@ -1397,6 +1828,42 @@ instanceId|string|是|云服务器实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vm/stop \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"instanceId": "i-t4n7rbtfeh1si9quyw94"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="vm-bind-security-group">云服务器绑定安全组</span>
 
@@ -1418,6 +1885,43 @@ securityGroupId|string|是|云服务器需要绑定的安全组ID
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vm/security-group/bind \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"instanceId": "i-t4n7rbtfeh1si9quyw94",
+			"securityGroupId": "sg-t4n7rbtfeh1si9qpqiqj"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="vm-unbind-security-group">云服务器解绑安全组</span>
 
 [POST] /alicloud/v1/vm/security-group/unbind
@@ -1438,6 +1942,43 @@ securityGroupId|string|是|云服务器需要绑定的安全组ID
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vm/security-group/unbind \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"instanceId": "i-t4n7rbtfeh1si9quyw94",
+			"securityGroupId": "sg-t4n7rbtfeh1si9qpqiqj"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
 ### 云硬盘管理
 
 #### <span id="disk-create">云硬盘创建</span>
@@ -1454,7 +1995,7 @@ cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
 seed|string|是|云服务器实例密钥种子
 instanceGuid|string|是|云服务器实例对应CI类型全局唯一ID
 password|string|是|云服务器实例的密码
-fileSystemType|string|是|初始化云硬盘的文件系统类型
+fileSystemType|string|是|初始化云硬盘的文件系统类型：ext3,ext4,xfs
 mountDir|string|是|云硬盘挂载的目录
 instanceId|string|是|云服务器实例ID
 diskId|string|否|云硬盘ID，若有值，则会检查该云硬盘是否已存在，若已存在，则不创建
@@ -1471,6 +2012,54 @@ description|string|否|云硬盘描述
 guid|string|CI类型全局唯一ID
 diskId|string|云硬盘ID
 volumeName|string|云硬盘的卷名称
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/disk/create_attach \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"seed": "seed123",
+			"instanceGuid": "0033_0000000001",
+			"password": "{cipher_a}9b28cb58bd8aca2a1f0cef1ea58f6756",
+			"fileSystemType": "ext3",
+			"mountDir": "/data/test",
+			"instanceId": "i-t4n7rbtfeh1si9quyw94",
+			"zoneId": "ap-southeast-1b",
+			"diskName": "test_disk",
+			"size": "40",
+			"diskCategory": "cloud_ssd",
+			"description": "test disk"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "diskId": "d-t4n96gxbb5gxotao8ibe",
+                "volumeName": "/dev/vdb"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="disk-delete">云硬盘销毁</span>
 
@@ -1496,6 +2085,48 @@ volumeName|string|是|云硬盘的卷名称
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/disk/detach_delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"seed": "seed123",
+			"instanceGuid": "0033_0000000001",
+			"password": "{cipher_a}9b28cb58bd8aca2a1f0cef1ea58f6756",
+			"unmountDir": "/data/test",
+			"instanceId": "i-t4n7rbtfeh1si9quyw94",
+			"diskId": "d-t4n96gxbb5gxotao8ibe",
+            "volumeName": "/dev/vdb"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 负载均衡
 
@@ -1533,6 +2164,50 @@ guid|string|CI类型全局唯一ID
 loadBalancerId|string|负载均衡实例ID
 address|string|分配的负载均衡实例的IP地址
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/load_balancer/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"addressType": "internet",
+			"internetChargeType": "paybytraffic",
+			"bandWidth": "5",
+			"loadBalancerName": "test_lb",
+			"vpcId": "vpc-t4nq3954f7lj8wk2hoy3o",
+			"vSwitchId": "vsw-t4n1d7ng0b37kv2a6od11",
+            "payType": "PostPaid"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "loadBalancerId": "lb-t4nvuami0zjalr9ne4fmj",
+                "address": "161.117.xx.222"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="lb-delete">负载均衡销毁</span>
 
 [POST] /alicloud/v1/load_balancer/delete
@@ -1551,6 +2226,42 @@ loadBalancerId|string|是|负载均衡实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/load_balancer/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "loadBalancerId": "lb-t4nvuami0zjalr9ne4fmj"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="lb-backend-server-add">负载均衡后端服务器添加</span>
 
@@ -1578,6 +2289,49 @@ listenerProtocol|string|是|监听器协议
 guid|string|CI类型全局唯一ID
 vServerGroupId|string|虚拟服务器组ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/load_balancer/backend_server/add \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"loadBalancerId": "lb-t4nvuami0zjalr9ne4fmj",
+			"hostIds": "[i-t4n7rbtfeh1si9quyw94]",
+			"hostPorts": "[8080]",
+			"vServerGroupName": "test_lb",
+			"bandwidth": "5",
+			"listenerPort": "8080",
+            "listenerProtocol": "tcp"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "vServerGroupId": "rsp-t4nfwp9ozu68v"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="lb-backend-server-remove">负载均衡后端服务器移除</span>
 
 [POST] /alicloud/v1/load_balancer/backend_server/remove
@@ -1590,9 +2344,9 @@ guid|string|是|CI类型全局唯一ID
 identityParams|string|是|公有云远程连接参数，包括accessKeyId和secret
 cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
 loadBalancerId|string|是|负载均衡实例ID
+vServerGroupId|string|是|虚拟服务器组ID
 hostIds|string|是|后端服务器实例ID
 hostPorts|string|是|后端服务器端口
-bandwidth|string|是|监听的带宽峰值，-1(即不限制带宽峰值)或1-5120
 listenerPort|string|是|监听器端口
 listenerProtocol|string|是|监听器协议
 deleteListener|string|是|是否删除监听器：Y或者N
@@ -1602,6 +2356,48 @@ deleteListener|string|是|是否删除监听器：Y或者N
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/load_balancer/backend_server/remove \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"loadBalancerId": "lb-t4nvuami0zjalr9ne4fmj",
+			"hostIds": "[i-t4n7rbtfeh1si9quyw94]",
+			"hostPorts": "[8080]",
+			"vServerGroupId": "rsp-t4nfwp9ozu68v",
+			"deleteListener": "Y",
+			"listenerPort": "8080",
+            "listenerProtocol": "tcp"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 云数据库RDS
 
@@ -1656,6 +2452,66 @@ dBInstanceId|string|DS实例ID
 connectionString|string|数据库连接地址
 port|string|RDS实例端口
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/rds/db/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "seed": "seed123",
+            "accountName": "root1",
+            "accountPassword": "Abcd1234",
+            "accountDescription": "test account",
+            "securityGroupId": "sg-t4n7rbtfeh1si9qpqiqj",
+            "dBInstanceSpec": "1C1G",
+            "dBInstanceStorage": "40",
+            "engine": "MySQL",
+            "engineVersion": "5.7",
+            "securityIPList": "[192.168.xx.xx,192.168.xx.0/24]",
+            "vpcId": "vpc-t4nq3954f7lj8wk2hoy3o",
+            "vSwitchId": "vsw-t4n1d7ng0b37kv2a6od11",
+            "dBInstanceStorageType": "local_ssd",
+            "category": "HighAvailability",
+            "dBIsIgnoreCase": "1",
+            "payType": "PostPaid",
+            "dBInstanceDescription": "test rds"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "connectionString": "rm-t4n64t9pm1yj736g6.mysql.singapore.rds.aliyuncs.com",
+                "port": "3306",
+                "accountName": "root1",
+                "cpu": "1",
+                "memory": "1",
+                "dBInstanceId": "rm-t4n64t9pm1yj736g6",
+                "accountPassword": "{cipher_a}9b28cb58bd8aca2a1f0cef1ea58f6756",
+                "dBInstanceClass": "rds.mysql.t1.small"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="rds-delete">云数据库RDS销毁</sapn>
 
 [POST] /alicloud/v1/rds/db/delete
@@ -1674,6 +2530,42 @@ dBInstanceId|string|是|RDS实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/rds/db/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "dBInstanceId": "rm-t4n64t9pm1yj736g6"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="rds-backup-create">云数据库RDS备份创建</sapn>
 
@@ -1699,6 +2591,45 @@ backupType|string|否|Auto(默认)或者FullBackup
 guid|string|CI类型全局唯一ID
 backupId|string|备份ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/rds/backup/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "dBInstanceId": "rm-t4n64t9pm1yj736g6",
+            "backupStrategy": "db",
+            "backupMethod": "Physical"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "backupId": "507512199"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="rds-backup-delete">云数据库RDS备份删除</sapn>
 
 [POST] /alicloud/v1/rds/backup/delete
@@ -1718,6 +2649,43 @@ backupId|string|是|备份ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/rds/backup/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "dBInstanceId": "rm-t4n64t9pm1yj736g6",
+            "backupId": "507512199"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="rds-security-ip-add">云数据库RDS白名单添加</sapn>
 
@@ -1741,6 +2709,43 @@ whitelistNetworkType|string|否|白名单的网络类型：Classic,VPC,MIX(默�
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/rds/security_ip/append \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "securityIps": "[192.168.0.xx,10.0.xx.1]",
+            "dBInstanceId": "rm-t4n64t9pm1yj736g6"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="rds-security-ip-remove">云数据库RDS白名单移除</sapn>
 
 [POST] /alicloud/v1/rds/security_ip/delete
@@ -1762,6 +2767,43 @@ whitelistNetworkType|string|否|白名单的网络类型：Classic,VPC,MIX(默�
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/rds/security_ip/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "securityIps": "[192.168.xx.6,10.0.xx.1]",
+            "dBInstanceId": "rm-t4n64t9pm1yj736g6"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 云数据库Redis
 
@@ -1805,6 +2847,57 @@ password|string|实例密码
 port|string|实例端口
 privateIpAddr|string|实例的内网IP地址
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/redis/create \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "seed": "seed123",
+            "instanceName": "test_redis",
+            "password": "Abcd1234",
+            "capacity": "1024",
+            "zoneId": "ap-southeast-1b",
+            "engineVersion": "4.0",
+            "securityIps": "0.0.0.0/32",
+            "securityGroupId": "sg-t4n7rbtfeh1si9qpqiqj",
+            "networkType": "VPC",
+            "vpcId": "vpc-t4nq3954f7lj8wk2hoy3o",
+            "vSwitchId": "vsw-t4n1d7ng0b37kv2a6od11",
+            "chargeType": "PostPaid"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+                "instanceId": "r-t4nd94f0f7cf4bb4",
+                "port": "6379",
+                "privateIpAddr": "1024",
+                "password": "{cipher_a}9b28cb58bd8aca2a1f0cef1ea58f6756"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="redis-delete">云数据库Redis销毁</sapn>
 
 [POST] /alicloud/v1/redis/delete
@@ -1823,6 +2916,42 @@ instanceId|string|是|Redis实例ID
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/redis/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=******",
+			"cloudParams": "regionId=ap-southeast-1",
+            "instanceId": "r-t4nd94f0f7cf4bb4"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 弹性公网IP
 
