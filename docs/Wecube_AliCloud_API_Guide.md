@@ -681,7 +681,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/route_entry/create \
 			"cloudParams": "regionId=ap-southeast-1",
 			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
 			"nextHopType": "NatGateway",
-			"destinationCidrBlock": "192.168.0.128/25",
+			"destinationCidrBlock": "xx.xx.xx.xx/xx",
 			"nextHopId": "ngw-t4nkybnb2eb9c1qm64wuo",
 			"routeEntryName": "test_route_entry"
 		}
@@ -741,7 +741,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/route_entry/delete \
 			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
-			"destinationCidrBlock": "192.168.0.128/25",
+			"destinationCidrBlock": "xx.xx.xx.xx/xx",
 			"nextHopId": "ngw-t4nkybnb2eb9c1qm64wuo"
 		}
 	]
@@ -900,7 +900,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/create \
 			"cloudParams": "regionId=ap-southeast-1",
 			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
 			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
-			"snatIp": "[47.241.116.241,161.117.5.156]",
+			"snatIp": "[xx.xx.xx.xx,xx.xx.xx.xx]",
 			"sourceVSwitchId": "vsw-t4nmkrt4iw96bzliflzy1",
 			"snatEntryName": "test_snat_entry"
 		}
@@ -1022,7 +1022,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/modify/append 
 			"cloudParams": "regionId=ap-southeast-1",
 			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
 			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
-			"snatIp": "[47.241.116.241,161.117.5.156]",
+			"snatIp": "[xx.xx.xx.xx,xx.xx.xx.xx]",
 			"snatEntryId": "snat-t4nimzwmoc4a42rrxo6hn"
 		}
 	]
@@ -1083,7 +1083,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/modify/remove 
 			"cloudParams": "regionId=ap-southeast-1",
 			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
 			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
-			"snatIp": "[47.241.116.241]",
+			"snatIp": "[xx.xx.xx.xx]",
 			"snatEntryId": "snat-t4nimzwmoc4a42rrxo6hn"
 		}
 	]
@@ -1900,14 +1900,14 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/allocate \
                 "allocationId": "eip-t4nxfcb1xc08dbkknjg6x",
                 "cbpId": "cbwp-t4n0wy2ovuasq46e1tc23",
                 "cbpName": "test_cbp",
-                "eipAddress": "47.241.116.241"
+                "eipAddress": "xx.xx.xx.xx"
             },
             {
                 "guid": "0033_0000000001",
                 "allocationId": "eip-t4nwk9pcc41nuxwh1cgui",
                 "cbpId": "cbwp-t4n0wy2ovuasq46e1tc23",
                 "cbpName": "test_cbp",
-                "eipAddress": "161.117.5.156"
+                "eipAddress": "xx.xx.xx.xx"
             }
         ]
     }
