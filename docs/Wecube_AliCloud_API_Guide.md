@@ -136,7 +136,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/create \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"vpcId": "",
 			"vpcName": "test_vpc1",
@@ -195,7 +195,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/delete \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"vpcId": "vpc-t4n0iti7ecd8erg63nngq"
 		}
@@ -259,7 +259,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/create \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"vSwitchName": "test_vswitch1",
 			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
@@ -319,7 +319,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/delete \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"vSwitchId": "vsw-t4n83ebdl4jvqc24rm5pt"
 		}
@@ -381,7 +381,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/create/route_table/bind \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"vSwitchName": "test_vswitch2",
 			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
@@ -440,7 +440,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vswitch/delete/route_table/unbind
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"vSwitchId": "vsw-t4nmkrt4iw96bzliflzy1"
 		}
@@ -501,7 +501,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/create \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"routeTableName": "test_route_table",
 			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
@@ -559,7 +559,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/delete \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"routeTableId": "vtb-t4nwtmqy18tpgzhkup3m6"
 		}
@@ -615,7 +615,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/vswitch/associate \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
 			"vSwitchId": "vsw-t4ndwyqqlxmczbyr6t3f3"
@@ -677,7 +677,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/route_entry/create \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
 			"nextHopType": "NatGateway",
@@ -738,7 +738,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/route_table/route_entry/delete \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"routeTableId": "vtb-t4n70cxitxen1mfsx5t2x",
 			"destinationCidrBlock": "192.168.0.128/25",
@@ -807,7 +807,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/create \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"name": "test_nat",
 			"vpcId": "vpc-t4nu397hag3n2u0cnftv7",
@@ -896,7 +896,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/create \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
 			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
@@ -938,13 +938,51 @@ identityParams|string|是|公有云远程连接参数，包括accessKeyId和secr
 cloudParams|string|是|公有云公共参数，包括regionId(地域ID)等
 natId|string|是|NAT网关实例ID
 snatTableId|string|是|SNAT表ID
-snatEntryId|string|否|SNAT条目的ID
+snatEntryId|string|是|SNAT条目的ID
 
 ##### 输出参数：
 
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/delete \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=*******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
+			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
+			"snatEntryId": "snat-t4nimzwmoc4a42rrxo6hn"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 #### <span id="snat-entry-add">NAT网关SNAT规则IP添加</span>
 
@@ -968,9 +1006,48 @@ snatIp|string|是|公网IP地址，支持多个IP[ip1,ip2]
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/modify/append \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=*******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
+			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
+			"snatIp": "[47.241.116.241,161.117.5.156]",
+			"snatEntryId": "snat-t4nimzwmoc4a42rrxo6hn"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
+
 #### <span id="snat-entry-remove">NAT网关SNAT规则IP移除</span>
 
-[POST] /alicloud/v1/vpc/nat/snat_entry/modify/prune
+[POST] /alicloud/v1/vpc/nat/snat_entry/modify/remove
 
 ##### 输入参数：
 
@@ -989,6 +1066,45 @@ snatIp|string|是|公网IP地址，支持多个IP[ip1,ip2]
 参数名称|类型|描述
 :--|:--|:--
 guid|string|CI类型全局唯一ID
+
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/nat/snat_entry/modify/remove \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=*******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"natId": "ngw-t4nkybnb2eb9c1qm64wuo",
+			"snatTableId": "stb-t4n2yfn8z2m5ktu1o60pr",
+			"snatIp": "[47.241.116.241]",
+			"snatEntryId": "snat-t4nimzwmoc4a42rrxo6hn"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
 
 ### 云企业网
 
@@ -1751,7 +1867,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/allocate \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"cbpName": "test_cbp",
 			"bandwidth": "5",
@@ -1760,7 +1876,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/allocate \
 		},
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"cbpName": "test_cbp",
 			"bandwidth": "5",
@@ -1818,6 +1934,53 @@ cbpName|string|否|共享带宽名称
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/release \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=*******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"cbpName": "test_cbp",
+			"allocationId": "eip-t4nxfcb1xc08dbkknjg6x"
+		},
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=*******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"cbpName": "test_cbp",
+			"allocationId": "eip-t4nwk9pcc41nuxwh1cgui"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001",
+            },
+            {
+                "guid": "0033_0000000001",
+            }
+        ]
+    }
+}
+```
+
 #### <sapn id="eip-associate">弹性公网IP绑定实例</sapn>
 
 [POST] /alicloud/v1/vpc/eip/associate
@@ -1852,7 +2015,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/associate \
 	"inputs": [
 		{
 			"guid":"0033_0000000001",
-			"identityParams": "accessKeyId=LTAI4GG5WUZyEkQPNNMJXUnA;secret=UYgKNNyr97cpFytJdcnWw1FuNHVpCF",
+			"identityParams": "accessKeyId=*******;secret=*******",
 			"cloudParams": "regionId=ap-southeast-1",
 			"allocationId": "eip-t4nxfcb1xc08dbkknjg6x",
 			"instanceId": "ngw-t4nkybnb2eb9c1qm64wuo",
@@ -1898,3 +2061,39 @@ instanceId|string|是|绑定实例ID
 :--|:--|:--
 guid|string|CI类型全局唯一ID
 
+##### 示例：
+
+输入：
+
+```
+curl -X POST http://127.0.0.1:8080/alicloud/v1/vpc/eip/un-associate \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -d '{
+	"inputs": [
+		{
+			"guid":"0033_0000000001",
+			"identityParams": "accessKeyId=*******;secret=*******",
+			"cloudParams": "regionId=ap-southeast-1",
+			"allocationId": "eip-t4nxfcb1xc08dbkknjg6x",
+			"instanceId": "ngw-t4nkybnb2eb9c1qm64wuo"
+		}
+	]
+}'
+```
+
+输出：
+
+```
+{
+    "resultCode": "0",
+    "resultMessage": "Success",
+    "results": {
+        "outputs": [
+            {
+                "guid": "0033_0000000001"
+            }
+        ]
+    }
+}
+```
