@@ -25,8 +25,8 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     public static final String CORE_PORT_RANGE_DELIMITER = "-";
     public static final String ALICLOUD_PORT_RANGE_DELIMITER = "/";
 
-    @NotEmpty(message = "actionType field is mandatory")
-    private String actionType;
+    @NotEmpty(message = "policyType field is mandatory")
+    private String policyType;
     @NotEmpty(message = "cidrIp field is mandatory")
     private String cidrIp;
 
@@ -57,12 +57,12 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     public CoreAuthorizeSecurityGroupRequestDto() {
     }
 
-    public String getActionType() {
-        return actionType;
+    public String getPolicyType() {
+        return policyType;
     }
 
-    public void setActionType(String actionType) {
-        this.actionType = actionType;
+    public void setPolicyType(String policyType) {
+        this.policyType = policyType;
     }
 
     public String getNicType() {
@@ -237,7 +237,7 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
                 .appendSuper(super.toString())
-                .append("actionType", actionType)
+                .append("actionType", policyType)
                 .append("nicType", nicType)
                 .append("resourceOwnerId", resourceOwnerId)
                 .append("sourcePortRange", sourcePortRange)
@@ -283,11 +283,11 @@ public class CoreAuthorizeSecurityGroupRequestDto extends CoreRequestInputDto im
 
             String transferred = PluginStringUtils.handleCidrListString(this.getCidrIp());
 
-            final SecurityGroupServiceImpl.ActionType actionType = EnumUtils.getEnumIgnoreCase(SecurityGroupServiceImpl.ActionType.class, this.getActionType());
-            if (null == actionType) {
-                throw new PluginException("Invalid actionType");
+            final SecurityGroupServiceImpl.PolicyType policyType = EnumUtils.getEnumIgnoreCase(SecurityGroupServiceImpl.PolicyType.class, this.getPolicyType());
+            if (null == policyType) {
+                throw new PluginException("Invalid policyType");
             } else {
-                switch (actionType) {
+                switch (policyType) {
                     case EGRESS:
                         this.setDestCidrIp(transferred);
                         this.setSourceCidrIp(null);
