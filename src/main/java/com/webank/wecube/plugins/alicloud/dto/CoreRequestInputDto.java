@@ -12,7 +12,6 @@ import javax.validation.constraints.NotEmpty;
 public class CoreRequestInputDto implements Cloneable {
     @NotEmpty(message = "identityParams cannot be null or empty")
     private String identityParams;
-    @NotEmpty(message = "cloudParams cannot be null or empty")
     private String cloudParams;
     @NotEmpty(message = "GUID cannot be null or empty")
     private String guid = StringUtils.EMPTY;
