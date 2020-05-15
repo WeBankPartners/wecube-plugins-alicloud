@@ -153,8 +153,12 @@ public class RDSServiceImpl implements RDSService {
                     bindSecurityGroupToInstance(client, regionId, requestDto.getSecurityGroupId(), response.getDBInstanceId());
                 }
 
+                // get instance's private ip address
+                final String dbInstancePrivateIpAddr = getDBInstancePrivateIpAddr(client, regionId, response.getDBInstanceId());
+
                 // return result
                 result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword, foundSpecInfo);
+                result.setPrivateIpAddress(dbInstancePrivateIpAddr);
 
 
             } catch (PluginException | AliCloudException ex) {
@@ -878,5 +882,36 @@ public class RDSServiceImpl implements RDSService {
         final String currentStatus = response.getAccounts().get(0).getAccountStatus();
 
         return StringUtils.equalsIgnoreCase(AccountStatus.Available.toString(), currentStatus);
+    }
+
+    private String getDBInstancePrivateIpAddr(IAcsClient client, String regionId, String dBInstanceId) throws PluginException, AliCloudException {
+
+        logger.info("Retrieving instance: [{}]'s private ip address.", dBInstanceId);
+
+        DescribeDBInstanceNetInfoRequest request = new DescribeDBInstanceNetInfoRequest();
+        request.setDBInstanceId(dBInstanceId);
+
+        final DescribeDBInstanceNetInfoResponse response = acsClientStub.request(client, request, regionId);
+
+        final List<String> privateIpAddrList = response.getDBInstanceNetInfos().stream()
+                .filter(dbInstanceNetInfo -> StringUtils.equals(DBInstanceIPType.Private.toString(), dbInstanceNetInfo.getIPType()))
+                .map(DescribeDBInstanceNetInfoResponse.DBInstanceNetInfo::getIPAddress)
+                .collect(Collectors.toList());
+
+        if (privateIpAddrList.isEmpty()) {
+            throw new PluginException("The resource doesn't have private ip");
+        }
+
+        return privateIpAddrList.get(0);
+
+    }
+
+    private enum DBInstanceIPType {
+        // inner
+        Inner,
+        // public
+        Public,
+        // private
+        Private
     }
 }
