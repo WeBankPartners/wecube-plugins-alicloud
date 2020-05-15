@@ -811,7 +811,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">actionType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policyType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
@@ -830,7 +830,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">actionType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policyType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
