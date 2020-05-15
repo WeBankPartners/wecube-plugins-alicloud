@@ -10,6 +10,8 @@ import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceRequest
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
@@ -30,6 +32,10 @@ public interface RDSService {
 
     List<CoreModifySecurityIPsResponseDto> deleteSecurityIps(List<CoreModifySecurityIPsRequestDto> requestDtoList);
 
+    List<CoreModifyDBSecurityGroupResponseDto> appendSecurityGroup(List<CoreModifyDBSecurityGroupRequestDto> requestDtoList);
+
+    List<CoreModifyDBSecurityGroupResponseDto> removeSecurityGroup(List<CoreModifyDBSecurityGroupRequestDto> requestDtoList);
+
     List<CoreCreateBackupResponseDto> createBackup(List<CoreCreateBackupRequestDto> requestDtoList);
 
     List<CoreDeleteBackupResponseDto> deleteBackup(List<CoreDeleteBackupRequestDto> requestDtoList);
@@ -37,5 +43,4 @@ public interface RDSService {
     Boolean ifDBInstanceInStatus(IAcsClient client, String regionId, String dbInstanceId, RDSStatus status) throws PluginException, AliCloudException;
 
     Boolean ifRDSAccountCreated(IAcsClient client, String regionId, String accountName, String dBInstanceId) throws PluginException, AliCloudException;
-
 }
