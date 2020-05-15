@@ -362,6 +362,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">dBInstanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">connectionString</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">port</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIpAddress</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>

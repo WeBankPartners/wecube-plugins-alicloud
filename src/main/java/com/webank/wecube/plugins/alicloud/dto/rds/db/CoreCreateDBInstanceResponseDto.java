@@ -29,6 +29,8 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
     @JsonProperty(value = "dBInstanceClass")
     private String dBInstanceClass;
 
+    private String privateIpAddress;
+
     public CoreCreateDBInstanceResponseDto() {
     }
 
@@ -113,6 +115,14 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
         this.dBInstanceClass = dBInstanceClass;
     }
 
+    public String getPrivateIpAddress() {
+        return privateIpAddress;
+    }
+
+    public void setPrivateIpAddress(String privateIpAddress) {
+        this.privateIpAddress = privateIpAddress;
+    }
+
 
     public CoreCreateDBInstanceResponseDto fromSdk(CreateDBInstanceResponse response, String accountName, String accountEncryptedPassword, SpecInfo specInfo) {
         final CoreCreateDBInstanceResponseDto result = this.fromSdk(response);
@@ -138,6 +148,8 @@ public class CoreCreateDBInstanceResponseDto extends CoreResponseOutputDto imple
                 .append("cpu", cpu)
                 .append("memory", memory)
                 .append("dBInstanceClass", dBInstanceClass)
+                .append("privateIpAddress", privateIpAddress)
                 .toString();
     }
+
 }
