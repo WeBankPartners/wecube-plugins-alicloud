@@ -1,7 +1,6 @@
 package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.ModifySecurityGroupConfigurationRequest;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
@@ -21,8 +20,7 @@ public class CoreModifySecurityGroupRequestDto extends CoreRequestInputDto imple
     @NotEmpty(message = "securityGroupId field is mandatory")
     private String securityGroupId;
     private String securityToken;
-    @NotEmpty(message = "instanceId field is mandatory")
-    @JsonProperty(value = "instanceId")
+    @NotEmpty(message = "dBInstanceId field is mandatory")
     private String dBInstanceId;
     private String resourceOwnerAccount;
     private String ownerAccount;
