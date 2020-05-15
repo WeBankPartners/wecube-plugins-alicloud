@@ -54,7 +54,6 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
 
                 final String cenId = requestDto.getCenId();
                 if (StringUtils.isNotEmpty(cenId)) {
@@ -73,11 +72,11 @@ public class CenServiceImpl implements CenService {
                 logger.info("Creating Cen: {}", requestDto.toString());
 
                 CreateCenRequest request = requestDto.toSdk();
-                CreateCenResponse response = this.acsClientStub.request(client, request, regionId);
+                CreateCenResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
 
                 // wait till CEN is in active status
-                Function<?, Boolean> func = o -> ifCenInStatus(client, regionId, response.getCenId(), CenStatus.Active);
+                Function<?, Boolean> func = o -> ifCenInStatus(client, response.getCenId(), CenStatus.Active);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
 
@@ -110,7 +109,6 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
 
                 final String cenId = requestDto.getCenId();
                 if (StringUtils.isNotEmpty(cenId)) {
@@ -135,7 +133,7 @@ public class CenServiceImpl implements CenService {
                 logger.info("Deleting Cen: {}", requestDto.toString());
 
                 final DeleteCenRequest deleteCenRequest = requestDto.toSdk();
-                final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest, regionId);
+                final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest);
                 result = result.fromSdk(response);
 
                 // check if cen has already been deleted
@@ -185,16 +183,11 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
-
-                if (StringUtils.isEmpty(requestDto.getChildInstanceRegionId())) {
-                    requestDto.setChildInstanceRegionId(regionId);
-                }
 
                 logger.info("Attaching Cen child instance: {}", requestDto.toString());
 
                 AttachCenChildInstanceRequest request = requestDto.toSdk();
-                AttachCenChildInstanceResponse response = this.acsClientStub.request(client, request, regionId);
+                AttachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -226,16 +219,11 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
-
-                if (StringUtils.isEmpty(requestDto.getChildInstanceRegionId())) {
-                    requestDto.setChildInstanceRegionId(regionId);
-                }
 
                 logger.info("Detaching Cen child instance: {}", requestDto.toString());
 
                 DetachCenChildInstanceRequest request = requestDto.toSdk();
-                DetachCenChildInstanceResponse response = this.acsClientStub.request(client, request, regionId);
+                DetachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
@@ -291,11 +279,11 @@ public class CenServiceImpl implements CenService {
         return ifCenDeleted;
     }
 
-    private boolean ifCenInStatus(IAcsClient client, String regionId, String cenId, CenStatus... statusArray) {
+    private boolean ifCenInStatus(IAcsClient client, String cenId, CenStatus... statusArray) {
 
         DescribeCensRequest request = new DescribeCensRequest();
 
-        final DescribeCensResponse response = acsClientStub.request(client, request, regionId);
+        final DescribeCensResponse response = acsClientStub.request(client, request);
         if (response.getCens().isEmpty()) {
             throw new PluginException("Current account doesn't have any CENs");
         }
