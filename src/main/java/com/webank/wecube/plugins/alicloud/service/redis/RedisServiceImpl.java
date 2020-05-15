@@ -6,10 +6,7 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.redis.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
@@ -18,6 +15,7 @@ import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RedisResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -220,6 +219,103 @@ public class RedisServiceImpl implements RedisService {
         final DescribeInstancesResponse.KVStoreInstance foundInstance = retrieveRedis(client, regionId, instanceId);
 
         return StringUtils.equals(status.getStatus(), foundInstance.getInstanceStatus());
+    }
+
+    @Override
+    public List<CoreModifySecurityGroupResponseDto> appendSecurityGroup(List<CoreModifySecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifySecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityGroupRequestDto requestDto : requestDtoList) {
+            CoreModifySecurityGroupResponseDto result = new CoreModifySecurityGroupResponseDto();
+
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // append target security group list to current's
+                List<String> currentSGList = queryRedisSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.addAll(targetSGList);
+                targetSGList = currentSGList.stream().distinct().collect(Collectors.toList());
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(targetSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifySecurityGroupResponseDto> removeSecurityGroup(List<CoreModifySecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifySecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityGroupRequestDto requestDto : requestDtoList) {
+            CoreModifySecurityGroupResponseDto result = new CoreModifySecurityGroupResponseDto();
+
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // remove target security group list from current's (with non-exist id removal)
+                List<String> currentSGList = queryRedisSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.removeAll(targetSGList);
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(currentSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
+    }
+
+    private List<String> queryRedisSecurityGroup(String instanceId, IAcsClient client, String regionId) throws AliCloudException {
+        DescribeSecurityGroupConfigurationRequest request = new DescribeSecurityGroupConfigurationRequest();
+        request.setInstanceId(instanceId);
+
+        final DescribeSecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+        return response.getItems().stream().map(DescribeSecurityGroupConfigurationResponse.EcsSecurityGroupRelation::getSecurityGroupId).collect(Collectors.toList());
     }
 
     private DescribeInstancesResponse.KVStoreInstance retrieveRedis(IAcsClient client, String regionId, String instanceId) {
