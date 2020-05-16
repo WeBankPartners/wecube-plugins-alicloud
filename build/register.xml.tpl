@@ -714,6 +714,7 @@
             <interface action="create_cen" path="/alicloud/v1/cen/create">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">cenId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">name</parameter>
@@ -730,6 +731,7 @@
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
                 </inputParameters>
                 <outputParameters>
@@ -742,6 +744,7 @@
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceRegionId</parameter>
@@ -758,6 +761,7 @@
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cenId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">childInstanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">childInstanceRegionId</parameter>
