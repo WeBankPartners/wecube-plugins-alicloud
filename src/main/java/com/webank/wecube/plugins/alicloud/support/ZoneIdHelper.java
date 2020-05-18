@@ -3,6 +3,8 @@ package com.webank.wecube.plugins.alicloud.support;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,6 +15,9 @@ import java.util.stream.Collectors;
  * @author howechen
  */
 public interface ZoneIdHelper {
+
+    Logger logger = LoggerFactory.getLogger(ZoneIdHelper.class);
+
     String WECUBE_HIGH_AVAILABLE_ZONE_PATTERN = "^(.*)(MAZ|maz)(\\d+)-(.+)$";
     String ALICLOUD_HIGH_AVAILABLE_ZONE_PATTERN = "^(?!\\[)+(.*)(MAZ)(\\d+)(.+)(?!])+$";
     String ALICLOUD_HIGH_AVAILABLE_ZONE_CHILD_ZONE_PATTERN = "^.*\\((.+)\\)$";
@@ -156,5 +161,29 @@ public interface ZoneIdHelper {
                     return split[0].concat("-").concat(split[1]);
                 })
                 .collect(Collectors.toSet());
+    }
+
+    static void ifZoneInAvailableZoneId(String zoneId, String availableZoneId) {
+        final List<String> availableChildZoneList = ZoneIdHelper.getChildZoneList(availableZoneId);
+
+        final Set<String> zonePrefixSet = ZoneIdHelper.getZonePrefixList(zoneId);
+        final List<String> zonePostfixList = ZoneIdHelper.getZonePostfixList(zoneId);
+
+        logger.info("Found availableZoneId: [{}], give zoneId prefix list is: [{}] and postFix list is: [{}]", availableZoneId, zonePrefixSet, zonePostfixList);
+
+        if (zonePrefixSet.size() != 1) {
+            throw new PluginException(String.format("Given redundant zoneId: [%s]", zonePrefixSet));
+        }
+
+        final String prefix = zonePrefixSet.iterator().next();
+        if (!StringUtils.containsIgnoreCase(availableZoneId, prefix)) {
+            throw new PluginException(String.format("The available zoneId: [%s] doesn't contains given zoneId prefix: [%s]", availableZoneId, prefix));
+        }
+
+        for (String postFix : zonePostfixList) {
+            if (!availableChildZoneList.contains(postFix)) {
+                throw new PluginException(String.format("The available zoneId: [%s] doesn't contain the postfix: [%s] in given zoneId: [%s]", availableZoneId, postFix, zoneId));
+            }
+        }
     }
 }
