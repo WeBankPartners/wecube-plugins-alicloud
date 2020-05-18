@@ -34,7 +34,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -911,8 +914,7 @@ public class RDSServiceImpl implements RDSService {
             // high availability category
             availableZoneId = queryAvailableZoneId(client, dbCloudParamDto);
 
-            ifZoneInAvailableZoneId(requestDto, availableZoneId);
-
+            ZoneIdHelper.ifZoneInAvailableZoneId(requestDto.getZoneId(), availableZoneId);
 
         } else {
             // basic category
@@ -931,30 +933,6 @@ public class RDSServiceImpl implements RDSService {
 
         requestDto.setZoneId(availableZoneId);
 
-    }
-
-    private void ifZoneInAvailableZoneId(CoreCreateDBInstanceRequestDto requestDto, String availableZoneId) {
-        final List<String> availableChildZoneList = ZoneIdHelper.getChildZoneList(availableZoneId);
-
-        final Set<String> zonePrefixSet = ZoneIdHelper.getZonePrefixList(requestDto.getZoneId());
-        final List<String> zonePostfixList = ZoneIdHelper.getZonePostfixList(requestDto.getZoneId());
-
-        logger.info("Found availableZoneId: [{}], give zoneId prefix list is: [{}] and postFix list is: [{}]", availableZoneId, zonePrefixSet, zonePostfixList);
-
-        if (zonePrefixSet.size() != 1) {
-            throw new PluginException(String.format("Given redundant zoneId: [%s]", zonePrefixSet));
-        }
-
-        final String prefix = zonePrefixSet.iterator().next();
-        if (!StringUtils.containsIgnoreCase(availableZoneId, prefix)) {
-            throw new PluginException(String.format("The available zoneId: [%s] doesn't contains given zoneId prefix: [%s]", availableZoneId, prefix));
-        }
-
-        for (String postFix : zonePostfixList) {
-            if (!availableChildZoneList.contains(postFix)) {
-                throw new PluginException(String.format("The available zoneId: [%s] doesn't contain the postfix: [%s] in given zoneId: [%s]", availableZoneId, postFix, requestDto.getZoneId()));
-            }
-        }
     }
 
     private String queryAvailableZoneId(IAcsClient client, DBCloudParamDto dbCloudParamDto) {
