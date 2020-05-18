@@ -490,16 +490,19 @@ public class VMServiceImpl implements VMService {
         }
 
         final DescribeInstancesResponse.Instance instance = foundInstance.getInstances().get(0);
-        final List<String> innerIpAddressList = instance.getInnerIpAddress();
+        final List<DescribeInstancesResponse.Instance.NetworkInterface> networkInterfaceList = instance.getNetworkInterfaces();
 
-        if (innerIpAddressList.isEmpty()) {
+        if (networkInterfaceList.isEmpty()) {
             return StringUtils.EMPTY;
         }
 
-        if (innerIpAddressList.size() == 1) {
-            return innerIpAddressList.get(0);
+        if (networkInterfaceList.size() == 1) {
+            return networkInterfaceList.get(0).getPrimaryIpAddress();
         } else {
-            return PluginStringUtils.stringifyListWithoutBracket(innerIpAddressList);
+            final List<String> ipAddressList = networkInterfaceList.stream()
+                    .map(DescribeInstancesResponse.Instance.NetworkInterface::getPrimaryIpAddress)
+                    .collect(Collectors.toList());
+            return PluginStringUtils.stringifyListWithoutBracket(ipAddressList);
         }
     }
 }
