@@ -4,9 +4,10 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.rds.model.v20140815.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.DBCloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreDeleteBackupRequestDto;
@@ -19,10 +20,7 @@ import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecu
 import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
-import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
-import com.webank.wecube.plugins.alicloud.support.AliCloudException;
-import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.*;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
@@ -36,10 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -77,10 +72,12 @@ public class RDSServiceImpl implements RDSService {
                 dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final String regionId = cloudParamDto.getRegionId();
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                requestDto.adaptToAliCloud();
+                final DBCloudParamDto dbCloudParamDto = DBCloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = dbCloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, dbCloudParamDto);
+
+                // zoneId adaption
+                zoneIdAdaption(client, dbCloudParamDto, requestDto);
 
                 if (StringUtils.isNotEmpty(requestDto.getDBInstanceId())) {
                     final String instanceId = requestDto.getDBInstanceId();
@@ -176,6 +173,7 @@ public class RDSServiceImpl implements RDSService {
         }
         return resultList;
     }
+
 
     @Override
     public List<CoreDeleteDBInstanceResponseDto> deleteDB(List<CoreDeleteDBInstanceRequestDto> requestDtoList) {
@@ -904,6 +902,75 @@ public class RDSServiceImpl implements RDSService {
 
         return privateIpAddrList.get(0);
 
+    }
+
+    private void zoneIdAdaption(IAcsClient client, DBCloudParamDto dbCloudParamDto, CoreCreateDBInstanceRequestDto requestDto) throws PluginException, AliCloudException {
+
+        final String availableZoneId;
+        if (StringUtils.equalsIgnoreCase(RDSCategory.HighAvailability.toString(), requestDto.getCategory())) {
+            // high availability category
+            availableZoneId = queryAvailableZoneId(client, dbCloudParamDto);
+
+            ifZoneInAvailableZoneId(requestDto, availableZoneId);
+
+
+        } else {
+            // basic category
+            final List<String> zoneIdList = PluginStringUtils.splitStringList(requestDto.getZoneId());
+            if (zoneIdList.isEmpty()) {
+                throw new PluginException("Invalid zoneId.");
+            }
+
+            availableZoneId = zoneIdList.get(0).trim();
+
+            if (ZoneIdHelper.ifZoneIdContainsMAZ(availableZoneId)) {
+                throw new PluginException("The given zoneId contains MAZ which is invalid.");
+            }
+
+        }
+
+        requestDto.setZoneId(availableZoneId);
+
+    }
+
+    private void ifZoneInAvailableZoneId(CoreCreateDBInstanceRequestDto requestDto, String availableZoneId) {
+        final List<String> availableChildZoneList = ZoneIdHelper.getChildZoneList(availableZoneId);
+
+        final Set<String> zonePrefixSet = ZoneIdHelper.getZonePrefixList(requestDto.getZoneId());
+        final List<String> zonePostfixList = ZoneIdHelper.getZonePostfixList(requestDto.getZoneId());
+
+        logger.info("Found availableZoneId: [{}], give zoneId prefix list is: [{}] and postFix list is: [{}]", availableZoneId, zonePrefixSet, zonePostfixList);
+
+        if (zonePrefixSet.size() != 1) {
+            throw new PluginException(String.format("Given redundant zoneId: [%s]", zonePrefixSet));
+        }
+
+        final String prefix = zonePrefixSet.iterator().next();
+        if (!StringUtils.containsIgnoreCase(availableZoneId, prefix)) {
+            throw new PluginException(String.format("The available zoneId: [%s] doesn't contains given zoneId prefix: [%s]", availableZoneId, prefix));
+        }
+
+        for (String postFix : zonePostfixList) {
+            if (!availableChildZoneList.contains(postFix)) {
+                throw new PluginException(String.format("The available zoneId: [%s] doesn't contain the postfix: [%s] in given zoneId: [%s]", availableZoneId, postFix, requestDto.getZoneId()));
+            }
+        }
+    }
+
+    private String queryAvailableZoneId(IAcsClient client, DBCloudParamDto dbCloudParamDto) {
+        DescribeRegionsRequest request = new DescribeRegionsRequest();
+        final DescribeRegionsResponse response = acsClientStub.request(client, request, dbCloudParamDto.getRegionId());
+
+        final Optional<String> zoneOpt = response.getRegions()
+                .stream()
+                .filter(rdsRegion -> StringUtils.containsIgnoreCase(rdsRegion.getZoneId(), dbCloudParamDto.getRegionGroup()))
+                .map(DescribeRegionsResponse.RDSRegion::getZoneId)
+                .filter(s -> StringUtils.containsIgnoreCase(s, dbCloudParamDto.getRegionGroup()))
+                .findFirst();
+
+        zoneOpt.orElseThrow(() -> new PluginException(String.format("Cannot find available zone by given region group: [%s]", dbCloudParamDto.getRegionGroup())));
+
+        return zoneOpt.get();
     }
 
     private enum DBInstanceIPType {
