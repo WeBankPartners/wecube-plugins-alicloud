@@ -1,4 +1,4 @@
-package com.webank.wecube.plugins.alicloud.dto;
+package com.webank.wecube.plugins.alicloud.dto.cloudParam;
 
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.utils.PluginMapUtils;
@@ -17,6 +17,14 @@ public class CloudParamDto {
         this.regionId = regionId;
     }
 
+    public String getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(String regionId) {
+        this.regionId = regionId;
+    }
+
     public static CloudParamDto convertFromString(String paramStr) throws PluginException {
         final Map<String, String> map = PluginMapUtils.fromCoreParamString(paramStr);
         final String regionId = map.get("regionId");
@@ -24,13 +32,5 @@ public class CloudParamDto {
             throw new PluginException("Cannot get field: [regionId] through the given cloudParams string");
         }
         return new CloudParamDto(regionId);
-    }
-
-    public String getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(String regionId) {
-        this.regionId = regionId;
     }
 }
