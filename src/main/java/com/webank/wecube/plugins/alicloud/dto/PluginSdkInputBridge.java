@@ -54,7 +54,7 @@ public interface PluginSdkInputBridge<K extends AcsRequest<?>> {
         }
 
         try {
-            result.setActionName(clazz.newInstance().getActionName());
+            result.setSysActionName(clazz.newInstance().getSysActionName());
         } catch (IllegalAccessException | InstantiationException e) {
             throw new PluginException(e.getMessage());
         }
