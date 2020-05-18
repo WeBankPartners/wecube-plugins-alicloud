@@ -3,9 +3,9 @@ package com.webank.wecube.plugins.alicloud.service.ecs.vm;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
@@ -112,7 +112,10 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                result = result.fromSdk(response, encryptedPassword, requestDto.getPrivateIpAddress(), fitSpec);
+                // query created instance and get the private ip
+                final String instancePrivateIp = getInstancePrivateIp(client, regionId, response.getInstanceId());
+
+                result = result.fromSdk(response, encryptedPassword, instancePrivateIp, fitSpec);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
@@ -471,8 +474,32 @@ public class VMServiceImpl implements VMService {
         throw new PluginException("The VM instance doesn't have IP address to connect to.");
     }
 
-    private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) {
+    private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
         final DescribeInstancesResponse describeInstancesResponse = this.retrieveVM(client, regionId, instanceId);
         return describeInstancesResponse.getTotalCount() == 0;
+    }
+
+    private String getInstancePrivateIp(IAcsClient client, String regionId, String instanceId) throws AliCloudException {
+
+        logger.info("Query instance private ip...");
+
+        final DescribeInstancesResponse foundInstance = retrieveVM(client, regionId, instanceId);
+
+        if (foundInstance.getInstances().isEmpty()) {
+            throw new PluginException(String.format("Cannot find instance by given instanceId: [%s]", instanceId));
+        }
+
+        final DescribeInstancesResponse.Instance instance = foundInstance.getInstances().get(0);
+        final List<String> innerIpAddressList = instance.getInnerIpAddress();
+
+        if (innerIpAddressList.isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+
+        if (innerIpAddressList.size() == 1) {
+            return innerIpAddressList.get(0);
+        } else {
+            return PluginStringUtils.stringifyListWithoutBracket(innerIpAddressList);
+        }
     }
 }
