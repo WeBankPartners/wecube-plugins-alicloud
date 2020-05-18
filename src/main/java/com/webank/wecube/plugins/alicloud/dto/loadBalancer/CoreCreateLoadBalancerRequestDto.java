@@ -2,28 +2,38 @@ package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.loadBalancer.LoadBalancerPayType;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateLoadBalancerRequest> {
+
     private String loadBalancerId;
     private String loadBalancerProtocol;
 
     private String resourceOwnerId;
     private String clientToken;
-    private String addressIPVersion;
+    private String addressIPVersion = "ipv4";
     private String masterZoneId;
     private String duration;
     private String resourceGroupId;
     private String loadBalancerName;
+    @NotEmpty(message = "addressType field is mandatory.")
     private String addressType;
     private String slaveZoneId;
-    private String deleteProtection;
+    private String deleteProtection = "off";
     private String loadBalancerSpec;
-    private String autoPay;
+    private String autoPay = "true";
     private String address;
     private String resourceOwnerAccount;
     private String bandwidth;
@@ -229,5 +239,66 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
 
     public void setPricingCycle(String pricingCycle) {
         this.pricingCycle = pricingCycle;
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("loadBalancerId", loadBalancerId)
+                .append("loadBalancerProtocol", loadBalancerProtocol)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("addressIPVersion", addressIPVersion)
+                .append("masterZoneId", masterZoneId)
+                .append("duration", duration)
+                .append("resourceGroupId", resourceGroupId)
+                .append("loadBalancerName", loadBalancerName)
+                .append("addressType", addressType)
+                .append("slaveZoneId", slaveZoneId)
+                .append("deleteProtection", deleteProtection)
+                .append("loadBalancerSpec", loadBalancerSpec)
+                .append("autoPay", autoPay)
+                .append("address", address)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("bandwidth", bandwidth)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("internetChargeType", internetChargeType)
+                .append("vpcId", vpcId)
+                .append("payType", payType)
+                .append("pricingCycle", pricingCycle)
+                .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (!StringUtils.isEmpty(this.getAddressType()) && StringUtils.equalsIgnoreCase(AddressType.internet.toString(), this.getAddressType())) {
+            this.setAddress(null);
+            this.setVSwitchId(null);
+        }
+
+        if (StringUtils.isNotEmpty(payType)) {
+            if (EnumUtils.isValidEnumIgnoreCase(LoadBalancerPayType.class, payType)) {
+                payType = EnumUtils.getEnumIgnoreCase(LoadBalancerPayType.class, payType).toString();
+            } else {
+                if (StringUtils.equalsIgnoreCase("postpaid", payType)) {
+                    payType = LoadBalancerPayType.PayOnDemand.toString();
+                } else if (StringUtils.equalsIgnoreCase("prepaid", payType)) {
+                    payType = LoadBalancerPayType.PrePay.toString();
+                } else {
+                    throw new PluginException(String.format("Invalid given payType: [%s]", payType));
+                }
+            }
+        }
+    }
+
+    private enum AddressType {
+        // internet
+        internet,
+        // intranet
+        intranet
     }
 }

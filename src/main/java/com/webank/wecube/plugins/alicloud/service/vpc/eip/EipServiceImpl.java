@@ -10,6 +10,8 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.eip.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author howechen
@@ -26,12 +29,10 @@ import java.util.List;
 @Service
 public class EipServiceImpl implements EipService {
 
-    public enum AssociatedInstanceType {EcsInstance, SlbInstance, Nat, HaVip, NetworkInterface}
-
     private static final Logger logger = LoggerFactory.getLogger(EipService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
 
     @Autowired
     public EipServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
@@ -47,16 +48,15 @@ public class EipServiceImpl implements EipService {
             try {
                 this.dtoValidator.validate(requestDto);
 
+                logger.info("Allocating EIP address: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
                 if (StringUtils.isNotEmpty(requestDto.getAllocationId())) {
-                    DescribeEipAddressesRequest retrieveEipAddressRequest = new DescribeEipAddressesRequest();
-                    retrieveEipAddressRequest.setAllocationId(requestDto.getAllocationId());
-                    retrieveEipAddressRequest.setRegionId(regionId);
-                    final DescribeEipAddressesResponse describeEipAddressesResponse = this.retrieveEipAddress(client, retrieveEipAddressRequest);
+                    final DescribeEipAddressesResponse describeEipAddressesResponse = retrieveEipByAllocationId(client, regionId, requestDto.getAllocationId(), true);
                     if (!describeEipAddressesResponse.getEipAddresses().isEmpty()) {
                         final DescribeEipAddressesResponse.EipAddress eipAddress = describeEipAddressesResponse.getEipAddresses().get(0);
                         result = result.fromSdkCrossLineage(eipAddress);
@@ -65,24 +65,48 @@ public class EipServiceImpl implements EipService {
                     }
                 }
 
-                logger.info("Allocating EIP address...");
 
                 AllocateEipAddressRequest allocateEipAddressRequest = requestDto.toSdk();
-                AllocateEipAddressResponse response = this.acsClientStub.request(client, allocateEipAddressRequest);
-                result = result.fromSdk(response);
+                AllocateEipAddressResponse createEipResponse = this.acsClientStub.request(client, allocateEipAddressRequest);
+
+                // if cbpName is empty, create CBP
+                String cbpId = StringUtils.EMPTY;
+                if (!StringUtils.isEmpty(requestDto.getName())) {
+                    DescribeCommonBandwidthPackagesRequest queryCBPRequest = new DescribeCommonBandwidthPackagesRequest();
+                    queryCBPRequest.setName(requestDto.getName());
+                    cbpId = queryCBP(client, queryCBPRequest, regionId);
+                }
+
+                if (StringUtils.isEmpty(cbpId)) {
+                    final CreateCommonBandwidthPackageRequest createCommonBandwidthPackageRequest = requestDto.toSdkCrossLineage(CreateCommonBandwidthPackageRequest.class);
+                    createCommonBandwidthPackageRequest.setName(requestDto.getName());
+                    cbpId = createCBP(client, createCommonBandwidthPackageRequest, regionId);
+                }
+
+                final String allocationId = createEipResponse.getAllocationId();
+                addEipToCBP(client, cbpId, allocationId);
+
+                result = result.fromSdk(createEipResponse);
+                result.setCbpId(cbpId);
+                result.setCbpName(requestDto.getName());
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
         }
         return resultList;
     }
+
 
     @Override
     public List<CoreReleaseEipResponseDto> releaseEipAddress(List<CoreReleaseEipRequestDto> requestDtoList) {
@@ -92,40 +116,75 @@ public class EipServiceImpl implements EipService {
             try {
                 this.dtoValidator.validate(requestDto);
 
+                logger.info("Releasing EIP address: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-                DescribeEipAddressesRequest retrieveEipAddressRequest = new DescribeEipAddressesRequest();
-                retrieveEipAddressRequest.setAllocationId(requestDto.getAllocationId());
-                retrieveEipAddressRequest.setRegionId(regionId);
-                final DescribeEipAddressesResponse describeEipAddressesResponse = this.retrieveEipAddress(client, retrieveEipAddressRequest);
+                final DescribeEipAddressesResponse describeEipAddressesResponse = this.retrieveEipByAllocationId(client, regionId, requestDto.getAllocationId(), true);
                 if (describeEipAddressesResponse.getEipAddresses().isEmpty()) {
                     result.setRequestId(describeEipAddressesResponse.getRequestId());
                     logger.info("The Eip address doesn't exist or has been released already.");
                     continue;
                 }
 
+                // remove eip from cbp
+                String foundCBPId;
+                if (!StringUtils.isEmpty(requestDto.getName())) {
+                    DescribeCommonBandwidthPackagesRequest queryCBP = new DescribeCommonBandwidthPackagesRequest();
+                    queryCBP.setName(requestDto.getName());
+                    foundCBPId = queryCBP(client, queryCBP, regionId);
+                } else {
+                    foundCBPId = queryCBPByEip(client, regionId, requestDto.getAllocationId());
+                }
 
-                logger.info("Releasing EIP address...");
+                if (!StringUtils.isEmpty(foundCBPId)) {
+                    removeFromCBP(client, requestDto.getAllocationId(), regionId, foundCBPId);
+                }
 
+                // release eip
                 ReleaseEipAddressRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                ReleaseEipAddressResponse response = this.acsClientStub.request(client, request);
+                ReleaseEipAddressResponse response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
         }
         return resultList;
+    }
+
+    private String queryCBPByEip(IAcsClient client, String regionId, String allocationId) throws PluginException, AliCloudException {
+        DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
+        request.setAllocationId(allocationId);
+
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, request, regionId);
+        if (response.getEipAddresses().isEmpty()) {
+            return StringUtils.EMPTY;
+        } else {
+            return response.getEipAddresses().get(0).getBandwidthPackageId();
+        }
+
+    }
+
+    private void removeFromCBP(IAcsClient client, String ipInstanceId, String regionId, String foundCBPId) throws AliCloudException {
+        RemoveCommonBandwidthPackageIpRequest removeCommonBandwidthPackageIpRequest = new RemoveCommonBandwidthPackageIpRequest();
+        removeCommonBandwidthPackageIpRequest.setBandwidthPackageId(foundCBPId);
+        removeCommonBandwidthPackageIpRequest.setIpInstanceId(ipInstanceId);
+
+        acsClientStub.request(client, removeCommonBandwidthPackageIpRequest, regionId);
     }
 
     @Override
@@ -135,9 +194,8 @@ public class EipServiceImpl implements EipService {
             logger.info("Releasing EIP address...");
 
             ReleaseEipAddressRequest request = new ReleaseEipAddressRequest();
-            request.setRegionId(regionId);
             request.setAllocationId(allocationId);
-            this.acsClientStub.request(client, request);
+            this.acsClientStub.request(client, request, regionId);
         }
     }
 
@@ -148,11 +206,10 @@ public class EipServiceImpl implements EipService {
             logger.info("Un-associating EIP address with the instance...");
 
             UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
-            request.setRegionId(regionId);
             request.setAllocationId(allocationId);
             request.setInstanceId(instanceId);
             request.setInstanceType(instanceType);
-            this.acsClientStub.request(client, request);
+            this.acsClientStub.request(client, request, regionId);
         }
     }
 
@@ -164,24 +221,32 @@ public class EipServiceImpl implements EipService {
             try {
                 this.dtoValidator.validate(requestDto);
 
+                logger.info("Associating EIP address: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-                logger.info("Associating EIP address...");
-
                 AssociateEipAddressRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                AssociateEipAddressResponse response = this.acsClientStub.request(client, request);
+                AssociateEipAddressResponse response = this.acsClientStub.request(client, request, regionId);
+
+                // wait till the eip is not in associating status
+                Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, requestDto.getAllocationId(), EipStatus.Associating);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -197,23 +262,31 @@ public class EipServiceImpl implements EipService {
             try {
                 this.dtoValidator.validate(requestDto);
 
+                logger.info("Un-associating EIP address: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
-                logger.info("Un-associating EIP address...");
-
                 UnassociateEipAddressRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                UnassociateEipAddressResponse response = this.acsClientStub.request(client, request);
+                UnassociateEipAddressResponse response = this.acsClientStub.request(client, request, regionId);
+
+                // wait till the eip is not in un-associating status
+                Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, requestDto.getAllocationId(), EipStatus.Unassociating);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
                 result = result.fromSdk(response);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -235,18 +308,146 @@ public class EipServiceImpl implements EipService {
         logger.info("Retrieving if the given resource have no Eip bound.");
 
         DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
-        request.setRegionId(regionId);
         request.setAssociatedInstanceType(associatedInstanceType);
         request.setAssociatedInstanceId(associatedInstanceId);
 
         DescribeEipAddressesResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response.getTotalCount().equals(0);
     }
 
-    private DescribeEipAddressesResponse retrieveEipAddress(IAcsClient client, DescribeEipAddressesRequest request) throws AliCloudException, PluginException {
-        logger.info("Retrieving EIP address...");
-        DescribeEipAddressesResponse response = this.acsClientStub.request(client, request);
+    @Override
+    public void bindIpToInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
+        for (String ip : ipAddress) {
+
+            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
+            final String allocationId = eipAddress.getAllocationId();
+
+            if (StringUtils.isNotEmpty(eipAddress.getInstanceId())) {
+                if (StringUtils.equals(eipAddress.getInstanceId(), instanceId)) {
+                    logger.info("The ip address: {} has already bound to that instance: {}", ipAddress, instanceId);
+                    continue;
+                } else {
+                    throw new PluginException("That EIP has already bond to another instance");
+                }
+            }
+
+            logger.info("Ip address: {} hasn't bound to the instance: {}, will create an association.", ip, instanceId);
+
+            AssociateEipAddressRequest request = new AssociateEipAddressRequest();
+            request.setAllocationId(allocationId);
+            request.setInstanceId(instanceId);
+            request.setInstanceType(instanceType.toString());
+
+            logger.info("Associating EIP: {} to the instance: {}", allocationId, instanceId);
+
+            acsClientStub.request(client, request, regionId);
+
+            // wait till the eip is not in associating status
+            Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, allocationId, EipStatus.Associating);
+            PluginTimer.runTask(new PluginTimerTask(func));
+        }
+
+    }
+
+    @Override
+    public void unbindIpFromInstance(IAcsClient client, String regionId, String instanceId, AssociatedInstanceType instanceType, String... ipAddress) throws PluginException, AliCloudException {
+        for (String ip : ipAddress) {
+            final DescribeEipAddressesResponse.EipAddress eipAddress = queryEipByAddress(client, regionId, ip);
+            final String allocationId = eipAddress.getAllocationId();
+
+            if (StringUtils.isEmpty(eipAddress.getInstanceId())) {
+                continue;
+            } else {
+                if (!StringUtils.equals(eipAddress.getInstanceId(), instanceId)) {
+                    throw new PluginException("That EIP has already bond to another instance");
+                }
+            }
+
+            UnassociateEipAddressRequest request = new UnassociateEipAddressRequest();
+            request.setAllocationId(allocationId);
+            request.setInstanceId(instanceId);
+            request.setInstanceType(instanceType.toString());
+
+            logger.info("Unbind EIP: {} from isntance: {}", allocationId, instanceId);
+
+            acsClientStub.request(client, request, regionId);
+
+            // wait till the eip not in un-associating status
+            Function<?, Boolean> func = o -> ifEipNotInStatus(client, regionId, allocationId, EipStatus.Unassociating);
+            PluginTimer.runTask(new PluginTimerTask(func));
+        }
+    }
+
+    private DescribeEipAddressesResponse retrieveEipByAllocationId(IAcsClient client, String regionId, String allocationId, boolean tolerateNotFound) {
+
+        logger.info("Retrieving EIP info...");
+
+        DescribeEipAddressesRequest request = new DescribeEipAddressesRequest();
+        request.setAllocationId(allocationId);
+
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, request, regionId);
+
+        if (!tolerateNotFound) {
+            if (response.getEipAddresses().isEmpty()) {
+                throw new PluginException(String.format("Cannot find EIP by given allocation Id: [%s]", allocationId));
+            }
+        }
         return response;
     }
+
+    private void addEipToCBP(IAcsClient client, String cbpId, String allocationId) throws AliCloudException {
+        AddCommonBandwidthPackageIpRequest request = new AddCommonBandwidthPackageIpRequest();
+        request.setBandwidthPackageId(cbpId);
+        request.setIpInstanceId(allocationId);
+
+        acsClientStub.request(client, request);
+    }
+
+    private String queryCBP(IAcsClient client, DescribeCommonBandwidthPackagesRequest queryCBPRequest, String regionId) throws PluginException, AliCloudException {
+        final DescribeCommonBandwidthPackagesResponse response = acsClientStub.request(client, queryCBPRequest, regionId);
+        if (response.getCommonBandwidthPackages().isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+
+        return response.getCommonBandwidthPackages().get(0).getBandwidthPackageId();
+
+    }
+
+    private String createCBP(IAcsClient client, CreateCommonBandwidthPackageRequest createCommonBandwidthPackageRequest, String regionId) throws AliCloudException {
+
+        final CreateCommonBandwidthPackageResponse response = acsClientStub.request(client, createCommonBandwidthPackageRequest, regionId);
+        return response.getBandwidthPackageId();
+
+    }
+
+    private DescribeEipAddressesResponse.EipAddress queryEipByAddress(IAcsClient client, String regionId, String ipAddress) throws PluginException, AliCloudException {
+        if (StringUtils.isEmpty(ipAddress)) {
+            throw new PluginException("ipAddress cannot be empty or null while query EIP");
+        }
+
+        DescribeEipAddressesRequest queryEipRequest = new DescribeEipAddressesRequest();
+        queryEipRequest.setEipAddress(ipAddress);
+
+        final DescribeEipAddressesResponse response = acsClientStub.request(client, queryEipRequest, regionId);
+        if (response.getEipAddresses().isEmpty()) {
+            throw new PluginException(String.format("Cannot find EIP by given ip address: [%s]", ipAddress));
+        }
+
+        return response.getEipAddresses().get(0);
+    }
+
+    private boolean ifEipInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) throws AliCloudException {
+        final DescribeEipAddressesResponse response = retrieveEipByAllocationId(client, regionId, allocationId, false);
+
+        return StringUtils.equals(status.toString(), response.getEipAddresses().get(0).getStatus());
+    }
+
+    private boolean ifEipNotInStatus(IAcsClient client, String regionId, String allocationId, EipStatus status) throws AliCloudException {
+        final DescribeEipAddressesResponse response = retrieveEipByAllocationId(client, regionId, allocationId, false);
+
+        return !StringUtils.equals(status.toString(), response.getEipAddresses().get(0).getStatus());
+    }
+
+
 }

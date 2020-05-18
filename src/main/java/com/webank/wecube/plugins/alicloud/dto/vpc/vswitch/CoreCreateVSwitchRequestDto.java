@@ -1,13 +1,19 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.vswitch;
 
 import com.aliyuncs.vpc.model.v20160428.CreateVSwitchRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateVSwitchRequest> {
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
 
     private String resourceOwnerId;
@@ -17,18 +23,25 @@ public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements 
     private String ownerAccount;
     private String ownerId;
     private String ipv6CidrBlock;
+    @NotEmpty(message = "vpcId field is mandatory.")
     private String vpcId;
+    @NotEmpty(message = "vSwitchName field is mandatory.")
+    @JsonProperty(value = "vSwitchName")
     private String vSwitchName;
+    @NotEmpty(message = "cidrBlock field is mandatory.")
     private String cidrBlock;
+    @NotEmpty(message = "zoneId field is mandatory.")
     private String zoneId;
 
     public CoreCreateVSwitchRequestDto() {
     }
 
+    @JsonProperty(value = "vSwitchId")
     public String getvSwitchId() {
         return vSwitchId;
     }
 
+    @JsonProperty(value = "vSwitchId")
     public void setvSwitchId(String vSwitchId) {
         this.vSwitchId = vSwitchId;
     }
@@ -119,5 +132,24 @@ public class CoreCreateVSwitchRequestDto extends CoreRequestInputDto implements 
 
     public void setZoneId(String zoneId) {
         this.zoneId = zoneId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("vSwitchId", vSwitchId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("ipv6CidrBlock", ipv6CidrBlock)
+                .append("vpcId", vpcId)
+                .append("vSwitchName", vSwitchName)
+                .append("cidrBlock", cidrBlock)
+                .append("zoneId", zoneId)
+                .toString();
     }
 }

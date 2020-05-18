@@ -3,6 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.vpc;
 import com.aliyuncs.vpc.model.v20160428.CreateVpcRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -15,6 +19,7 @@ public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements Plug
     private String clientToken;
     private String enableIpv6;
     private String description;
+    @NotEmpty(message = "VpcName field is mandatory")
     private String vpcName;
     private String resourceGroupId;
     private String userCidr;
@@ -23,6 +28,7 @@ public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements Plug
     private String ownerAccount;
     private String ownerId;
     private String ipv6CidrBlock;
+    @NotEmpty(message = "CidrBlock field is mandatory")
     private String cidrBlock;
 
     public CoreCreateVpcRequestDto() {
@@ -138,5 +144,27 @@ public class CoreCreateVpcRequestDto extends CoreRequestInputDto implements Plug
 
     public void setCidrBlock(String cidrBlock) {
         this.cidrBlock = cidrBlock;
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("vpcId", vpcId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("enableIpv6", enableIpv6)
+                .append("description", description)
+                .append("vpcName", vpcName)
+                .append("resourceGroupId", resourceGroupId)
+                .append("userCidr", userCidr)
+                .append("dryRun", dryRun)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("ipv6CidrBlock", ipv6CidrBlock)
+                .append("cidrBlock", cidrBlock)
+                .toString();
     }
 }

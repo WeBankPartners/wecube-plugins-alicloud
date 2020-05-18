@@ -2,10 +2,20 @@ package com.webank.wecube.plugins.alicloud.dto.redis;
 
 import com.aliyuncs.r_kvstore.model.v20150101.CreateInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.redis.ChargeType;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
+
+import static com.webank.wecube.plugins.alicloud.support.ZoneIdHelper.*;
 
 /**
  * @author howechen
@@ -14,13 +24,25 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
     private String instanceId;
 
+//    // redis instance spec
+//    @NotEmpty(message = "seriesType field is mandatory")
+//    private String seriesType;
+//    @NotEmpty(message = "architecture field is mandatory")
+//    private String architecture;
+//    @NotEmpty(message = "shardNumber field is mandatory")
+//    private String shardNumber;
+//    @NotEmpty(message = "supportedNodeType field is mandatory")
+//    private String supportedNodeType;
+//
+
     // redis password generation
-    @NotEmpty
+    @NotEmpty(message = "seed field is mandatory")
     private String seed;
 
     private String resourceOwnerId;
     private String couponNo;
     private String networkType;
+    //    @NotEmpty(message = "engineVersion field is mandatory")
     private String engineVersion;
     private String resourceGroupId;
     private String password;
@@ -46,8 +68,16 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
     private String ownerAccount;
     private String token;
     private String vpcId;
+    @NotEmpty(message = "chargeType field is mandatory")
     private String chargeType;
     private String config;
+
+    // securityIp config
+    private String modifyMode = "Append";
+    private String securityIps;
+
+    // security group config
+    private String securityGroupId;
 
     public CoreCreateInstanceRequestDto() {
     }
@@ -299,4 +329,144 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
     public void setSeed(String seed) {
         this.seed = seed;
     }
+
+    public String getModifyMode() {
+        return modifyMode;
+    }
+
+    public void setModifyMode(String modifyMode) {
+        this.modifyMode = modifyMode;
+    }
+
+    public String getSecurityIps() {
+        return securityIps;
+    }
+
+    public void setSecurityIps(String securityIps) {
+        this.securityIps = securityIps;
+    }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
+//
+//    public String getSeriesType() {
+//        return seriesType;
+//    }
+//
+//    public void setSeriesType(String seriesType) {
+//        this.seriesType = seriesType;
+//    }
+//
+//    public String getShardNumber() {
+//        return shardNumber;
+//    }
+//
+//    public void setShardNumber(String shardNumber) {
+//        this.shardNumber = shardNumber;
+//    }
+//
+//    public String getArchitecture() {
+//        return architecture;
+//    }
+//
+//    public void setArchitecture(String architecture) {
+//        this.architecture = architecture;
+//    }
+//
+//    public String getSupportedNodeType() {
+//        return supportedNodeType;
+//    }
+//
+//    public void setSupportedNodeType(String supportedNodeType) {
+//        this.supportedNodeType = supportedNodeType;
+//    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("instanceId", instanceId)
+//                .append("seriesType", seriesType)
+//                .append("architecture", architecture)
+//                .append("shardNumber", shardNumber)
+//                .append("supportedNodeType", supportedNodeType)
+                .append("seed", seed)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("couponNo", couponNo)
+                .append("networkType", networkType)
+                .append("engineVersion", engineVersion)
+                .append("resourceGroupId", resourceGroupId)
+                .append("password", password)
+                .append("securityToken", securityToken)
+                .append("businessInfo", businessInfo)
+                .append("autoRenewPeriod", autoRenewPeriod)
+                .append("period", period)
+                .append("backupId", backupId)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("instanceName", instanceName)
+                .append("autoRenew", autoRenew)
+                .append("zoneId", zoneId)
+                .append("nodeType", nodeType)
+                .append("autoUseCoupon", autoUseCoupon)
+                .append("instanceClass", instanceClass)
+                .append("capacity", capacity)
+                .append("instanceType", instanceType)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("srcDBInstanceId", srcDBInstanceId)
+                .append("ownerAccount", ownerAccount)
+                .append("token", token)
+                .append("vpcId", vpcId)
+                .append("chargeType", chargeType)
+                .append("config", config)
+                .append("modifyMode", modifyMode)
+                .append("securityIps", securityIps)
+                .append("securityGroupId", securityGroupId)
+                .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (!StringUtils.isEmpty(chargeType)) {
+            final ChargeType type = EnumUtils.getEnumIgnoreCase(ChargeType.class, chargeType);
+            if (type == null) {
+                throw new PluginException("Invalid charge type");
+            }
+            chargeType = type.toString();
+        }
+
+        if (!StringUtils.isEmpty(securityIps)) {
+            securityIps = PluginStringUtils.removeSquareBracket(securityIps);
+        }
+
+        if (!StringUtils.isEmpty(securityGroupId)) {
+            securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
+        }
+
+        if (!StringUtils.isEmpty(zoneId)) {
+            String resultZoneId = zoneId;
+            final List<String> zoneIdList = PluginStringUtils.splitStringList(zoneId);
+            if (zoneIdList.size() == 1) {
+                // basic RDS category
+                if (!isValidBasicZoneId(zoneId)) {
+                    final String rawStr = zoneIdList.get(0);
+                    resultZoneId = removeMAZField(rawStr);
+                }
+            } else {
+                // other RDS categories
+                if (!isValidMAZZoneId(zoneId)) {
+                    resultZoneId = concatHighAvailableZoneId(zoneIdList);
+                }
+            }
+            zoneId = resultZoneId;
+        }
+    }
+
+
 }

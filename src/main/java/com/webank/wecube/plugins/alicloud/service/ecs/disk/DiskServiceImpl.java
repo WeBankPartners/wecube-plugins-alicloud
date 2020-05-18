@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.ecs.disk;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
+import com.google.common.collect.Lists;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
@@ -13,10 +14,10 @@ import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginObjectUtils;
-import com.webank.wecube.plugins.alicloud.utils.PluginResourceUtils;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,40 +28,35 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.webank.wecube.plugins.alicloud.service.ecs.disk.DiskScriptHelper.*;
+
 /**
  * @author howechen
  */
 @Service
 public class DiskServiceImpl implements DiskService {
 
-    private static Logger logger = LoggerFactory.getLogger(DiskService.class);
-
-    private static final String DISK_SCRIPT_PATH = "classpath:diskScript/";
-    private static final String MOUNT_SCRIPT_PATH = "classpath:diskScript/formatAndMountDisk.py";
-    private static final String MOUNT_SCRIPT_NAME = "formatAndMountDisk.py";
-    private static final String UNMOUNT_SCRIPT_PATH = "classpath:diskScript/unmountDisk.py";
-    private static final String UNMOUNT_SCRIPT_NAME = "unmountDisk.py";
-    private static final String UNFORMATTED_DISK_INFO_SCRIPT_PATH = "classpath:diskScript/getUnformatedDisk.py";
-    private static final String UNFORMATTED_DISK_INFO_SCRIPT_NAME = "getUnformatedDisk.py";
-    private static final String DEFAULT_REMOTE_DIRECTORY_PATH = "/tmp/";
+    private static final Logger logger = LoggerFactory.getLogger(DiskService.class);
 
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private VMService vmService;
-    private PluginScpClient pluginScpClient;
-    private PluginSshdClient pluginSshdClient;
-    private PasswordManager passwordManager;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final VMService vmService;
+    private final PluginScpClient pluginScpClient;
+    private final PluginSshdClient pluginSshdClient;
+    private final PasswordManager passwordManager;
+    private final DiskScriptHelper diskScriptHelper;
 
 
     @Autowired
-    public DiskServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, VMService vmService, PluginScpClient pluginScpClient, PluginSshdClient pluginSshdClient, PasswordManager passwordManager) {
+    public DiskServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, VMService vmService, PluginScpClient pluginScpClient, PluginSshdClient pluginSshdClient, PasswordManager passwordManager, DiskScriptHelper diskScriptHelper) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
         this.vmService = vmService;
         this.pluginScpClient = pluginScpClient;
         this.pluginSshdClient = pluginSshdClient;
         this.passwordManager = passwordManager;
+        this.diskScriptHelper = diskScriptHelper;
     }
 
     @Override
@@ -72,6 +68,8 @@ public class DiskServiceImpl implements DiskService {
             try {
 
                 dtoValidator.validate(requestDto);
+
+                logger.info("Creating and attaching disk: {}", requestDto.toString());
 
                 // check region id
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
@@ -99,9 +97,8 @@ public class DiskServiceImpl implements DiskService {
                 // if disk id is empty, create disk
                 // this toSdk() method would set instanceId to null due to the collision between zoneId and instanceId
                 final CreateDiskRequest createDiskRequest = requestDto.toSdk();
-                createDiskRequest.setRegionId(regionId);
                 CreateDiskResponse response;
-                response = this.acsClientStub.request(client, createDiskRequest);
+                response = this.acsClientStub.request(client, createDiskRequest, regionId);
                 result = result.fromSdk(response);
 
                 // setup a task to poll the the status of created disk until it is available
@@ -118,9 +115,13 @@ public class DiskServiceImpl implements DiskService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -138,14 +139,12 @@ public class DiskServiceImpl implements DiskService {
 
                 dtoValidator.validate(requestDto);
 
+                logger.info("Detaching and deleting disk: {}", requestDto.toString());
+
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-
-                if (StringUtils.isEmpty(requestDto.getDiskId())) {
-                    throw new PluginException("The disk id cannot be empty or null.");
-                }
 
                 final String diskId = requestDto.getDiskId();
                 final DescribeDisksResponse foundDiskInfo = this.retrieveDisk(client, regionId, diskId);
@@ -163,8 +162,7 @@ public class DiskServiceImpl implements DiskService {
                 // delete disk
                 logger.info("Deleting disk, disk ID: [{}], disk region:[{}]", diskId, regionId);
                 DeleteDiskRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                final DeleteDiskResponse response = this.acsClientStub.request(client, request);
+                final DeleteDiskResponse response = this.acsClientStub.request(client, request, regionId);
 
                 // re-check if disk has already been deleted
                 if (0 != this.retrieveDisk(client, regionId, diskId).getTotalCount()) {
@@ -178,9 +176,13 @@ public class DiskServiceImpl implements DiskService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -194,12 +196,17 @@ public class DiskServiceImpl implements DiskService {
         }
 
         final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
-        final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
+        final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         // scp diskScripts
-        final List<String> resourceAbsolutePathList = PluginResourceUtils.getResourceAbsolutePath(UNFORMATTED_DISK_INFO_SCRIPT_PATH, MOUNT_SCRIPT_PATH);
-        for (String resourceAbsolutePath : resourceAbsolutePathList) {
-            pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
+        @SuppressWarnings("unchecked") final ArrayList<Pair<String, byte[]>> nameToDataPairList = Lists.newArrayList(
+                diskScriptHelper.getUnFormattedDiskScriptPair(),
+                diskScriptHelper.getMountDiskScriptPair()
+        );
+        for (Pair<String, byte[]> nameToDataPair : nameToDataPairList) {
+            final String fileName = nameToDataPair.getKey();
+            final byte[] data = nameToDataPair.getValue();
+            pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, data, fileName, DEFAULT_REMOTE_DIRECTORY_PATH);
         }
 
         // ssh to host and execute the getUnformattedDiskInfo script
@@ -207,12 +214,11 @@ public class DiskServiceImpl implements DiskService {
 
         // attach disk request
         final AttachDiskRequest request = requestDto.toSdkCrossLineage(AttachDiskRequest.class);
-        request.setRegionId(regionId);
         if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
             throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
         }
 
-        this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
 
         // check if the disk is in use
         Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.IN_USE);
@@ -241,23 +247,24 @@ public class DiskServiceImpl implements DiskService {
 
 
         final String vmInstanceIp = vmService.getVMIpAddress(client, regionId, requestDto.getInstanceId());
-        final String password = passwordManager.decryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getHostPassword());
+        final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         final DetachDiskRequest request = requestDto.toSdkCrossLineage(DetachDiskRequest.class);
-        request.setRegionId(regionId);
 
         if (StringUtils.isAnyEmpty(request.getDiskId(), request.getInstanceId())) {
             throw new PluginException("Either disk ID or instance ID cannot be empty or null.");
         }
 
         // scp the unmount script to target server
-        final String resourceAbsolutePath = PluginResourceUtils.getResourceAbsolutePath(UNMOUNT_SCRIPT_PATH);
-        pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, resourceAbsolutePath, DEFAULT_REMOTE_DIRECTORY_PATH);
+        final Pair<String, byte[]> nameToDataPair = diskScriptHelper.getUnmountDiskScriptPair();
+        final String fileName = nameToDataPair.getKey();
+        final byte[] data = nameToDataPair.getValue();
+        pluginScpClient.put(vmInstanceIp, PluginScpClient.PORT, PluginScpClient.DEFAULT_USER, password, data, fileName, DEFAULT_REMOTE_DIRECTORY_PATH);
 
         // ssh to host and execute the unmount script
         unmountDisk(vmInstanceIp, password, requestDto.getVolumeName(), requestDto.getUnmountDir());
 
-        DetachDiskResponse response = this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
 
         // wait detaching process to finish
         Function<?, Boolean> func = o -> this.ifDiskInStatus(client, regionId, requestDto.getDiskId(), DiskStatus.AVAILABLE);
@@ -275,10 +282,9 @@ public class DiskServiceImpl implements DiskService {
 
         // create new request
         DescribeDisksRequest retrieveDiskRequest = new DescribeDisksRequest();
-        retrieveDiskRequest.setRegionId(regionId);
         retrieveDiskRequest.setDiskIds(PluginStringUtils.stringifyList(diskId));
         // send the request and handle the error, then return the response
-        return this.acsClientStub.request(client, retrieveDiskRequest);
+        return this.acsClientStub.request(client, retrieveDiskRequest, regionId);
     }
 
     @Override
@@ -302,7 +308,7 @@ public class DiskServiceImpl implements DiskService {
         String command = "python "
                 .concat(DEFAULT_REMOTE_DIRECTORY_PATH).concat(MOUNT_SCRIPT_NAME)
                 .concat(" -d ").concat(volumeName)
-                .concat(" -f ").concat(fileSystemType)
+                .concat(" -f ").concat(fileSystemType.toLowerCase())
                 .concat(" -m ").concat(mountDir);
         pluginSshdClient.runWithReturn(vmInstanceIp, PluginSshdClient.DEFAULT_USER, password, PluginSshdClient.PORT, command);
     }

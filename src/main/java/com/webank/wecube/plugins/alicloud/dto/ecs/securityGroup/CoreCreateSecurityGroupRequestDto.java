@@ -3,7 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup;
 import com.aliyuncs.ecs.model.v20140526.CreateSecurityGroupRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -15,6 +18,7 @@ public class CoreCreateSecurityGroupRequestDto extends CoreRequestInputDto imple
     private String resourceOwnerId;
     private String clientToken;
     private String description;
+    @NotEmpty(message = "securityGroupName field is mandatory")
     private String securityGroupName;
     private String resourceGroupId;
     private List<CreateSecurityGroupRequest.Tag> tags;
@@ -121,5 +125,24 @@ public class CoreCreateSecurityGroupRequestDto extends CoreRequestInputDto imple
 
     public void setVpcId(String vpcId) {
         this.vpcId = vpcId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("securityGroupId", securityGroupId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("securityGroupName", securityGroupName)
+                .append("resourceGroupId", resourceGroupId)
+                .append("tags", tags)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("securityGroupType", securityGroupType)
+                .append("vpcId", vpcId)
+                .toString();
     }
 }

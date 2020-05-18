@@ -3,6 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.cbn.cen;
 import com.aliyuncs.cbn.model.v20170912.DeleteCenRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -10,6 +14,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 public class CoreDeleteCenRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteCenRequest> {
     private String resourceOwnerId;
     private String resourceOwnerAccount;
+    @NotEmpty(message = "cenId field is mandatory")
     private String cenId;
     private String ownerAccount;
     private String ownerId;
@@ -55,5 +60,17 @@ public class CoreDeleteCenRequestDto extends CoreRequestInputDto implements Plug
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("cenId", cenId)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .toString();
     }
 }

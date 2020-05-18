@@ -11,6 +11,8 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
@@ -34,19 +36,20 @@ import java.util.stream.Collectors;
 @Service
 public class VMServiceImpl implements VMService {
 
-    private static final String VM_INSTANCE_PENDING = "Pending";
 
     private static final Logger logger = LoggerFactory.getLogger(VMService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private PasswordManager passwordManager;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final PasswordManager passwordManager;
+    private final ECSResourceSeeker ecsResourceSeeker;
 
     @Autowired
-    public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
+    public VMServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager, ECSResourceSeeker ecsResourceSeeker) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
         this.passwordManager = passwordManager;
+        this.ecsResourceSeeker = ecsResourceSeeker;
     }
 
     @Override
@@ -75,25 +78,27 @@ public class VMServiceImpl implements VMService {
                     }
                 }
 
-                if (StringUtils.isAnyEmpty(requestDto.getImageId(), requestDto.getInstanceType(), requestDto.getZoneId(), regionId)) {
-                    String msg = "Any of requested fields: ImageId, InstanceType, ZoneId, RegionId cannot be null or empty";
-                    logger.error(msg);
-                    throw new PluginException(msg);
-                }
-
                 // check password field, if empty, generate one
                 if (StringUtils.isEmpty(password)) {
                     password = passwordManager.generatePassword();
                     requestDto.setPassword(password);
                 }
 
+                // seek available resource when instanceType is not designated
+                SpecInfo fitSpec = new SpecInfo();
+                if (!StringUtils.isEmpty(requestDto.getInstanceSpec()) && StringUtils.isEmpty(requestDto.getInstanceType())) {
+                    fitSpec = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec(), requestDto.getInstanceFamily());
+                    requestDto.setInstanceType(fitSpec.getResourceClass());
+                }
+
 
                 // create VM instance
+                logger.info("Creating VM instance: {}", requestDto.toString());
+
                 final CreateInstanceRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
 
                 CreateInstanceResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
 
                 // wait till VM instance finish its create process
                 Function<?, Boolean> checkIfVMFinishCreation = o -> !this.checkIfVMInStatus(client, regionId, response.getInstanceId(), InstanceStatus.PENDING);
@@ -107,14 +112,17 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                result = result.fromSdk(response, encryptedPassword);
-
+                result = result.fromSdk(response, encryptedPassword, requestDto.getPrivateIpAddress(), fitSpec);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -133,11 +141,10 @@ public class VMServiceImpl implements VMService {
         logger.info(String.format("Retrieving VM instance info, region ID: [%s], VM instance ID: [%s]", regionId, instanceId));
 
         DescribeInstancesRequest request = new DescribeInstancesRequest();
-        request.setRegionId(regionId);
         request.setInstanceIds(PluginStringUtils.stringifyList(instanceId));
 
         DescribeInstancesResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
     }
 
@@ -156,11 +163,6 @@ public class VMServiceImpl implements VMService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String instanceId = requestDto.getInstanceId();
 
-                logger.info("Deleting VM instance, VM instance ID: [{}], VM instance region:[{}]", instanceId, regionId);
-                if (StringUtils.isEmpty(instanceId)) {
-                    throw new PluginException("The VM instance id cannot be empty or null.");
-                }
-
                 final DescribeInstancesResponse foundInstanceResponse = this.retrieveVM(client, regionId, instanceId);
 
                 // check if VM instance already deleted
@@ -170,10 +172,11 @@ public class VMServiceImpl implements VMService {
 
 
                 // delete VM instance
+                logger.info("Deleting VM instance: {}", requestDto.toString());
+
                 DeleteInstanceRequest deleteInstanceRequest = requestDto.toSdk();
-                deleteInstanceRequest.setRegionId(regionId);
                 DeleteInstanceResponse response;
-                response = this.acsClientStub.request(client, deleteInstanceRequest);
+                response = this.acsClientStub.request(client, deleteInstanceRequest, regionId);
 
 
                 // re-check if VM instance has already been deleted
@@ -186,9 +189,13 @@ public class VMServiceImpl implements VMService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -212,10 +219,11 @@ public class VMServiceImpl implements VMService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+                logger.info("Starting VM instance: {}", requestDto.toString());
+
                 final StartInstanceRequest startInstanceRequest = requestDto.toSdk();
-                startInstanceRequest.setRegionId(regionId);
                 StartInstanceResponse response;
-                response = this.acsClientStub.request(client, startInstanceRequest);
+                response = this.acsClientStub.request(client, startInstanceRequest, regionId);
 
                 Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, requestDto.getInstanceId(), InstanceStatus.RUNNING);
                 PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
@@ -225,9 +233,13 @@ public class VMServiceImpl implements VMService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -248,11 +260,12 @@ public class VMServiceImpl implements VMService {
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
 
+                logger.info("Stopping VM instance: {}", requestDto.toString());
+
                 final StopInstanceRequest stopInstanceRequest = requestDto.toSdk();
-                stopInstanceRequest.setRegionId(regionId);
 
                 StopInstanceResponse response;
-                response = this.acsClientStub.request(client, stopInstanceRequest);
+                response = this.acsClientStub.request(client, stopInstanceRequest, regionId);
 
                 Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, requestDto.getInstanceId(), InstanceStatus.STOPPED);
                 PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
@@ -261,9 +274,13 @@ public class VMServiceImpl implements VMService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -272,10 +289,10 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public List<CoreBindSecurityGroupResponseDto> bindSecurityGroup(List<CoreBindSecurityGroupRequestDto> coreBindSecurityGroupRequestDtoList) throws PluginException {
-        List<CoreBindSecurityGroupResponseDto> resultList = new ArrayList<>();
-        for (CoreBindSecurityGroupRequestDto requestDto : coreBindSecurityGroupRequestDtoList) {
-            CoreBindSecurityGroupResponseDto result = new CoreBindSecurityGroupResponseDto();
+    public List<CoreModifyInstanceAttributeResponesDto> bindSecurityGroup(List<CoreModifyInstanceAttributeRequestDto> coreModifyInstanceAttributeRequestDtoList) throws PluginException {
+        List<CoreModifyInstanceAttributeResponesDto> resultList = new ArrayList<>();
+        for (CoreModifyInstanceAttributeRequestDto requestDto : coreModifyInstanceAttributeRequestDtoList) {
+            CoreModifyInstanceAttributeResponesDto result = new CoreModifyInstanceAttributeResponesDto();
 
             try {
 
@@ -285,7 +302,7 @@ public class VMServiceImpl implements VMService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String securityGroupId = requestDto.getSecurityGroupId();
+                final List<String> securityGroupIdList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
                 final String instanceId = requestDto.getInstanceId();
 
                 final DescribeInstancesResponse retrieveVMResponse = this.retrieveVM(client, regionId, instanceId);
@@ -297,23 +314,88 @@ public class VMServiceImpl implements VMService {
 
                 final DescribeInstancesResponse.Instance foundInstance = retrieveVMResponse.getInstances().get(0);
                 List<String> currentSecurityGroupIdList = foundInstance.getSecurityGroupIds();
-                currentSecurityGroupIdList.add(securityGroupId);
+                currentSecurityGroupIdList.addAll(securityGroupIdList);
                 currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
 
+                logger.info("Binding security group with VM instance: {}", requestDto.toString());
+
                 ModifyInstanceAttributeRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 request.setSecurityGroupIdss(currentSecurityGroupIdList);
 
                 ModifyInstanceAttributeResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifyInstanceAttributeResponesDto> unbindSecurityGroup(List<CoreModifyInstanceAttributeRequestDto> coreModifyInstanceAttributeRequestDtoList) {
+        List<CoreModifyInstanceAttributeResponesDto> resultList = new ArrayList<>();
+        for (CoreModifyInstanceAttributeRequestDto requestDto : coreModifyInstanceAttributeRequestDtoList) {
+            CoreModifyInstanceAttributeResponesDto result = new CoreModifyInstanceAttributeResponesDto();
+
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = cloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final List<String> securityGroupIdList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                final String instanceId = requestDto.getInstanceId();
+
+                final DescribeInstancesResponse retrieveVMResponse = this.retrieveVM(client, regionId, instanceId);
+                if (0 == retrieveVMResponse.getTotalCount()) {
+                    String msg = String.format("Cannot retrieve instance info according to given regionId: [%s] and instanceId: [%s]", regionId, instanceId);
+                    logger.error(msg);
+                    throw new PluginException(msg);
+                }
+
+                // current list - target list
+                final DescribeInstancesResponse.Instance foundInstance = retrieveVMResponse.getInstances().get(0);
+                List<String> currentSecurityGroupIdList = foundInstance.getSecurityGroupIds();
+                currentSecurityGroupIdList.removeAll(securityGroupIdList);
+                if (currentSecurityGroupIdList.isEmpty()) {
+                    throw new PluginException("At least one security group should be remained.");
+                }
+                currentSecurityGroupIdList = currentSecurityGroupIdList.stream().distinct().collect(Collectors.toList());
+
+                logger.info("Unbinding security group with VM instance: {}", requestDto.toString());
+
+                ModifyInstanceAttributeRequest request = requestDto.toSdk();
+                request.setSecurityGroupIdss(currentSecurityGroupIdList);
+
+                ModifyInstanceAttributeResponse response;
+                response = this.acsClientStub.request(client, request, regionId);
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -329,12 +411,13 @@ public class VMServiceImpl implements VMService {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
 
+        logger.info("Retrieve if VM: [{}] instance in status: [{}]...", instanceId, status.getStatus());
+
         DescribeInstanceStatusRequest request = new DescribeInstanceStatusRequest();
-        request.setRegionId("cn-shanghai");
         request.setInstanceIds(Collections.singletonList(instanceId));
 
         DescribeInstanceStatusResponse foundInstance;
-        foundInstance = this.acsClientStub.request(client, request);
+        foundInstance = this.acsClientStub.request(client, request, regionId);
 
         final Optional<DescribeInstanceStatusResponse.InstanceStatus> first = foundInstance.getInstanceStatuses().stream().filter(instance -> StringUtils.equals(instanceId, instance.getInstanceId())).findFirst();
 
@@ -349,11 +432,12 @@ public class VMServiceImpl implements VMService {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
 
+        logger.info("Starting VM instance...");
+
         StartInstanceRequest request = new StartInstanceRequest();
-        request.setRegionId(regionId);
         request.setInstanceId(instanceId);
 
-        this.acsClientStub.request(client, request);
+        this.acsClientStub.request(client, request, regionId);
 
         Function<?, Boolean> checkIfVMFinishCreation = o -> this.checkIfVMInStatus(client, regionId, instanceId, InstanceStatus.RUNNING);
         PluginTimer.runTask(new PluginTimerTask(checkIfVMFinishCreation));
@@ -391,6 +475,4 @@ public class VMServiceImpl implements VMService {
         final DescribeInstancesResponse describeInstancesResponse = this.retrieveVM(client, regionId, instanceId);
         return describeInstancesResponse.getTotalCount() == 0;
     }
-
-
 }

@@ -3,18 +3,24 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.eip;
 import com.aliyuncs.vpc.model.v20160428.UnassociateEipAddressRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
  */
 public class CoreUnAssociateEipRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<UnassociateEipAddressRequest> {
     private String resourceOwnerId;
+    @NotEmpty(message = "allocationId is mandatory")
     private String allocationId;
     private String instanceType;
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
     private String privateIpAddress;
+    @NotEmpty(message = "instanceId is mandatory")
     private String instanceId;
     private String force;
 
@@ -91,5 +97,21 @@ public class CoreUnAssociateEipRequestDto extends CoreRequestInputDto implements
 
     public void setForce(String force) {
         this.force = force;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("allocationId", allocationId)
+                .append("instanceType", instanceType)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("instanceId", instanceId)
+                .append("force", force)
+                .toString();
     }
 }

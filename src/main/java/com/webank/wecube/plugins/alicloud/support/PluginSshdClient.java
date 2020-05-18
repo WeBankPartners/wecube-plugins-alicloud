@@ -6,7 +6,6 @@ import com.webank.wecube.plugins.alicloud.support.ssh2.RemoteCommand;
 import com.webank.wecube.plugins.alicloud.support.ssh2.RemoteCommandExecutorConfig;
 import com.webank.wecube.plugins.alicloud.support.ssh2.impl.PooledRemoteCommandExecutor;
 import com.webank.wecube.plugins.alicloud.support.ssh2.impl.SimpleRemoteCommand;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,27 +21,9 @@ public class PluginSshdClient {
     private static final Logger logger = LoggerFactory.getLogger(PluginSshdClient.class);
 
 
-    public String run(String host, String user, String password, Integer port, String command)
+    public void run(String host, String user, String password, Integer port, String command)
             throws PluginException {
-        RemoteCommandExecutorConfig config = new RemoteCommandExecutorConfig();
-        config.setRemoteHost(host);
-        config.setUser(user);
-        config.setPsword(password);
-        config.setPort(port);
-
-        RemoteCommand cmd = new SimpleRemoteCommand(command);
-        PooledRemoteCommandExecutor executor = new PooledRemoteCommandExecutor();
-        executor.init(config);
-
-        String result;
-        try {
-            result = executor.execute(cmd);
-        } finally {
-            executor.destroy();
-        }
-
-        logger.info("result is: " + result);
-        return result;
+        runWithReturn(host, user, password, port, command);
     }
 
     public String runWithReturn(String host, String user, String password, Integer port, String command)
@@ -59,15 +40,12 @@ public class PluginSshdClient {
 
         String result;
         try {
+            logger.info("Sending command: [{}] to target machine: [{}]", command, host);
             result = executor.execute(cmd);
-            logger.info("result is: " + result);
-            if (StringUtils.isEmpty(result)) {
-                throw new PluginException("return is empty, please check !");
-            }
         } finally {
             executor.destroy();
         }
+        logger.info("result is: " + result);
         return result;
-
     }
 }

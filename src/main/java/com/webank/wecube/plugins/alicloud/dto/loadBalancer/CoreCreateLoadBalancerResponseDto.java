@@ -1,9 +1,10 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerResponse;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -102,5 +103,23 @@ public class CoreCreateLoadBalancerResponseDto extends CoreResponseOutputDto imp
 
     public void setAddressIPVersion(String addressIPVersion) {
         this.addressIPVersion = addressIPVersion;
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("loadBalancerId", loadBalancerId)
+                .append("resourceGroupId", resourceGroupId)
+                .append("address", address)
+                .append("loadBalancerName", loadBalancerName)
+                .append("vpcId", vpcId)
+                .append("vSwitchId", vSwitchId)
+                .append("networkType", networkType)
+                .append("orderId", orderId)
+                .append("addressIPVersion", addressIPVersion)
+                .toString();
     }
 }

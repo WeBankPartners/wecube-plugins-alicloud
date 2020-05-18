@@ -2,6 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.rds;
 
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.rds.model.v20140815.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
@@ -14,16 +15,21 @@ import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceRequest
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
-import com.webank.wecube.plugins.alicloud.service.redis.InstanceStatus;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
+import com.webank.wecube.plugins.alicloud.utils.PluginObjectUtils;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,31 +37,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
  */
 @Service
 public class RDSServiceImpl implements RDSService {
+    private static final String TOLERABLE_DB_NOT_FOUND_CODE = "InvalidDBInstanceId.NotFound";
 
-    private static Logger logger = LoggerFactory.getLogger(RDSService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RDSService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
-    private PasswordManager passwordManager;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
+    private final PasswordManager passwordManager;
+    private final RDSResourceSeeker rdsResourceSeeker;
 
     @Autowired
-    public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager) {
+    public RDSServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator, PasswordManager passwordManager, RDSResourceSeeker rdsResourceSeeker) {
         this.acsClientStub = acsClientStub;
         this.dtoValidator = dtoValidator;
         this.passwordManager = passwordManager;
+        this.rdsResourceSeeker = rdsResourceSeeker;
     }
 
     @Override
-    public List<CoreCreateDBInstanceResponseDto> createDB(List<CoreCreateDBInstanceRequestDto> requestDtoList) throws PluginException {
+    public List<CoreCreateDBInstanceResponseDto> createDB(List<CoreCreateDBInstanceRequestDto> requestDtoList) {
         List<CoreCreateDBInstanceResponseDto> resultList = new ArrayList<>();
         for (CoreCreateDBInstanceRequestDto requestDto : requestDtoList) {
 
@@ -69,25 +80,51 @@ public class RDSServiceImpl implements RDSService {
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final String regionId = cloudParamDto.getRegionId();
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                requestDto.adaptToAliCloud();
 
                 if (StringUtils.isNotEmpty(requestDto.getDBInstanceId())) {
                     final String instanceId = requestDto.getDBInstanceId();
-                    final DescribeDBInstancesResponse retrieveDBInstance = this.retrieveDBInstance(client, regionId, instanceId);
-                    if (1 == retrieveDBInstance.getTotalRecordCount()) {
-                        final DescribeDBInstancesResponse.DBInstance dbInstance = retrieveDBInstance.getItems().get(0);
-                        result = result.fromSdkCrossLineage(dbInstance);
-                        result.setRequestId(retrieveDBInstance.getRequestId());
-                        continue;
+                    DescribeDBInstancesResponse retrieveDBInstance;
+                    try {
+                        retrieveDBInstance = this.retrieveDBInstance(client, regionId, instanceId);
+                        if (!retrieveDBInstance.getItems().isEmpty()) {
+                            final DescribeDBInstancesResponse.DBInstance dbInstance = retrieveDBInstance.getItems().get(0);
+                            result = result.fromSdkCrossLineage(dbInstance);
+                            result.setRequestId(retrieveDBInstance.getRequestId());
+                            continue;
+                        }
+                    } catch (AliCloudException ex) {
+                        if (!TOLERABLE_DB_NOT_FOUND_CODE.equalsIgnoreCase(ex.getErrCode())) {
+                            throw ex;
+                        }
                     }
 
                 }
 
-                logger.info("Creating DB instance....");
+                // get Parameter group from current account
+                final String parameterGroupId = fetchParameterGroupId(client, regionId, requestDto.getEngine(), requestDto.getEngineVersion());
+                requestDto.setdBParamGroupId(parameterGroupId);
+
+                logger.info("Creating DB instance: {}", requestDto.toString());
+
+                // find available resource according to AliCloud's stock and return the result that match the wecube's dBInstanceSpec
+                SpecInfo foundSpecInfo = new SpecInfo();
+                if (!StringUtils.isEmpty(requestDto.getdBInstanceSpec()) && StringUtils.isEmpty(requestDto.getDBInstanceClass())) {
+                    foundSpecInfo = rdsResourceSeeker.findAvailableResource(client,
+                            requestDto.getEngine(),
+                            requestDto.getdBInstanceSpec(),
+                            regionId,
+                            requestDto.getZoneId(),
+                            requestDto.getEngineVersion(),
+                            requestDto.getPayType(),
+                            requestDto.getDBInstanceStorageType(),
+                            requestDto.getCategory());
+                    requestDto.setDBInstanceClass(foundSpecInfo.getResourceClass());
+                }
 
                 final CreateDBInstanceRequest createDBInstanceRequest = requestDto.toSdk();
-                createDBInstanceRequest.setRegionId(regionId);
                 CreateDBInstanceResponse response;
-                response = this.acsClientStub.request(client, createDBInstanceRequest);
+                response = this.acsClientStub.request(client, createDBInstanceRequest, regionId);
 
                 // set up Plugin Timer to check if the resource is not creating any more
                 final String createdDBInstanceId = response.getDBInstanceId();
@@ -104,33 +141,44 @@ public class RDSServiceImpl implements RDSService {
                     password = passwordManager.generateRDSPassword();
                     createAccountRequest.setAccountPassword(password);
                 }
-
                 final String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), password);
 
-                createAccountRequest.setRegionId(regionId);
                 createAccountRequest.setDBInstanceId(createdDBInstanceId);
-                createRDSAccount(client, createAccountRequest);
+                createRDSAccount(client, regionId, createAccountRequest);
+                func = o -> ifAccountIsAvailable(client, regionId, response.getDBInstanceId(), requestDto.getAccountName());
+                PluginTimer.runTask(new PluginTimerTask(func));
+
+                // bind security group to the created RDS instance
+                if (StringUtils.isNotEmpty(requestDto.getSecurityGroupId())) {
+                    bindSecurityGroupToInstance(client, regionId, requestDto.getSecurityGroupId(), response.getDBInstanceId());
+                }
+
+                // get instance's private ip address
+                final String dbInstancePrivateIpAddr = getDBInstancePrivateIpAddr(client, regionId, response.getDBInstanceId());
 
                 // return result
-                result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword);
+                result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword, foundSpecInfo);
+                result.setPrivateIpAddress(dbInstancePrivateIpAddr);
 
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
-
-
         }
         return resultList;
     }
 
     @Override
-    public List<CoreDeleteDBInstanceResponseDto> deleteDB(List<CoreDeleteDBInstanceRequestDto> requestDtoList) throws PluginException {
+    public List<CoreDeleteDBInstanceResponseDto> deleteDB(List<CoreDeleteDBInstanceRequestDto> requestDtoList) {
         List<CoreDeleteDBInstanceResponseDto> resultList = new ArrayList<>();
         for (CoreDeleteDBInstanceRequestDto requestDto : requestDtoList) {
 
@@ -147,10 +195,6 @@ public class RDSServiceImpl implements RDSService {
 
                 final String dbInstanceId = requestDto.getDBInstanceId();
 
-                if (StringUtils.isAnyEmpty(regionId, dbInstanceId)) {
-                    throw new PluginException("Either the regionId or dbInstanceID cannot be empty or null.");
-                }
-
                 DescribeDBInstancesResponse describeDBInstancesResponse = this.retrieveDBInstance(client, regionId, dbInstanceId);
                 if (0 == describeDBInstancesResponse.getTotalRecordCount()) {
                     logger.info("The given db instance has already been released...");
@@ -158,12 +202,11 @@ public class RDSServiceImpl implements RDSService {
                     continue;
                 }
 
-                logger.info("Deleting DB instance...");
+                logger.info("Deleting DB instance: {}", requestDto.toString());
 
                 final DeleteDBInstanceRequest deleteDBInstanceRequest = requestDto.toSdk();
-                deleteDBInstanceRequest.setRegionId(regionId);
                 DeleteDBInstanceResponse response;
-                response = this.acsClientStub.request(client, deleteDBInstanceRequest);
+                response = this.acsClientStub.request(client, deleteDBInstanceRequest, regionId);
 
 
                 // set up Plugin Timer to check if the resource has been deleted
@@ -175,9 +218,13 @@ public class RDSServiceImpl implements RDSService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -185,7 +232,7 @@ public class RDSServiceImpl implements RDSService {
     }
 
     @Override
-    public List<CoreModifySecurityIPsResponseDto> modifySecurityIPs(List<CoreModifySecurityIPsRequestDto> requestDtoList) throws PluginException {
+    public List<CoreModifySecurityIPsResponseDto> modifySecurityIPs(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
         List<CoreModifySecurityIPsResponseDto> resultList = new ArrayList<>();
         for (CoreModifySecurityIPsRequestDto requestDto : requestDtoList) {
 
@@ -199,24 +246,22 @@ public class RDSServiceImpl implements RDSService {
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
                 final String regionId = cloudParamDto.getRegionId();
 
+                logger.info("Modifying rds instance's security ip: {}", requestDto.toString());
 
-                if (StringUtils.isAnyEmpty(regionId, requestDto.getSecurityIps())) {
-                    throw new PluginException("Either regionId or security IP cannot be null or empty.");
-                }
-
-                final ModifySecurityIpsRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
-                ModifySecurityIpsResponse response;
-                response = this.acsClientStub.request(client, request);
+                ModifySecurityIpsResponse response = modifySecurityIps(requestDto, client, regionId);
 
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -224,7 +269,191 @@ public class RDSServiceImpl implements RDSService {
     }
 
     @Override
-    public List<CoreCreateBackupResponseDto> createBackup(List<CoreCreateBackupRequestDto> requestDtoList) throws PluginException {
+    public List<CoreModifySecurityIPsResponseDto> appendSecurityIps(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
+
+        List<CoreModifySecurityIPsResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityIPsRequestDto requestDto : requestDtoList) {
+
+            CoreModifySecurityIPsResponseDto result = new CoreModifySecurityIPsResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                final DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray foundDBInstance = queryDBInstance(requestDto.getdBInstanceId(), client, regionId);
+
+                // remove the exist element in new ip list
+                final List<String> currentIpList = Arrays.asList(foundDBInstance.getSecurityIPList().split(","));
+                final List<String> newIpList = PluginStringUtils.splitStringList(requestDto.getSecurityIps()).stream().distinct().collect(Collectors.toList());
+                newIpList.removeAll(currentIpList);
+                requestDto.setSecurityIps(PluginStringUtils.stringifyObjectList(newIpList));
+                requestDto.setModifyMode("Append");
+
+                final ModifySecurityIpsResponse response = modifySecurityIps(requestDto, client, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifySecurityIPsResponseDto> deleteSecurityIps(List<CoreModifySecurityIPsRequestDto> requestDtoList) {
+        List<CoreModifySecurityIPsResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityIPsRequestDto requestDto : requestDtoList) {
+
+            CoreModifySecurityIPsResponseDto result = new CoreModifySecurityIPsResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                final DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray foundDBInstance = queryDBInstance(requestDto.getdBInstanceId(), client, regionId);
+
+                // retain the common eleement in two lists
+                final List<String> currentIpList = Arrays.asList(foundDBInstance.getSecurityIPList().split(","));
+                List<String> newIpList = PluginStringUtils.splitStringList(requestDto.getSecurityIps()).stream().distinct().collect(Collectors.toList());
+                // newIpList now is the intersection of both current ip list and request ip list
+                newIpList = currentIpList.stream().filter(newIpList::contains).collect(Collectors.toList());
+
+                if (newIpList.size() == currentIpList.size()) {
+                    // AliCloud doesn't allow delete all securityIps
+                    // set a default security ip as AliCloud officially do
+                    requestDto.setSecurityIps("127.0.0.1");
+                    requestDto.setModifyMode("Cover");
+                } else {
+                    requestDto.setSecurityIps(PluginStringUtils.stringifyObjectList(newIpList));
+                    requestDto.setModifyMode("Delete");
+                }
+
+
+                final ModifySecurityIpsResponse response = modifySecurityIps(requestDto, client, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifyDBSecurityGroupResponseDto> appendSecurityGroup(List<CoreModifyDBSecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifyDBSecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifyDBSecurityGroupRequestDto requestDto : requestDtoList) {
+
+            CoreModifyDBSecurityGroupResponseDto result = new CoreModifyDBSecurityGroupResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // append target security group list to current's
+                List<String> currentSGList = queryDBSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.addAll(targetSGList);
+                targetSGList = currentSGList.stream().distinct().collect(Collectors.toList());
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(targetSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifyDBSecurityGroupResponseDto> removeSecurityGroup(List<CoreModifyDBSecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifyDBSecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifyDBSecurityGroupRequestDto requestDto : requestDtoList) {
+
+            CoreModifyDBSecurityGroupResponseDto result = new CoreModifyDBSecurityGroupResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // remove target security group list from current's (with non-exist id removal)
+                List<String> currentSGList = queryDBSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.removeAll(targetSGList);
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(currentSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreCreateBackupResponseDto> createBackup(List<CoreCreateBackupRequestDto> requestDtoList) {
         List<CoreCreateBackupResponseDto> resultList = new ArrayList<>();
         for (CoreCreateBackupRequestDto requestDto : requestDtoList) {
 
@@ -253,17 +482,16 @@ public class RDSServiceImpl implements RDSService {
 
                 }
 
-                logger.info("Creating backup....");
+                logger.info("Creating backup: {}", requestDto.toString());
 
-                final CreateBackupRequest createDBInstanceRequest = requestDto.toSdk();
-                createDBInstanceRequest.setRegionId(regionId);
+                final CreateBackupRequest createBackupRequest = requestDto.toSdk();
                 CreateBackupResponse response;
-                response = this.acsClientStub.request(client, createDBInstanceRequest);
+                response = this.acsClientStub.request(client, createBackupRequest, regionId);
 
                 final String backupJobId = response.getBackupJobId();
 
                 // wait for the backup job to be finished
-                Function<?, Boolean> func = o -> this.ifBackupTaskInStatus(client, regionId, dbInstanceId, backupJobId, BackupStatus.FINISHED);
+                Function<?, Boolean> func = o -> ifBackupTaskInStatus(client, regionId, dbInstanceId, backupJobId, BackupStatus.FINISHED, BackupStatus.FAILED);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
                 // retrieve backup info according to the backup job id from the AliCloud
@@ -272,13 +500,22 @@ public class RDSServiceImpl implements RDSService {
 
                 result = result.fromSdkCrossLineage(backupJob);
                 result.setRequestId(response.getRequestId());
+                result.setBackupJobId(backupJobId);
+
+                if (StringUtils.equals(BackupStatus.FAILED.getStatus(), result.getBackupStatus())) {
+                    throw new PluginException("Backup job failed");
+                }
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -318,12 +555,11 @@ public class RDSServiceImpl implements RDSService {
                     logger.info("The backup has already been deleted...");
                 }
 
-                logger.info("Deleting backup...");
+                logger.info("Deleting backup: {}", requestDto.toString());
 
                 final DeleteBackupRequest deleteBackupRequest = requestDto.toSdk();
-                deleteBackupRequest.setRegionId(regionId);
                 deleteBackupRequest.setBackupId(backupId);
-                DeleteBackupResponse response = this.acsClientStub.request(client, deleteBackupRequest);
+                DeleteBackupResponse response = this.acsClientStub.request(client, deleteBackupRequest, regionId);
 
                 // setup a timer task to retrieve if the backup has been deleted
                 final String finalBackupId = backupId;
@@ -335,9 +571,13 @@ public class RDSServiceImpl implements RDSService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
 
@@ -352,11 +592,9 @@ public class RDSServiceImpl implements RDSService {
         }
 
         DescribeDBInstancesRequest request = new DescribeDBInstancesRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
 
-
-        final DescribeDBInstancesResponse response = this.acsClientStub.request(client, request);
+        final DescribeDBInstancesResponse response = this.acsClientStub.request(client, request, regionId);
 
         final Optional<DescribeDBInstancesResponse.DBInstance> foundDBInstanceOpt = response.getItems().stream().filter(dbInstance -> StringUtils.equals(dbInstanceId, dbInstance.getDBInstanceId())).findFirst();
 
@@ -367,19 +605,17 @@ public class RDSServiceImpl implements RDSService {
         return StringUtils.equals(status.getStatus(), dbInstance.getDBInstanceStatus());
     }
 
-    @Override
-    public Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus status) throws PluginException, AliCloudException {
+    public Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus... statusArray) throws PluginException, AliCloudException {
         if (StringUtils.isAnyEmpty(regionId, backupJobId)) {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
 
         DescribeBackupTasksRequest request = new DescribeBackupTasksRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
-        request.setBackupJobId(backupJobId);
+        request.setBackupJobId(Integer.valueOf(backupJobId));
 
 
-        final DescribeBackupTasksResponse response = this.acsClientStub.request(client, request);
+        final DescribeBackupTasksResponse response = this.acsClientStub.request(client, request, regionId);
 
         final Optional<DescribeBackupTasksResponse.BackupJob> foundBackupJobOpt = response.getItems().stream().filter(backupTask -> StringUtils.equals(backupJobId, backupTask.getBackupJobId())).findFirst();
 
@@ -387,22 +623,19 @@ public class RDSServiceImpl implements RDSService {
 
         final DescribeBackupTasksResponse.BackupJob backupJob = foundBackupJobOpt.get();
 
-        return StringUtils.equals(status.getStatus(), backupJob.getBackupStatus());
+        final List<String> statusList = Arrays.stream(statusArray).map(BackupStatus::getStatus).collect(Collectors.toList());
+
+        return statusList.contains(backupJob.getBackupStatus());
     }
 
-    @Override
-    public void createRDSAccount(IAcsClient client, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
+    public void createRDSAccount(IAcsClient client, String regionId, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
 
         logger.info("Creating RDS account...");
 
-        if (StringUtils.isEmpty(createAccountRequest.getRegionId())) {
-            throw new PluginException("The regionId cannot be null or empty.");
-        }
-
-        this.acsClientStub.request(client, createAccountRequest);
+        this.acsClientStub.request(client, createAccountRequest, regionId);
 
         // check if the account has been created
-        Function<?, Boolean> func = o -> ifRDSAccountCreated(client, createAccountRequest.getRegionId(), createAccountRequest.getAccountName(), createAccountRequest.getDBInstanceId());
+        Function<?, Boolean> func = o -> ifRDSAccountCreated(client, createAccountRequest.getSysRegionId(), createAccountRequest.getAccountName(), createAccountRequest.getDBInstanceId());
         PluginTimer.runTask(new PluginTimerTask(func));
     }
 
@@ -418,11 +651,10 @@ public class RDSServiceImpl implements RDSService {
         }
 
         DescribeAccountsRequest request = new DescribeAccountsRequest();
-        request.setRegionId(regionId);
         request.setAccountName(accountName);
         request.setDBInstanceId(dBInstanceId);
 
-        final DescribeAccountsResponse response = this.acsClientStub.request(client, request);
+        final DescribeAccountsResponse response = this.acsClientStub.request(client, request, regionId);
 
         final long count = response.getAccounts().stream().filter(dbInstanceAccount -> StringUtils.equals(accountName, dbInstanceAccount.getAccountName())).count();
 
@@ -476,7 +708,7 @@ public class RDSServiceImpl implements RDSService {
     private DescribeBackupTasksResponse.BackupJob retrieveBackupFromJobId(IAcsClient client, String dbInstanceId, String backupJobId) throws PluginException, AliCloudException {
         DescribeBackupTasksRequest retrieveTasksRequest = new DescribeBackupTasksRequest();
         retrieveTasksRequest.setDBInstanceId(dbInstanceId);
-        retrieveTasksRequest.setBackupJobId(backupJobId);
+        retrieveTasksRequest.setBackupJobId(Integer.valueOf(backupJobId));
         DescribeBackupTasksResponse retrieveTasksRepsonse;
         retrieveTasksRepsonse = this.acsClientStub.request(client, retrieveTasksRequest);
 
@@ -504,11 +736,10 @@ public class RDSServiceImpl implements RDSService {
         logger.info("Retrieving dbInstance info...");
 
         DescribeDBInstancesRequest request = new DescribeDBInstancesRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
 
         DescribeDBInstancesResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
     }
 
@@ -520,13 +751,167 @@ public class RDSServiceImpl implements RDSService {
         logger.info("Retrieving backup info...");
 
         DescribeBackupsRequest request = new DescribeBackupsRequest();
-        request.setRegionId(regionId);
         request.setDBInstanceId(dbInstanceId);
         request.setBackupId(backupId);
 
         DescribeBackupsResponse response;
-        response = this.acsClientStub.request(client, request);
+        response = this.acsClientStub.request(client, request, regionId);
         return response;
     }
 
+    /**
+     * Fetch parameter group id, if no parameter group found, then create one and return
+     *
+     * @param client   acsclient
+     * @param regionId regionId
+     * @return found parameter gropu id
+     * @throws PluginException   plugin exception
+     * @throws AliCloudException alicloud exception
+     */
+    private String fetchParameterGroupId(IAcsClient client, String regionId, String engine, String engineVersion) throws PluginException, AliCloudException {
+        final String presetGroupName = "rds" + "_" + engine + "_" + engineVersion;
+
+        DescribeParameterGroupsRequest request = new DescribeParameterGroupsRequest();
+
+        final DescribeParameterGroupsResponse response = acsClientStub.request(client, request, regionId);
+        final List<DescribeParameterGroupsResponse.ParameterGroup> groupList = response.getParameterGroups();
+        final List<String> foundId = groupList.stream().filter(parameterGroup -> StringUtils.equalsIgnoreCase(presetGroupName, parameterGroup.getParameterGroupName())).map(DescribeParameterGroupsResponse.ParameterGroup::getParameterGroupId).collect(Collectors.toList());
+
+        String result;
+        if (foundId.isEmpty()) {
+            // create new one
+            createParameterGroup(client, regionId, engine, engineVersion, presetGroupName);
+            return fetchParameterGroupId(client, regionId, engine, engineVersion);
+        } else {
+            result = foundId.get(0);
+        }
+        return result;
+    }
+
+    /**
+     * Create new parameter group
+     *
+     * @param client          acsclient
+     * @param regionId        regionId
+     * @param engine          engine name
+     * @param engineVersion   engine version
+     * @param presetGroupName preset group name
+     * @throws PluginException   plugin exception
+     * @throws AliCloudException alicloud exception
+     */
+    private void createParameterGroup(IAcsClient client, String regionId, String engine, String engineVersion, String presetGroupName) throws PluginException, AliCloudException {
+
+        CreateParameterGroupRequest request = new CreateParameterGroupRequest();
+        request.setEngine(engine.toLowerCase());
+        request.setEngineVersion(engineVersion);
+        request.setParameterGroupName(presetGroupName);
+        request.setParameters(PluginObjectUtils.mapObjectToJsonStr(new RdsParameterGroupTemplate()));
+
+        acsClientStub.request(client, request, regionId);
+    }
+
+    private void bindSecurityGroupToInstance(IAcsClient client, String regionId, String securityGroupId, String dbInstanceId) {
+        ModifySecurityGroupConfigurationRequest request = new ModifySecurityGroupConfigurationRequest();
+        request.setSecurityGroupId(securityGroupId);
+        request.setDBInstanceId(dbInstanceId);
+
+        acsClientStub.request(client, request, regionId);
+    }
+
+
+    private static class RdsParameterGroupTemplate {
+        @JsonProperty(value = "character_set_server")
+        private String characterSetServer = "utf8";
+
+        public RdsParameterGroupTemplate() {
+        }
+
+        public String getCharacterSetServer() {
+            return characterSetServer;
+        }
+
+        public void setCharacterSetServer(String characterSetServer) {
+            this.characterSetServer = characterSetServer;
+        }
+    }
+
+
+    private ModifySecurityIpsResponse modifySecurityIps(CoreModifySecurityIPsRequestDto requestDto, IAcsClient client, String regionId) throws AliCloudException {
+        final ModifySecurityIpsRequest request = requestDto.toSdk();
+        ModifySecurityIpsResponse response;
+        response = this.acsClientStub.request(client, request, regionId);
+        return response;
+    }
+
+    private List<String> queryDBSecurityGroup(String dBInstanceId, IAcsClient client, String regionId) throws AliCloudException {
+        DescribeSecurityGroupConfigurationRequest request = new DescribeSecurityGroupConfigurationRequest();
+        request.setDBInstanceId(dBInstanceId);
+
+        final DescribeSecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+        return response.getItems().stream().map(DescribeSecurityGroupConfigurationResponse.EcsSecurityGroupRelation::getSecurityGroupId).collect(Collectors.toList());
+
+    }
+
+    private DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray queryDBInstance(String dBInstanceId, IAcsClient client, String regionId) throws PluginException, AliCloudException {
+        DescribeDBInstanceIPArrayListRequest queryRequest = new DescribeDBInstanceIPArrayListRequest();
+        queryRequest.setDBInstanceId(dBInstanceId);
+        final DescribeDBInstanceIPArrayListResponse queryResponse = acsClientStub.request(client, queryRequest, regionId);
+
+
+        if (queryResponse.getItems().isEmpty()) {
+            throw new PluginException(String.format("Cannot find dBInstance by given instanceId: [%s]", dBInstanceId));
+        }
+
+        return queryResponse.getItems().get(0);
+    }
+
+    private boolean ifAccountIsAvailable(IAcsClient client, String regionId, String dBInstanceId, String accountName) throws PluginException, AliCloudException {
+
+        logger.info("Querying account info to check the status...");
+
+        DescribeAccountsRequest request = new DescribeAccountsRequest();
+        request.setDBInstanceId(dBInstanceId);
+        request.setAccountName(accountName);
+
+        final DescribeAccountsResponse response = acsClientStub.request(client, request, regionId);
+
+        if (response.getAccounts().isEmpty()) {
+            throw new PluginException("Cannot find account info.");
+        }
+
+        final String currentStatus = response.getAccounts().get(0).getAccountStatus();
+
+        return StringUtils.equalsIgnoreCase(AccountStatus.Available.toString(), currentStatus);
+    }
+
+    private String getDBInstancePrivateIpAddr(IAcsClient client, String regionId, String dBInstanceId) throws PluginException, AliCloudException {
+
+        logger.info("Retrieving instance: [{}]'s private ip address.", dBInstanceId);
+
+        DescribeDBInstanceNetInfoRequest request = new DescribeDBInstanceNetInfoRequest();
+        request.setDBInstanceId(dBInstanceId);
+
+        final DescribeDBInstanceNetInfoResponse response = acsClientStub.request(client, request, regionId);
+
+        final List<String> privateIpAddrList = response.getDBInstanceNetInfos().stream()
+                .filter(dbInstanceNetInfo -> StringUtils.equals(DBInstanceIPType.Private.toString(), dbInstanceNetInfo.getIPType()))
+                .map(DescribeDBInstanceNetInfoResponse.DBInstanceNetInfo::getIPAddress)
+                .collect(Collectors.toList());
+
+        if (privateIpAddrList.isEmpty()) {
+            throw new PluginException("The resource doesn't have private ip");
+        }
+
+        return privateIpAddrList.get(0);
+
+    }
+
+    private enum DBInstanceIPType {
+        // inner
+        Inner,
+        // public
+        Public,
+        // private
+        Private
+    }
 }

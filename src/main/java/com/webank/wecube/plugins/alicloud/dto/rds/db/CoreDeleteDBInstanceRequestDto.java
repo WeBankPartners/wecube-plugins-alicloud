@@ -4,6 +4,10 @@ import com.aliyuncs.rds.model.v20140815.DeleteDBInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -13,6 +17,7 @@ public class CoreDeleteDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "dBInstanceId field is mandatory.")
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
 
@@ -58,4 +63,17 @@ public class CoreDeleteDBInstanceRequestDto extends CoreRequestInputDto implemen
     public void setDBInstanceId(String dBInstanceId) {
         this.dBInstanceId = dBInstanceId;
     }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("dBInstanceId", dBInstanceId)
+                .toString();
+    }
+
 }

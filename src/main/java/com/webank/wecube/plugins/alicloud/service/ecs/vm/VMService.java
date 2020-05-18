@@ -23,7 +23,9 @@ public interface VMService {
 
     List<CoreStopVMResponseDto> stopVM(List<CoreStopVMRequestDto> stopInstanceRequestList);
 
-    List<CoreBindSecurityGroupResponseDto> bindSecurityGroup(List<CoreBindSecurityGroupRequestDto> coreBindSecurityGroupRequestDtoList);
+    List<CoreModifyInstanceAttributeResponesDto> bindSecurityGroup(List<CoreModifyInstanceAttributeRequestDto> coreModifyInstanceAttributeRequestDtoList);
+
+    List<CoreModifyInstanceAttributeResponesDto> unbindSecurityGroup(List<CoreModifyInstanceAttributeRequestDto> coreModifyInstanceAttributeRequestDtoList);
 
     Boolean checkIfVMInStatus(IAcsClient client, String regionId, String instanceId, InstanceStatus status) throws PluginException, AliCloudException;
 

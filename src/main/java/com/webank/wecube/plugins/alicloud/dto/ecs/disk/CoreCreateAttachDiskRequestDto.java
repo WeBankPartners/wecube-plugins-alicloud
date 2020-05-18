@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
-import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 /**
@@ -32,10 +33,13 @@ public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implemen
     private String performanceLevel;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "instanceId field is mandatory")
     private String instanceId;
     private String storageSetId;
+    @NotEmpty(message = "size field is mandatory")
     private String size;
     private String encrypted;
+    @NotEmpty(message = "zoneId field is mandatory")
     private String zoneId;
     private String kMSKeyId;
 
@@ -43,10 +47,14 @@ public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implemen
     @NotEmpty(message = "Password field is mandatory.")
     @JsonProperty(value = "password")
     private String hostPassword;
+    @NotEmpty(message = "fileSystemType field is mandatory")
     private String fileSystemType;
+    @NotEmpty(message = "mountDir field is mandatory")
     private String mountDir;
     @NotEmpty(message = "Seed field is mandatory.")
     private String seed;
+    @NotEmpty(message = "instanceGuid field is mandatory")
+    private String instanceGuid;
 
     private String keyPairName;
     private String bootable;
@@ -296,6 +304,15 @@ public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implemen
         this.device = device;
     }
 
+
+    public String getInstanceGuid() {
+        return instanceGuid;
+    }
+
+    public void setInstanceGuid(String instanceGuid) {
+        this.instanceGuid = instanceGuid;
+    }
+
     @Override
     public CreateDiskRequest toSdk() {
         if (null != this.getZoneId()) {
@@ -304,4 +321,43 @@ public class CoreCreateAttachDiskRequestDto extends CoreRequestInputDto implemen
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.convertValue(this, CreateDiskRequest.class);
     }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("diskId", diskId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("snapshotId", snapshotId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("diskName", diskName)
+                .append("resourceGroupId", resourceGroupId)
+                .append("diskCategory", diskCategory)
+                .append("storageSetPartitionNumber", storageSetPartitionNumber)
+                .append("tags", tags)
+                .append("arns", arns)
+                .append("advancedFeatures", advancedFeatures)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("performanceLevel", performanceLevel)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("instanceId", instanceId)
+                .append("storageSetId", storageSetId)
+                .append("size", size)
+                .append("encrypted", encrypted)
+                .append("zoneId", zoneId)
+                .append("kMSKeyId", kMSKeyId)
+                .append("hostPassword", hostPassword)
+                .append("fileSystemType", fileSystemType)
+                .append("mountDir", mountDir)
+                .append("seed", seed)
+                .append("instanceGuid", instanceGuid)
+                .append("keyPairName", keyPairName)
+                .append("bootable", bootable)
+                .append("deleteWithInstance", deleteWithInstance)
+                .append("device", device)
+                .toString();
+    }
+
 }

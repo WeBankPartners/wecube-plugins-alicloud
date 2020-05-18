@@ -1,8 +1,13 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 
 import com.aliyuncs.vpc.model.v20160428.AssociateRouteTableRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -10,10 +15,13 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 public class CoreAssociateRouteTableRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<AssociateRouteTableRequest> {
     private String resourceOwnerId;
     private String clientToken;
+    @NotEmpty(message = "routeTableId field is mandatory.")
     private String routeTableId;
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "routeTableId field is mandatory.")
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
 
     public CoreAssociateRouteTableRequestDto() {
@@ -74,5 +82,19 @@ public class CoreAssociateRouteTableRequestDto extends CoreRequestInputDto imple
 
     public void setVSwitchId(String vSwitchId) {
         this.vSwitchId = vSwitchId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("routeTableId", routeTableId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .toString();
     }
 }

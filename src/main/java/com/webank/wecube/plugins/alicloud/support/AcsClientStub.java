@@ -10,6 +10,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AcsClientStub {
     private final static Logger logger = LoggerFactory.getLogger(AcsClientStub.class);
+    private static final int DEFAULT_TIMEOUT_IN_MILLISECONDS = 60000;
 
 
     public IAcsClient generateAcsClient(IdentityParamDto identityParamDto, CloudParamDto cloudParamDto) throws PluginException {
@@ -34,7 +36,9 @@ public class AcsClientStub {
                 identityParamDto.getAccessKeyId(),
                 identityParamDto.getSecret()
         );
-        defaultProfile.setLogger(logger);
+        if (logger.isDebugEnabled()) {
+            defaultProfile.setLogger(logger);
+        }
         return new DefaultAcsClient(defaultProfile);
     }
 
@@ -47,16 +51,23 @@ public class AcsClientStub {
     }
 
     public <T extends AcsResponse> T request(IAcsClient client, AcsRequest<T> request) throws AliCloudException {
+        request.setSysReadTimeout(DEFAULT_TIMEOUT_IN_MILLISECONDS);
         T response;
         try {
             response = client.getAcsResponse(request);
         } catch (ServerException serverEx) {
             logger.error("AliCloud server error! Error type: [{}], code: [{}], msg: [{}], description: [{}]", serverEx.getErrorType(), serverEx.getErrCode(), serverEx.getMessage(), serverEx.getErrorDescription());
-            throw new AliCloudException(String.format("AliCloud server error: [%s]", serverEx.getMessage()));
+            throw new AliCloudException(serverEx.getRequestId(), serverEx.getErrCode(), PluginStringUtils.formatStr(serverEx.getErrMsg()), serverEx.getErrorType(), serverEx.getErrorDescription());
         } catch (ClientException clientEx) {
             logger.error("AliCloud local client error! Error type: [{}], code: [{}], msg: [{}], description: [{}]", clientEx.getErrorType(), clientEx.getErrCode(), clientEx.getMessage(), clientEx.getErrorDescription());
-            throw new AliCloudException(String.format("AliCloud local client error: [%s]", clientEx.getMessage()));
+            throw new AliCloudException(clientEx.getRequestId(), clientEx.getErrCode(), PluginStringUtils.formatStr(clientEx.getErrMsg()), clientEx.getErrorType(), clientEx.getErrorDescription());
         }
         return response;
+    }
+
+
+    public <T extends AcsResponse> T request(IAcsClient client, AcsRequest<T> request, String regionId) throws AliCloudException {
+        request.setSysRegionId(regionId);
+        return request(client, request);
     }
 }

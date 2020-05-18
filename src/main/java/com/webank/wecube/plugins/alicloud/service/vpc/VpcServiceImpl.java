@@ -13,6 +13,8 @@ import com.webank.wecube.plugins.alicloud.dto.vpc.CoreDeleteVpcResponseDto;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -28,10 +33,10 @@ import java.util.List;
 @Service
 public class VpcServiceImpl implements VpcService {
 
-    private static Logger logger = LoggerFactory.getLogger(VpcService.class);
+    private static final Logger logger = LoggerFactory.getLogger(VpcService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator dtoValidator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator dtoValidator;
 
     @Autowired
     public VpcServiceImpl(AcsClientStub acsClientStub, DtoValidator dtoValidator) {
@@ -73,17 +78,24 @@ public class VpcServiceImpl implements VpcService {
 
                 // if vpc id is empty or cannot find VPC by given vpcId, create vpc
                 final CreateVpcRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 CreateVpcResponse response;
-                response = this.acsClientStub.request(client, request);
+                response = this.acsClientStub.request(client, request, regionId);
                 result = result.fromSdk(response);
+
+                // wait till vpc is available to be used
+                Function<?, Boolean> func = o -> ifVpcInStatus(client, regionId, response.getVpcId(), VpcStatus.Available);
+                PluginTimer.runTask(new PluginTimerTask(func));
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Create VPC result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -101,10 +113,9 @@ public class VpcServiceImpl implements VpcService {
 
         // create new request
         DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
-        describeVpcsRequest.setRegionId(regionId);
         describeVpcsRequest.setVpcId(vpcId);
         // send the request and handle the error, then return the response
-        return this.acsClientStub.request(client, describeVpcsRequest);
+        return this.acsClientStub.request(client, describeVpcsRequest, regionId);
     }
 
     @Override
@@ -146,12 +157,31 @@ public class VpcServiceImpl implements VpcService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Delete VPC result: {}", result.toString());
                 resultList.add(result);
             }
         }
         return resultList;
+    }
+
+    private boolean ifVpcInStatus(IAcsClient client, String regionId, String vpcId, VpcStatus... statusArray) throws PluginException, AliCloudException {
+
+        DescribeVpcsRequest request = new DescribeVpcsRequest();
+        request.setVpcId(vpcId);
+
+        final DescribeVpcsResponse response = acsClientStub.request(client, request, regionId);
+        if (response.getVpcs().isEmpty()) {
+            throw new PluginException(String.format("Cannot find VPC according to the given vpcId: [%s]", vpcId));
+        }
+
+        final List<String> statusList = Arrays.stream(statusArray).map(Enum::toString).collect(Collectors.toList());
+
+        return statusList.contains(response.getVpcs().get(0).getStatus());
     }
 }

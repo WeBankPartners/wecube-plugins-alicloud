@@ -4,6 +4,7 @@ import com.webank.wecube.plugins.alicloud.common.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.concurrent.*;
 
 /**
@@ -44,6 +45,11 @@ public interface PluginTimer {
             throw new PluginException(String.format("Encounter error while running the timer task. The error is: %s", e.getMessage()));
         } catch (TimeoutException e) {
             throw new PluginException("The request is timeout.");
+        } finally {
+            if (!scheduledFuture.isCancelled()) {
+                scheduledFuture.cancel(true);
+            }
+            service.shutdownNow();
         }
     }
 }

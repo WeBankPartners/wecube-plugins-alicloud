@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/vswitch")
 public class VSwitchController {
 
-    private VSwitchService vSwitchService;
+    private final VSwitchService vSwitchService;
 
     @Autowired
     public VSwitchController(VSwitchService vSwitchService) {
@@ -34,10 +34,24 @@ public class VSwitchController {
         return new CoreResponseDto<CoreCreateVSwitchResponseDto>().withErrorCheck(result);
     }
 
+    @PostMapping(path = "/create/route_table/bind")
+    @ResponseBody
+    public CoreResponseDto<CoreCreateVSwitchResponseDto> createVSwitchThenBindRouteTable(@RequestBody CoreRequestDto<CoreCreateVSwitchRequestDto> coreCreateVSwitchDtoCoreResponseDto) {
+        List<CoreCreateVSwitchResponseDto> result = this.vSwitchService.createVSwitchWithRouteTable(coreCreateVSwitchDtoCoreResponseDto.getInputs());
+        return new CoreResponseDto<CoreCreateVSwitchResponseDto>().withErrorCheck(result);
+    }
+
     @PostMapping(path = "delete")
     @ResponseBody
     public CoreResponseDto<CoreDeleteVSwitchResponseDto> deleteVSwitch(@RequestBody CoreRequestDto<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
         List<CoreDeleteVSwitchResponseDto> result = this.vSwitchService.deleteVSwitch(coreDeleteVSwitchRequestDto.getInputs());
+        return new CoreResponseDto<CoreDeleteVSwitchResponseDto>().withErrorCheck(result);
+    }
+
+    @PostMapping(path = "delete/route_table/unbind")
+    @ResponseBody
+    public CoreResponseDto<CoreDeleteVSwitchResponseDto> unbindRouteTableThenDeleteVSwitch(@RequestBody CoreRequestDto<CoreDeleteVSwitchRequestDto> coreDeleteVSwitchRequestDto) {
+        List<CoreDeleteVSwitchResponseDto> result = this.vSwitchService.deleteVSwitchWithRouteTable(coreDeleteVSwitchRequestDto.getInputs());
         return new CoreResponseDto<CoreDeleteVSwitchResponseDto>().withErrorCheck(result);
     }
 }

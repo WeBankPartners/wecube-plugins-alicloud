@@ -4,6 +4,8 @@ import com.aliyuncs.r_kvstore.model.v20150101.CreateInstanceResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -35,9 +37,10 @@ public class CoreCreateInstanceResponseDto extends CoreResponseOutputDto impleme
     private String vSwitchId;
     private String privateIpAddr;
 
-    public CoreCreateInstanceResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword) {
+    public CoreCreateInstanceResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String privateIpAddr) {
         final CoreCreateInstanceResponseDto result = this.fromSdk(response);
         result.setEncryptedPassword(encryptedPassword);
+        result.setPrivateIpAddr(privateIpAddr);
         return result;
     }
 
@@ -218,5 +221,35 @@ public class CoreCreateInstanceResponseDto extends CoreResponseOutputDto impleme
 
     public void setEncryptedPassword(String encryptedPassword) {
         this.encryptedPassword = encryptedPassword;
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("encryptedPassword", encryptedPassword)
+                .append("requestId", requestId)
+                .append("instanceId", instanceId)
+                .append("instanceName", instanceName)
+                .append("connectionDomain", connectionDomain)
+                .append("port", port)
+                .append("userName", userName)
+                .append("instanceStatus", instanceStatus)
+                .append("regionId", regionId)
+                .append("capacity", capacity)
+                .append("qPS", qPS)
+                .append("bandwidth", bandwidth)
+                .append("connections", connections)
+                .append("zoneId", zoneId)
+                .append("config", config)
+                .append("chargeType", chargeType)
+                .append("endTime", endTime)
+                .append("nodeType", nodeType)
+                .append("networkType", networkType)
+                .append("vpcId", vpcId)
+                .append("vSwitchId", vSwitchId)
+                .append("privateIpAddr", privateIpAddr)
+                .toString();
     }
 }

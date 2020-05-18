@@ -1,5 +1,8 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 /**
  * @author howechen
  */
@@ -28,6 +31,10 @@ public class CoreResponseOutputDto {
         this.errorMessage = errorMessage;
     }
 
+    public void setUnhandledErrorMessage(String errorMessage) {
+        this.errorMessage = "Plugin not properly handled error: " + errorMessage;
+    }
+
     public String getGuid() {
         return guid;
     }
@@ -42,5 +49,15 @@ public class CoreResponseOutputDto {
 
     public void setCallbackParameter(String callbackParameter) {
         this.callbackParameter = callbackParameter;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .append("errorCode", errorCode)
+                .append("errorMessage", errorMessage)
+                .append("guid", guid)
+                .append("callbackParameter", callbackParameter)
+                .toString();
     }
 }

@@ -108,5 +108,26 @@ public class PluginScpClient {
             connection.close();
         }
     }
+
+    public void put(String ip, Integer port, String user, String password, byte[] data, String remoteFileName, String remoteTargetDirectory) throws PluginException {
+        Connection connection = new Connection(ip, port);
+        try {
+            connection.connect();
+            boolean isConnected = connection.authenticateWithPassword(user, password);
+            if (isConnected) {
+                logger.info("Connection is OK");
+                SCPClient scpClient = connection.createSCPClient();
+                scpClient.put(data, remoteFileName, remoteTargetDirectory, "7777");
+            } else {
+                logger.info("User or password incorrect");
+                throw new PluginException("User or password incorrect");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new PluginException("Run 'scp' command meet error: " + e.getMessage());
+        } finally {
+            connection.close();
+        }
+    }
 }
 
