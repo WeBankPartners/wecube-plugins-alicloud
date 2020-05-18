@@ -15,7 +15,7 @@ public class PluginTimerTask implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(PluginTimerTask.class);
 
     private int DELAY_TIME = 5;
-    private Function<?, Boolean> func;
+    private final Function<?, Boolean> func;
 
 
     public PluginTimerTask(Function<?, Boolean> func, int delayTime) {
@@ -30,9 +30,11 @@ public class PluginTimerTask implements Runnable {
 
     @Override
     public void run() throws PluginException {
-        logger.info("Running plugin timer task.");
+        int times = 0;
+        logger.info(String.format("Running plugin timer task... Retry times: [%d]", times));
         while (!this.func.apply(null)) {
-            logger.info("Running plugin timer task.");
+            times += 1;
+            logger.info(String.format("Running plugin timer task... Retry times: [%d]", times));
 
             try {
                 TimeUnit.SECONDS.sleep(this.DELAY_TIME);

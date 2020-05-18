@@ -2,10 +2,21 @@ package com.webank.wecube.plugins.alicloud.dto.rds.db;
 
 import com.aliyuncs.rds.model.v20140815.CreateDBInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.rds.RDSCategory;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
+
+import static com.webank.wecube.plugins.alicloud.support.ZoneIdHelper.*;
 
 /**
  * @author howechen
@@ -14,6 +25,12 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     @JsonProperty("dBInstanceId")
     private String dBInstanceId;
+    @NotEmpty(message = "dBInstanceSpec field is mandatory.")
+    @JsonProperty("dBInstanceSpec")
+    private String dBInstanceSpec;
+
+    // security group config
+    private String securityGroupId;
 
     // RDS user management
     private String seed;
@@ -26,10 +43,13 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String ownerId;
     private String accountPassword;
 
+    private String dBParamGroupId;
     private String resourceOwnerId;
+    @NotEmpty(message = "dBInstanceStorage field is mandatory.")
     @JsonProperty("dBInstanceStorage")
     private String dBInstanceStorage;
     private String systemDBCharset;
+    @NotEmpty(message = "engineVersion field is mandatory.")
     private String engineVersion;
     private String targetDedicatedHostIdForMaster;
     @JsonProperty("dBInstanceDescription")
@@ -39,27 +59,37 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
     private String encryptionKey;
     @JsonProperty("dBInstanceClass")
     private String dBInstanceClass;
+    @NotEmpty(message = "securityIPList field is mandatory.")
+    @JsonProperty(value = "securityIPList")
     private String securityIPList;
+    @JsonProperty(value = "vSwitchId")
     private String vSwitchId;
     private String privateIpAddress;
     private String targetDedicatedHostIdForLog;
     private String autoRenew;
     private String roleARN;
     private String zoneId;
-    private String instanceNetworkType;
+    private String instanceNetworkType = "VPC";
     private String connectionMode;
     private String clientToken;
     private String targetDedicatedHostIdForSlave;
+    @NotEmpty(message = "engine field is mandatory.")
     private String engine;
+    @NotEmpty(message = "dBInstanceStorageType field is mandatory")
     @JsonProperty("dBInstanceStorageType")
     private String dBInstanceStorageType;
     private String dedicatedHostGroupId;
     @JsonProperty("dBInstanceNetType")
-    private String dBInstanceNetType;
+    private String dBInstanceNetType = "Intranet";
     private String usedTime;
+    @JsonProperty(value = "vpcId")
     private String vPCId;
     private String category;
+    @NotEmpty(message = "payType field is mandatory.")
     private String payType;
+    @NotEmpty(message = "dBIsIgnoreCase field is mandatory")
+    @JsonProperty(value = "dBIsIgnoreCase")
+    private String dBIsIgnoreCase;
 
     public CoreCreateDBInstanceRequestDto() {
     }
@@ -366,5 +396,136 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     public void setAccountPassword(String accountPassword) {
         this.accountPassword = accountPassword;
+    }
+
+    public String getDBIsIgnoreCase() {
+        return dBIsIgnoreCase;
+    }
+
+    public void setDBIsIgnoreCase(String dBIsIgnoreCase) {
+        this.dBIsIgnoreCase = dBIsIgnoreCase;
+    }
+
+    public String getdBInstanceSpec() {
+        return dBInstanceSpec;
+    }
+
+    public void setDBInstanceSpec(String dBInstanceSpec) {
+        this.dBInstanceSpec = dBInstanceSpec;
+    }
+
+    public String getDBParamGroupId() {
+        return dBParamGroupId;
+    }
+
+    public void setdBParamGroupId(String dBParamGroupId) {
+        this.dBParamGroupId = dBParamGroupId;
+    }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("dBInstanceId", dBInstanceId)
+                .append("dBInstanceSpec", dBInstanceSpec)
+                .append("securityGroupId", securityGroupId)
+                .append("seed", seed)
+                .append("accountType", accountType)
+                .append("accountDescription", accountDescription)
+                .append("accountName", accountName)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("accountPassword", accountPassword)
+                .append("dBParamGroupId", dBParamGroupId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("dBInstanceStorage", dBInstanceStorage)
+                .append("systemDBCharset", systemDBCharset)
+                .append("engineVersion", engineVersion)
+                .append("targetDedicatedHostIdForMaster", targetDedicatedHostIdForMaster)
+                .append("dBInstanceDescription", dBInstanceDescription)
+                .append("businessInfo", businessInfo)
+                .append("period", period)
+                .append("encryptionKey", encryptionKey)
+                .append("dBInstanceClass", dBInstanceClass)
+                .append("securityIPList", securityIPList)
+                .append("vSwitchId", vSwitchId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("targetDedicatedHostIdForLog", targetDedicatedHostIdForLog)
+                .append("autoRenew", autoRenew)
+                .append("roleARN", roleARN)
+                .append("zoneId", zoneId)
+                .append("instanceNetworkType", instanceNetworkType)
+                .append("connectionMode", connectionMode)
+                .append("clientToken", clientToken)
+                .append("targetDedicatedHostIdForSlave", targetDedicatedHostIdForSlave)
+                .append("engine", engine)
+                .append("dBInstanceStorageType", dBInstanceStorageType)
+                .append("dedicatedHostGroupId", dedicatedHostGroupId)
+                .append("dBInstanceNetType", dBInstanceNetType)
+                .append("usedTime", usedTime)
+                .append("vPCId", vPCId)
+                .append("category", category)
+                .append("payType", payType)
+                .append("dBIsIgnoreCase", dBIsIgnoreCase)
+                .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+
+        if (StringUtils.isNotEmpty(zoneId)) {
+            String resultZoneId = zoneId;
+            final List<String> strings = PluginStringUtils.splitStringList(zoneId);
+            if (StringUtils.equalsIgnoreCase(RDSCategory.Basic.toString(), category)) {
+                // basic RDS category
+                if (!isValidBasicZoneId(this.getZoneId())) {
+                    if (strings.size() != 1) {
+                        throw new PluginException("RDS basic category support one zone only.");
+                    } else {
+                        final String rawStr = strings.get(0);
+                        resultZoneId = removeMAZField(rawStr);
+                    }
+                }
+            } else {
+                // other RDS categories
+                if (!isValidMAZZoneId(this.getZoneId())) {
+                    resultZoneId = concatHighAvailableZoneId(strings);
+                }
+            }
+            zoneId = resultZoneId;
+        }
+
+        if (StringUtils.isNotEmpty(securityIPList) && PluginStringUtils.isListStr(securityIPList)) {
+            securityIPList = PluginStringUtils.removeSquareBracket(securityIPList);
+        }
+
+        if (StringUtils.isNotEmpty(engine)) {
+            final RDSResourceSeeker.RDSEngine engineType = EnumUtils.getEnumIgnoreCase(RDSResourceSeeker.RDSEngine.class, engine);
+            if (null == engineType) {
+                throw new PluginException("Invalid engine type.");
+            }
+            engine = engineType.getEngine();
+        }
+
+        if (StringUtils.isNotEmpty(payType)) {
+            payType = StringUtils.capitalize(payType.toLowerCase());
+        }
+
+        if (StringUtils.isNotEmpty(period)) {
+            period = StringUtils.capitalize(period.toLowerCase());
+        }
+
+        if (StringUtils.isNotEmpty(securityGroupId)) {
+            securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
+        }
     }
 }

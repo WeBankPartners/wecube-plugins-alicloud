@@ -3,6 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.cbn.cen;
 import com.aliyuncs.cbn.model.v20170912.CreateCenRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -18,6 +22,7 @@ public class CoreCreateCenRequestDto extends CoreRequestInputDto implements Plug
     private String ownerAccount;
     private String ownerId;
     private String protectionLevel;
+    @NotEmpty(message = "name field is mandatory")
     private String name;
 
     public CoreCreateCenRequestDto() {
@@ -93,5 +98,21 @@ public class CoreCreateCenRequestDto extends CoreRequestInputDto implements Plug
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("cenId", cenId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("protectionLevel", protectionLevel)
+                .append("name", name)
+                .toString();
     }
 }

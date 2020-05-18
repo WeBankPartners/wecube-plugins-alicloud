@@ -2,10 +2,7 @@ package com.webank.wecube.plugins.alicloud.service.redis;
 
 import com.aliyuncs.IAcsClient;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.redis.*;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 
 import java.util.List;
@@ -20,4 +17,8 @@ public interface RedisService {
     List<CoreDeleteInstanceResponseDto> deleteInstance(List<CoreDeleteInstanceRequestDto> coreDeleteInstanceRequestDtoList);
 
     Boolean ifRedisInStatus(IAcsClient client, String regionId, String instanceId, InstanceStatus status) throws PluginException, AliCloudException;
+
+    List<CoreModifySecurityGroupResponseDto> appendSecurityGroup(List<CoreModifySecurityGroupRequestDto> requestDtoList);
+
+    List<CoreModifySecurityGroupResponseDto> removeSecurityGroup(List<CoreModifySecurityGroupRequestDto> requestDtoList);
 }

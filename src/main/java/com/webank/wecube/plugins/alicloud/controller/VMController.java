@@ -54,8 +54,15 @@ public class VMController {
 
     @PostMapping(path = "/security-group/bind")
     @ResponseBody
-    public CoreResponseDto<CoreBindSecurityGroupResponseDto> bindSecurityGroup(@RequestBody CoreRequestDto<CoreBindSecurityGroupRequestDto> request) {
-        List<CoreBindSecurityGroupResponseDto> result = this.vmService.bindSecurityGroup(request.getInputs());
-        return new CoreResponseDto<CoreBindSecurityGroupResponseDto>().withErrorCheck(result);
+    public CoreResponseDto<CoreModifyInstanceAttributeResponesDto> bindSecurityGroup(@RequestBody CoreRequestDto<CoreModifyInstanceAttributeRequestDto> request) {
+        List<CoreModifyInstanceAttributeResponesDto> result = this.vmService.bindSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreModifyInstanceAttributeResponesDto>().withErrorCheck(result);
+    }
+
+    @PostMapping(path = "/security-group/unbind")
+    @ResponseBody
+    public CoreResponseDto<CoreModifyInstanceAttributeResponesDto> unbindSecurityGroup(@RequestBody CoreRequestDto<CoreModifyInstanceAttributeRequestDto> request) {
+        List<CoreModifyInstanceAttributeResponesDto> result = this.vmService.unbindSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreModifyInstanceAttributeResponesDto>().withErrorCheck(result);
     }
 }

@@ -3,7 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry;
 import com.aliyuncs.vpc.model.v20160428.CreateRouteEntryRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -13,10 +16,13 @@ public class CoreCreateRouteEntryRequestDto extends CoreRequestInputDto implemen
     private String resourceOwnerId;
     private String routeEntryName;
     private String clientToken;
+    @NotEmpty(message = "nextHopId field is mandatory")
     private String nextHopId;
     private String nextHopType;
+    @NotEmpty(message = "routeTableId field is mandatory")
     private String routeTableId;
     private String resourceOwnerAccount;
+    @NotEmpty(message = "destinationCidrBlock field is mandatory")
     private String destinationCidrBlock;
     private String ownerAccount;
     private String ownerId;
@@ -112,5 +118,23 @@ public class CoreCreateRouteEntryRequestDto extends CoreRequestInputDto implemen
 
     public void setNextHopLists(List<CreateRouteEntryRequest.NextHopList> nextHopLists) {
         this.nextHopLists = nextHopLists;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("routeEntryName", routeEntryName)
+                .append("clientToken", clientToken)
+                .append("nextHopId", nextHopId)
+                .append("nextHopType", nextHopType)
+                .append("routeTableId", routeTableId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("destinationCidrBlock", destinationCidrBlock)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("nextHopLists", nextHopLists)
+                .toString();
     }
 }

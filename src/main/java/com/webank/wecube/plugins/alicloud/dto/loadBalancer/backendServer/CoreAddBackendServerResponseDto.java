@@ -1,8 +1,11 @@
 package com.webank.wecube.plugins.alicloud.dto.loadBalancer.backendServer;
 
 import com.aliyuncs.slb.model.v20140515.CreateVServerGroupResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
 
@@ -12,6 +15,7 @@ import java.util.List;
 public class CoreAddBackendServerResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreAddBackendServerResponseDto, CreateVServerGroupResponse> {
 
     private String requestId;
+    @JsonProperty(value = "vServerGroupId")
     private String vServerGroupId;
     private List<CreateVServerGroupResponse.BackendServer> backendServers;
 
@@ -26,11 +30,11 @@ public class CoreAddBackendServerResponseDto extends CoreResponseOutputDto imple
         this.requestId = requestId;
     }
 
-    public String getVServerGroupId() {
+    public String getvServerGroupId() {
         return vServerGroupId;
     }
 
-    public void setVServerGroupId(String vServerGroupId) {
+    public void setvServerGroupId(String vServerGroupId) {
         this.vServerGroupId = vServerGroupId;
     }
 
@@ -40,5 +44,16 @@ public class CoreAddBackendServerResponseDto extends CoreResponseOutputDto imple
 
     public void setBackendServers(List<CreateVServerGroupResponse.BackendServer> backendServers) {
         this.backendServers = backendServers;
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("requestId", requestId)
+                .append("vServerGroupId", vServerGroupId)
+                .append("backendServers", backendServers)
+                .toString();
     }
 }

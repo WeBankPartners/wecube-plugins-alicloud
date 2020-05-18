@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,8 +33,8 @@ public class CenServiceImpl implements CenService {
 
     private static final Logger logger = LoggerFactory.getLogger(CenService.class);
 
-    private AcsClientStub acsClientStub;
-    private DtoValidator validator;
+    private final AcsClientStub acsClientStub;
+    private final DtoValidator validator;
 
     @Autowired
     public CenServiceImpl(AcsClientStub acsClientStub, DtoValidator validator) {
@@ -53,7 +54,6 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
 
                 final String cenId = requestDto.getCenId();
                 if (StringUtils.isNotEmpty(cenId)) {
@@ -69,19 +69,27 @@ public class CenServiceImpl implements CenService {
 
                 }
 
-                logger.info("Creating Cen...");
+                logger.info("Creating Cen: {}", requestDto.toString());
 
                 CreateCenRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 CreateCenResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
+
+                // wait till CEN is in active status
+                Function<?, Boolean> func = o -> ifCenInStatus(client, response.getCenId(), CenStatus.Active);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -101,7 +109,6 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
 
                 final String cenId = requestDto.getCenId();
                 if (StringUtils.isNotEmpty(cenId)) {
@@ -123,7 +130,7 @@ public class CenServiceImpl implements CenService {
                     detachAllChildInstances(client, cenId, childInstances);
                 }
 
-                logger.info("Deleting Cen...");
+                logger.info("Deleting Cen: {}", requestDto.toString());
 
                 final DeleteCenRequest deleteCenRequest = requestDto.toSdk();
                 final DeleteCenResponse response = this.acsClientStub.request(client, deleteCenRequest);
@@ -136,9 +143,13 @@ public class CenServiceImpl implements CenService {
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -172,21 +183,23 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
 
-                logger.info("Attaching Cen child instance...");
+                logger.info("Attaching Cen child instance: {}", requestDto.toString());
 
                 AttachCenChildInstanceRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 AttachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -206,22 +219,23 @@ public class CenServiceImpl implements CenService {
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
                 final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
                 final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
 
-
-                logger.info("Detaching Cen child instance...");
+                logger.info("Detaching Cen child instance: {}", requestDto.toString());
 
                 DetachCenChildInstanceRequest request = requestDto.toSdk();
-                request.setRegionId(regionId);
                 DetachCenChildInstanceResponse response = this.acsClientStub.request(client, request);
                 result = result.fromSdk(response);
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
             } finally {
                 result.setGuid(requestDto.getGuid());
                 result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
                 resultList.add(result);
             }
         }
@@ -263,5 +277,28 @@ public class CenServiceImpl implements CenService {
             ifCenDeleted = true;
         }
         return ifCenDeleted;
+    }
+
+    private boolean ifCenInStatus(IAcsClient client, String cenId, CenStatus... statusArray) {
+
+        DescribeCensRequest request = new DescribeCensRequest();
+
+        final DescribeCensResponse response = acsClientStub.request(client, request);
+        if (response.getCens().isEmpty()) {
+            throw new PluginException("Current account doesn't have any CENs");
+        }
+
+        final List<DescribeCensResponse.Cen> foundCenList = response.getCens()
+                .stream()
+                .filter(cen -> StringUtils.equals(cen.getCenId(), cenId))
+                .collect(Collectors.toList());
+
+        if (foundCenList.isEmpty()) {
+            throw new PluginException(String.format("Current account doesn't have CEN resource according to given CenID: [%s]", cenId));
+        }
+
+        final List<String> statusList = Arrays.stream(statusArray).map(Enum::toString).collect(Collectors.toList());
+
+        return statusList.contains(foundCenList.get(0).getStatus());
     }
 }

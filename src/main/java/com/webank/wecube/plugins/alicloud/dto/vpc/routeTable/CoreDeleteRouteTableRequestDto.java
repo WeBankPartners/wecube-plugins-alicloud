@@ -3,6 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.vpc.routeTable;
 import com.aliyuncs.vpc.model.v20160428.DeleteRouteTableRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -10,6 +14,7 @@ import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
 public class CoreDeleteRouteTableRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<DeleteRouteTableRequest> {
 
     private String resourceOwnerId;
+    @NotEmpty(message = "routeTableId field is mandatory.")
     private String routeTableId;
     private String resourceOwnerAccount;
     private String ownerAccount;
@@ -56,5 +61,17 @@ public class CoreDeleteRouteTableRequestDto extends CoreRequestInputDto implemen
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("routeTableId", routeTableId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .toString();
     }
 }

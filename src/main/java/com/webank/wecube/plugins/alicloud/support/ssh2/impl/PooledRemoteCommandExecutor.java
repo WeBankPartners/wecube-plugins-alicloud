@@ -4,7 +4,6 @@ import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
-
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.support.ssh2.PoolableRemoteCommandExecutor;
 import com.webank.wecube.plugins.alicloud.support.ssh2.RemoteCommand;
@@ -29,14 +28,15 @@ public class PooledRemoteCommandExecutor implements PoolableRemoteCommandExecuto
     private RemoteCommandExecutorConfig config;
 
     @Override
-    public String execute(RemoteCommand cmd) {
+    public String execute(RemoteCommand cmd) throws PluginException {
         Future<String> f = this.executor.submit(new PooledRemoteCommandTask(cmd));
 
         try {
             return f.get();
         } catch (InterruptedException | ExecutionException e1) {
-            LOGGER.error("execution error", e1);
-            return null;
+            String msg = String.format("Error while executing the given command: [%s], please check the code.", cmd.getCommand());
+            LOGGER.error(msg);
+            throw new PluginException(msg);
         }
     }
 

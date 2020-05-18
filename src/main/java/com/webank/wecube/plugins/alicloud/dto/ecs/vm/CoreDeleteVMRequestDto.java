@@ -3,6 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 import com.aliyuncs.ecs.model.v20140526.DeleteInstanceRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -13,6 +17,7 @@ public class CoreDeleteVMRequestDto extends CoreRequestInputDto implements Plugi
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "instanceId field is mandatory.")
     private String instanceId;
     private String force;
 
@@ -73,5 +78,19 @@ public class CoreDeleteVMRequestDto extends CoreRequestInputDto implements Plugi
 
     public void setForce(String force) {
         this.force = force;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("terminateSubscription", terminateSubscription)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("instanceId", instanceId)
+                .append("force", force)
+                .toString();
     }
 }

@@ -5,3 +5,5 @@ server:
 spring:
   banner:
     location: classpath:/banner.txt
+  jackson:
+    default-property-inclusion: non_null

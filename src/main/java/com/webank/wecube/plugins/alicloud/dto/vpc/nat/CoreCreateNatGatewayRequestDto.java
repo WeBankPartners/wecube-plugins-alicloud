@@ -1,9 +1,16 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 
 import com.aliyuncs.vpc.model.v20160428.CreateNatGatewayRequest;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.vpc.nat.InstanceChargeType;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -20,12 +27,13 @@ public class CoreCreateNatGatewayRequestDto extends CoreRequestInputDto implemen
     private String natType;
     private List<CreateNatGatewayRequest.BandwidthPackage> bandwidthPackages;
     private String instanceChargeType;
-    private String autoPay;
+    private String autoPay = "true";
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
     private String vSwitchId;
-    private String internetChargeType;
+    private String internetChargeType = "PayByTraffic";
+    @NotEmpty(message = "vpcId field is mandatory")
     private String vpcId;
     private String name;
     private String pricingCycle;
@@ -175,5 +183,45 @@ public class CoreCreateNatGatewayRequestDto extends CoreRequestInputDto implemen
 
     public void setPricingCycle(String pricingCycle) {
         this.pricingCycle = pricingCycle;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("natGatewayId", natGatewayId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("clientToken", clientToken)
+                .append("description", description)
+                .append("spec", spec)
+                .append("duration", duration)
+                .append("natType", natType)
+                .append("bandwidthPackages", bandwidthPackages)
+                .append("instanceChargeType", instanceChargeType)
+                .append("autoPay", autoPay)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("internetChargeType", internetChargeType)
+                .append("vpcId", vpcId)
+                .append("name", name)
+                .append("pricingCycle", pricingCycle)
+                .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (StringUtils.isNotEmpty(instanceChargeType)) {
+            final InstanceChargeType type = EnumUtils.getEnumIgnoreCase(InstanceChargeType.class, instanceChargeType);
+            if (type == null) {
+                throw new PluginException(String.format("Invalid instance charge type: [%s]", instanceChargeType));
+            }
+            instanceChargeType = type.toString();
+        }
+
+        if (StringUtils.isNotEmpty(pricingCycle)) {
+            pricingCycle = StringUtils.capitalize(pricingCycle.toLowerCase());
+        }
     }
 }

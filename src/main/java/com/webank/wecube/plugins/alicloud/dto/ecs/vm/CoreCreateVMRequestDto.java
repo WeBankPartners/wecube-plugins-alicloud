@@ -2,10 +2,19 @@ package com.webank.wecube.plugins.alicloud.dto.ecs.vm;
 
 import com.aliyuncs.ecs.model.v20140526.CreateInstanceRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.ecs.vm.InstanceChargeType;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,6 +23,11 @@ import java.util.List;
 public class CoreCreateVMRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateInstanceRequest> {
     @NotEmpty
     private String seed;
+
+    @NotEmpty(message = "instanceSpec field is mandatory.")
+    private String instanceSpec;
+    @NotEmpty(message = "instanceFamily field is mandatory")
+    private String instanceFamily;
 
     private String instanceId;
 
@@ -28,6 +42,7 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     private String password;
     private String storageSetPartitionNumber;
     private List<CreateInstanceRequest.Tag> tags;
+    private String resourceTag;
     private String autoRenewPeriod;
     private String nodeControllerId;
     private String period;
@@ -41,10 +56,12 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     private String instanceName;
     private String autoRenew;
     private String internetChargeType;
+    @NotEmpty(message = "zoneId field is mandatory.")
     private String zoneId;
     private String internetMaxBandwidthIn;
     private String useAdditionalService;
     private String affinity;
+    @NotEmpty(message = "imageId field is mandatory.")
     private String imageId;
     private String clientToken;
     private String vlanId;
@@ -550,4 +567,126 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
     public void setSeed(String seed) {
         this.seed = seed;
     }
+
+    public String getInstanceSpec() {
+        return instanceSpec;
+    }
+
+    public void setInstanceSpec(String instanceSpec) {
+        this.instanceSpec = instanceSpec;
+    }
+
+    public String getResourceTag() {
+        return resourceTag;
+    }
+
+    public void setResourceTag(String resourceTag) {
+        this.resourceTag = resourceTag;
+    }
+
+
+    public String getInstanceFamily() {
+        return instanceFamily;
+    }
+
+    public void setInstanceFamily(String instanceFamily) {
+        this.instanceFamily = instanceFamily;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("seed", seed)
+                .append("instanceSpec", instanceSpec)
+                .append("instanceFamily", instanceFamily)
+                .append("instanceId", instanceId)
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("hpcClusterId", hpcClusterId)
+                .append("securityEnhancementStrategy", securityEnhancementStrategy)
+                .append("keyPairName", keyPairName)
+                .append("spotPriceLimit", spotPriceLimit)
+                .append("deletionProtection", deletionProtection)
+                .append("resourceGroupId", resourceGroupId)
+                .append("hostName", hostName)
+                .append("password", password)
+                .append("storageSetPartitionNumber", storageSetPartitionNumber)
+                .append("tags", tags)
+                .append("resourceTag", resourceTag)
+                .append("autoRenewPeriod", autoRenewPeriod)
+                .append("nodeControllerId", nodeControllerId)
+                .append("period", period)
+                .append("dryRun", dryRun)
+                .append("ownerId", ownerId)
+                .append("vSwitchId", vSwitchId)
+                .append("privateIpAddress", privateIpAddress)
+                .append("spotStrategy", spotStrategy)
+                .append("periodUnit", periodUnit)
+                .append("instanceName", instanceName)
+                .append("autoRenew", autoRenew)
+                .append("internetChargeType", internetChargeType)
+                .append("zoneId", zoneId)
+                .append("internetMaxBandwidthIn", internetMaxBandwidthIn)
+                .append("useAdditionalService", useAdditionalService)
+                .append("affinity", affinity)
+                .append("imageId", imageId)
+                .append("clientToken", clientToken)
+                .append("vlanId", vlanId)
+                .append("spotInterruptionBehavior", spotInterruptionBehavior)
+                .append("ioOptimized", ioOptimized)
+                .append("securityGroupId", securityGroupId)
+                .append("internetMaxBandwidthOut", internetMaxBandwidthOut)
+                .append("description", description)
+                .append("systemDiskCategory", systemDiskCategory)
+                .append("systemDiskPerformanceLevel", systemDiskPerformanceLevel)
+                .append("userData", userData)
+                .append("passwordInherit", passwordInherit)
+                .append("instanceType", instanceType)
+                .append("arns", arns)
+                .append("instanceChargeType", instanceChargeType)
+                .append("deploymentSetId", deploymentSetId)
+                .append("innerIpAddress", innerIpAddress)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("tenancy", tenancy)
+                .append("systemDiskDiskName", systemDiskDiskName)
+                .append("ramRoleName", ramRoleName)
+                .append("dedicatedHostId", dedicatedHostId)
+                .append("clusterId", clusterId)
+                .append("creditSpecification", creditSpecification)
+                .append("spotDuration", spotDuration)
+                .append("dataDisks", dataDisks)
+                .append("storageSetId", storageSetId)
+                .append("systemDiskSize", systemDiskSize)
+                .append("systemDiskDescription", systemDiskDescription)
+                .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() {
+        if (StringUtils.isNotEmpty(this.getResourceTag())) {
+            final List<Pair<String, String>> pairs = PluginStringUtils.splitResourceTag(this.getResourceTag());
+            List<CreateInstanceRequest.Tag> tags = new ArrayList<>();
+            for (Pair<String, String> pair : pairs) {
+                final CreateInstanceRequest.Tag tag = new CreateInstanceRequest.Tag();
+                tag.setKey(pair.getKey());
+                tag.setValue(pair.getValue());
+                tags.add(tag);
+            }
+            this.setTags(tags);
+        }
+
+        if (StringUtils.isNotEmpty(instanceChargeType)) {
+            final InstanceChargeType type = EnumUtils.getEnumIgnoreCase(InstanceChargeType.class, instanceChargeType);
+            if (null == type) {
+                throw new PluginException("Invalid instance charge type");
+            }
+            instanceChargeType = type.toString();
+        }
+
+        if (StringUtils.isNotEmpty(periodUnit)) {
+            periodUnit = StringUtils.capitalize(periodUnit.toLowerCase());
+        }
+    }
+
 }

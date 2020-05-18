@@ -3,6 +3,7 @@ package com.webank.wecube.plugins.alicloud.support;
 import com.aliyuncs.AcsRequest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 
@@ -27,8 +28,15 @@ public interface PluginSdkBridge {
     static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz, boolean transLineage) throws PluginException {
         final T result;
         if (transLineage) {
-            ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            result = mapper.convertValue(requestDto, clazz);
+            ObjectMapper mapper = new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            try {
+                result = mapper.convertValue(requestDto, clazz);
+            } catch (IllegalArgumentException exception) {
+                throw new PluginException(exception.getMessage());
+            }
+
             try {
                 result.setActionName(clazz.newInstance().getActionName());
             } catch (IllegalAccessException | InstantiationException e) {
@@ -50,9 +58,15 @@ public interface PluginSdkBridge {
      * @return transferred result
      * @throws PluginException plugin exception
      */
-    static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(requestDto, clazz);
+    static <T extends AcsRequest<?>, K> T toSdk(K requestDto, Class<T> clazz) throws PluginException {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        try {
+            return mapper.convertValue(requestDto, clazz);
+        } catch (IllegalArgumentException exception) {
+            throw new PluginException(exception.getMessage());
+        }
     }
 
     /**
@@ -65,9 +79,14 @@ public interface PluginSdkBridge {
      * @return transferred result
      * @throws PluginException plugin exception
      */
-    static <T extends AcsRequest<?>, K> T toSdkStrict(K requestDto, Class<T> clazz) {
+    static <T extends AcsRequest<?>, K> T toSdkStrict(K requestDto, Class<T> clazz) throws PluginException {
         ObjectMapper mapper = new ObjectMapper();
-        final T result = mapper.convertValue(requestDto, clazz);
+        final T result;
+        try {
+            result = mapper.convertValue(requestDto, clazz);
+        } catch (IllegalArgumentException exception) {
+            throw new PluginException(exception.getMessage());
+        }
         try {
             result.setActionName(clazz.newInstance().getActionName());
         } catch (IllegalAccessException | InstantiationException e) {
@@ -85,14 +104,26 @@ public interface PluginSdkBridge {
      * @param <K>         SDK response  object
      * @return transferred result
      */
-    static <T, K> T fromSdk(K responseDto, Class<T> clazz) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(responseDto, clazz);
+    static <T, K> T fromSdk(K responseDto, Class<T> clazz) throws PluginException {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        try {
+            return mapper.convertValue(responseDto, clazz);
+        } catch (IllegalArgumentException exception) {
+            throw new PluginException(exception.getMessage());
+        }
     }
 
     static <T, K> List<T> fromSdkList(List<K> responseDtoList, Class<T> clazz) {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(responseDtoList, new TypeReference<List<T>>() {
-        });
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        try {
+            return mapper.convertValue(responseDtoList, new TypeReference<List<T>>() {
+            });
+        } catch (IllegalArgumentException exception) {
+            throw new PluginException(exception.getMessage());
+        }
     }
 }

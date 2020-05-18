@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class DtoValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(DtoValidator.class);
-    private Validator validator;
+    private final Validator validator;
 
     public DtoValidator() {
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -32,7 +32,7 @@ public class DtoValidator {
         final Set<ConstraintViolation<T>> validations = this.validator.validate(o);
         final List<String> validationStr = validations.stream().map(ConstraintViolation::getMessage).collect(Collectors.toList());
         if (!validationStr.isEmpty()) {
-            final String errorMsg = PluginStringUtils.stringifyList(validationStr);
+            final String errorMsg = PluginStringUtils.stringifyObjectList(validationStr);
             logger.error(errorMsg);
             throw new PluginException(errorMsg);
         }

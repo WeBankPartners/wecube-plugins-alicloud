@@ -1,20 +1,27 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc;
 
 import com.aliyuncs.vpc.model.v20160428.CreateVpcResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseOutputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkOutputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
  */
 public class CoreCreateVpcResponseDto extends CoreResponseOutputDto implements PluginSdkOutputBridge<CoreCreateVpcResponseDto, CreateVpcResponse> {
+    @JsonIgnore
     private String vRouterId;
+    @JsonIgnore
     private String cidrBlock;
+    @JsonIgnore
     private String vpcName;
-
+    @JsonIgnore
     private String requestId;
     private String vpcId;
     private String routeTableId;
+    @JsonIgnore
     private String resourceGroupId;
 
     public CoreCreateVpcResponseDto() {
@@ -74,5 +81,19 @@ public class CoreCreateVpcResponseDto extends CoreResponseOutputDto implements P
 
     public void setResourceGroupId(String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("vRouterId", vRouterId)
+                .append("cidrBlock", cidrBlock)
+                .append("vpcName", vpcName)
+                .append("requestId", requestId)
+                .append("vpcId", vpcId)
+                .append("routeTableId", routeTableId)
+                .append("resourceGroupId", resourceGroupId)
+                .toString();
     }
 }

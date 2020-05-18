@@ -3,6 +3,10 @@ package com.webank.wecube.plugins.alicloud.dto.redis;
 import com.aliyuncs.r_kvstore.model.v20150101.DeleteInstanceRequest;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author howechen
@@ -12,6 +16,7 @@ public class CoreDeleteInstanceRequestDto extends CoreRequestInputDto implements
     private String resourceOwnerAccount;
     private String ownerAccount;
     private String ownerId;
+    @NotEmpty(message = "instanceId field is mandatory.")
     private String instanceId;
     private String securityToken;
 
@@ -64,5 +69,18 @@ public class CoreDeleteInstanceRequestDto extends CoreRequestInputDto implements
 
     public void setSecurityToken(String securityToken) {
         this.securityToken = securityToken;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("instanceId", instanceId)
+                .append("securityToken", securityToken)
+                .toString();
     }
 }

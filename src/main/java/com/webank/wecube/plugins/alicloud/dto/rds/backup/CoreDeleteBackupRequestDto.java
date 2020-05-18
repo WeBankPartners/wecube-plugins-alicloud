@@ -4,6 +4,8 @@ import com.aliyuncs.rds.model.v20140815.DeleteBackupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author howechen
@@ -78,4 +80,19 @@ public class CoreDeleteBackupRequestDto extends CoreRequestInputDto implements P
     public void setBackupJobId(String backupJobId) {
         this.backupJobId = backupJobId;
     }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+                .appendSuper(super.toString())
+                .append("resourceOwnerId", resourceOwnerId)
+                .append("resourceOwnerAccount", resourceOwnerAccount)
+                .append("backupId", backupId)
+                .append("ownerAccount", ownerAccount)
+                .append("ownerId", ownerId)
+                .append("dBInstanceId", dBInstanceId)
+                .append("backupJobId", backupJobId)
+                .toString();
+    }
+
 }
