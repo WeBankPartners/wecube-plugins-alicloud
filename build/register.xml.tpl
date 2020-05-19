@@ -371,7 +371,7 @@
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">connectionString</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">port</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">privateIpAddress</parameter>
-                    <parameter datatype="string" sensitiveData="N"sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>

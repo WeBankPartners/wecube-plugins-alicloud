@@ -2845,7 +2845,6 @@ instanceId|string|Redis实例ID
 password|string|实例密码
 port|string|实例端口
 privateIpAddr|string|实例的内网IP地址
-connectionDomain|string|数据库连接地址
 
 ##### 示例：
 
@@ -2890,7 +2889,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/redis/create \
                 "guid": "0033_0000000001",
                 "instanceId": "r-t4nd94f0f7cf4bb4",
                 "port": "6379",
-                "privateIpAddr": "1024",
+                "privateIpAddr": "xx.xx.xx.xx",
                 "password": "{cipher_a}9b28cb58bd8aca2a1f0cef1ea58f6756"
             }
         ]
