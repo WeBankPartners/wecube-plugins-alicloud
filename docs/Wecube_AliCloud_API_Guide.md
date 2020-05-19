@@ -245,7 +245,6 @@ description|string|否|交换机的描述
 :--|:--|:--    
 guid|string|CI类型全局唯一ID
 vSwitchId|string|交换机实例ID
-routeTableId|string|交换机默认路由表ID
 
 ##### 示例：
 
