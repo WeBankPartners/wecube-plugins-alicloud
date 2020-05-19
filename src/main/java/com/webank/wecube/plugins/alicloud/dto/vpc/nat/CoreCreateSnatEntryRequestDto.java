@@ -1,8 +1,10 @@
 package com.webank.wecube.plugins.alicloud.dto.vpc.nat;
 
 import com.aliyuncs.vpc.model.v20160428.CreateSnatEntryRequest;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -146,5 +148,12 @@ public class CoreCreateSnatEntryRequestDto extends CoreRequestInputDto implement
                 .append("ownerId", ownerId)
                 .append("snatEntryName", snatEntryName)
                 .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (StringUtils.isNotEmpty(sourceVSwitchId)) {
+            sourceCIDR = null;
+        }
     }
 }
