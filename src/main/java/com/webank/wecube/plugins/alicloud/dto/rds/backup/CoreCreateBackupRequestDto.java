@@ -2,8 +2,11 @@ package com.webank.wecube.plugins.alicloud.dto.rds.backup;
 
 import com.aliyuncs.rds.model.v20140815.CreateBackupRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -95,4 +98,10 @@ public class CoreCreateBackupRequestDto extends CoreRequestInputDto implements P
                 .toString();
     }
 
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (StringUtils.isNotEmpty(dBName)) {
+            dBName = PluginStringUtils.removeSquareBracket(dBName);
+        }
+    }
 }

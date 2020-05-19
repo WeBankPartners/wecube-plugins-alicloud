@@ -11,6 +11,8 @@ import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceRequest
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
 import com.webank.wecube.plugins.alicloud.service.rds.RDSService;
@@ -26,7 +28,7 @@ import java.util.List;
 @RequestMapping(ApplicationConstants.ApiInfo.URL_PREFIX + "/rds")
 public class RDSController {
 
-    private RDSService rdsServcie;
+    private final RDSService rdsServcie;
 
     @Autowired
     public RDSController(RDSService rdsServcie) {
@@ -45,6 +47,20 @@ public class RDSController {
     public CoreResponseDto<CoreDeleteDBInstanceResponseDto> deleteDB(@RequestBody CoreRequestDto<CoreDeleteDBInstanceRequestDto> request) {
         List<CoreDeleteDBInstanceResponseDto> result = this.rdsServcie.deleteDB(request.getInputs());
         return new CoreResponseDto<CoreDeleteDBInstanceResponseDto>().withErrorCheck(result);
+    }
+
+    @PostMapping(path = "/security_group/append")
+    @ResponseBody
+    public CoreResponseDto<CoreModifyDBSecurityGroupResponseDto> appendSecurityGroup(@RequestBody CoreRequestDto<CoreModifyDBSecurityGroupRequestDto> request) {
+        List<CoreModifyDBSecurityGroupResponseDto> result = this.rdsServcie.appendSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreModifyDBSecurityGroupResponseDto>().withErrorCheck(result);
+    }
+
+    @PostMapping(path = "/security_group/remove")
+    @ResponseBody
+    public CoreResponseDto<CoreModifyDBSecurityGroupResponseDto> removeSecurityGroup(@RequestBody CoreRequestDto<CoreModifyDBSecurityGroupRequestDto> request) {
+        List<CoreModifyDBSecurityGroupResponseDto> result = this.rdsServcie.removeSecurityGroup(request.getInputs());
+        return new CoreResponseDto<CoreModifyDBSecurityGroupResponseDto>().withErrorCheck(result);
     }
 
     @PostMapping(path = "/security_ip/modify")

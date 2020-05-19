@@ -38,7 +38,7 @@ public interface PluginSdkBridge {
             }
 
             try {
-                result.setActionName(clazz.newInstance().getActionName());
+                result.setSysActionName(clazz.newInstance().getSysActionName());
             } catch (IllegalAccessException | InstantiationException e) {
                 throw new PluginException(e.getMessage());
             }
@@ -88,7 +88,7 @@ public interface PluginSdkBridge {
             throw new PluginException(exception.getMessage());
         }
         try {
-            result.setActionName(clazz.newInstance().getActionName());
+            result.setSysActionName(clazz.newInstance().getSysActionName());
         } catch (IllegalAccessException | InstantiationException e) {
             throw new PluginException(e.getMessage());
         }

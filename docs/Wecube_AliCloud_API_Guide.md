@@ -2846,7 +2846,7 @@ instanceId|string|Redis实例ID
 password|string|实例密码
 port|string|实例端口
 privateIpAddr|string|实例的内网IP地址
-connectionDomain|string|
+connectionDomain|string|数据库连接地址
 
 ##### 示例：
 

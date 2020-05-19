@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
-import com.webank.wecube.plugins.alicloud.service.rds.RDSCategory;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -14,9 +13,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
-
-import static com.webank.wecube.plugins.alicloud.support.ZoneIdHelper.*;
 
 /**
  * @author howechen
@@ -481,28 +477,6 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
     @Override
     public void adaptToAliCloud() throws PluginException {
-
-        if (StringUtils.isNotEmpty(zoneId)) {
-            String resultZoneId = zoneId;
-            final List<String> strings = PluginStringUtils.splitStringList(zoneId);
-            if (StringUtils.equalsIgnoreCase(RDSCategory.Basic.toString(), category)) {
-                // basic RDS category
-                if (!isValidBasicZoneId(this.getZoneId())) {
-                    if (strings.size() != 1) {
-                        throw new PluginException("RDS basic category support one zone only.");
-                    } else {
-                        final String rawStr = strings.get(0);
-                        resultZoneId = removeMAZField(rawStr);
-                    }
-                }
-            } else {
-                // other RDS categories
-                if (!isValidMAZZoneId(this.getZoneId())) {
-                    resultZoneId = concatHighAvailableZoneId(strings);
-                }
-            }
-            zoneId = resultZoneId;
-        }
 
         if (StringUtils.isNotEmpty(securityIPList) && PluginStringUtils.isListStr(securityIPList)) {
             securityIPList = PluginStringUtils.removeSquareBracket(securityIPList);

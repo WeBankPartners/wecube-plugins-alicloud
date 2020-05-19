@@ -3,9 +3,9 @@ package com.webank.wecube.plugins.alicloud.service.vpc.vswitch;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreCreateVSwitchResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.vswitch.CoreDeleteVSwitchRequestDto;
@@ -137,16 +137,29 @@ public class VSwitchServiceImpl implements VSwitchService {
                 CreateVSwitchResponse createVSwitchResponse = this.acsClientStub.request(client, aliCloudRequest, regionId);
                 vSwitchId = createVSwitchResponse.getVSwitchId();
 
+                // wait till vSwitch is available
+                // while there is need to roll back the created vSwitch when route table creation is failed
+                Function<?, Boolean> func = ifVSwitchAvailable(client, regionId, vSwitchId);
+                PluginTimer.runTask(new PluginTimerTask(func));
+
 
                 // create route table
                 CreateRouteTableRequest createRouteTableRequest = new CreateRouteTableRequest();
                 createRouteTableRequest.setRouteTableName("Bind_by_" + requestDto.getvSwitchName());
                 createRouteTableRequest.setVpcId(requestDto.getVpcId());
-                final CreateRouteTableResponse createRouteTableResponse = this.routeTableService.createRouteTable(client, createRouteTableRequest, regionId);
+                final CreateRouteTableResponse createRouteTableResponse;
+                try {
+                    createRouteTableResponse = this.routeTableService.createRouteTable(client, createRouteTableRequest, regionId);
+                } catch (PluginException | AliCloudException ex) {
+                    // roll back, delete created vSwitch
+                    deleteVSwitch(client, regionId, vSwitchId);
+                    throw ex;
+                }
+
                 final String createdRouteTableId = createRouteTableResponse.getRouteTableId();
 
                 // wait till both route table and vSwitch are available to be configured
-                Function<?, Boolean> func = this.ifBothRouteTableAndVSwitchAvailable(client, regionId, createdRouteTableId, vSwitchId);
+                func = this.ifBothRouteTableAndVSwitchAvailable(client, regionId, createdRouteTableId, vSwitchId);
                 final PluginTimerTask checkRouteTableStatusTask = new PluginTimerTask(func);
                 PluginTimer.runTask(checkRouteTableStatusTask);
 
@@ -364,5 +377,15 @@ public class VSwitchServiceImpl implements VSwitchService {
 
     private Function<?, Boolean> ifVSwitchAvailable(IAcsClient client, String regionId, String vSwitchId) throws PluginException {
         return o -> this.checkIfVSwitchAvailable(client, regionId, vSwitchId);
+    }
+
+
+    private void deleteVSwitch(IAcsClient client, String regionId, String vSwitchId) throws AliCloudException {
+
+        DeleteVSwitchRequest request = new DeleteVSwitchRequest();
+        request.setVSwitchId(vSwitchId);
+
+        acsClientStub.request(client, request, regionId);
+
     }
 }

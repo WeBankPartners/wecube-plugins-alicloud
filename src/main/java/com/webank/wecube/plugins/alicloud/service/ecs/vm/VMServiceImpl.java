@@ -3,15 +3,16 @@ package com.webank.wecube.plugins.alicloud.service.ecs.vm;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.vm.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.ECSResourceSeeker;
+import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
@@ -84,10 +85,10 @@ public class VMServiceImpl implements VMService {
                 }
 
                 // seek available resource when instanceType is not designated
-                String availableInstanceType;
+                SpecInfo fitSpec = new SpecInfo();
                 if (!StringUtils.isEmpty(requestDto.getInstanceSpec()) && StringUtils.isEmpty(requestDto.getInstanceType())) {
-                    availableInstanceType = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec());
-                    requestDto.setInstanceType(availableInstanceType);
+                    fitSpec = ecsResourceSeeker.findAvailableInstance(client, regionId, requestDto.getZoneId(), requestDto.getInstanceChargeType(), requestDto.getInstanceSpec(), requestDto.getInstanceFamily());
+                    requestDto.setInstanceType(fitSpec.getResourceClass());
                 }
 
 
@@ -111,7 +112,10 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                result = result.fromSdk(response, encryptedPassword, requestDto.getInstanceSpec(), requestDto.getPrivateIpAddress());
+                // query created instance and get the private ip
+                final String instancePrivateIp = getInstancePrivateIp(client, regionId, response.getInstanceId());
+
+                result = result.fromSdk(response, encryptedPassword, instancePrivateIp, fitSpec);
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
@@ -470,8 +474,35 @@ public class VMServiceImpl implements VMService {
         throw new PluginException("The VM instance doesn't have IP address to connect to.");
     }
 
-    private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) {
+    private Boolean ifVMHasBeenDeleted(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
         final DescribeInstancesResponse describeInstancesResponse = this.retrieveVM(client, regionId, instanceId);
         return describeInstancesResponse.getTotalCount() == 0;
+    }
+
+    private String getInstancePrivateIp(IAcsClient client, String regionId, String instanceId) throws AliCloudException {
+
+        logger.info("Query instance private ip...");
+
+        final DescribeInstancesResponse foundInstance = retrieveVM(client, regionId, instanceId);
+
+        if (foundInstance.getInstances().isEmpty()) {
+            throw new PluginException(String.format("Cannot find instance by given instanceId: [%s]", instanceId));
+        }
+
+        final DescribeInstancesResponse.Instance instance = foundInstance.getInstances().get(0);
+        final List<DescribeInstancesResponse.Instance.NetworkInterface> networkInterfaceList = instance.getNetworkInterfaces();
+
+        if (networkInterfaceList.isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+
+        if (networkInterfaceList.size() == 1) {
+            return networkInterfaceList.get(0).getPrimaryIpAddress();
+        } else {
+            final List<String> ipAddressList = networkInterfaceList.stream()
+                    .map(DescribeInstancesResponse.Instance.NetworkInterface::getPrimaryIpAddress)
+                    .collect(Collectors.toList());
+            return PluginStringUtils.stringifyListWithoutBracket(ipAddressList);
+        }
     }
 }

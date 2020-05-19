@@ -37,9 +37,10 @@ public class CoreCreateInstanceResponseDto extends CoreResponseOutputDto impleme
     private String vSwitchId;
     private String privateIpAddr;
 
-    public CoreCreateInstanceResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword) {
+    public CoreCreateInstanceResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String privateIpAddr) {
         final CoreCreateInstanceResponseDto result = this.fromSdk(response);
         result.setEncryptedPassword(encryptedPassword);
+        result.setPrivateIpAddr(privateIpAddr);
         return result;
     }
 

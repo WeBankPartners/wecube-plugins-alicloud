@@ -4,9 +4,10 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.rds.model.v20140815.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.DBCloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreDeleteBackupRequestDto;
@@ -15,12 +16,11 @@ import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceRequest
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreCreateDBInstanceResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.db.CoreDeleteDBInstanceResponseDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupRequestDto;
+import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
-import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
-import com.webank.wecube.plugins.alicloud.support.AliCloudException;
-import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.*;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
@@ -75,10 +75,12 @@ public class RDSServiceImpl implements RDSService {
                 dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final String regionId = cloudParamDto.getRegionId();
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                requestDto.adaptToAliCloud();
+                final DBCloudParamDto dbCloudParamDto = DBCloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = dbCloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, dbCloudParamDto);
+
+                // zoneId adaption
+                zoneIdAdaption(client, dbCloudParamDto, requestDto);
 
                 if (StringUtils.isNotEmpty(requestDto.getDBInstanceId())) {
                     final String instanceId = requestDto.getDBInstanceId();
@@ -151,8 +153,12 @@ public class RDSServiceImpl implements RDSService {
                     bindSecurityGroupToInstance(client, regionId, requestDto.getSecurityGroupId(), response.getDBInstanceId());
                 }
 
+                // get instance's private ip address
+                final String dbInstancePrivateIpAddr = getDBInstancePrivateIpAddr(client, regionId, response.getDBInstanceId());
+
                 // return result
                 result = result.fromSdk(response, requestDto.getAccountName(), encryptedPassword, foundSpecInfo);
+                result.setPrivateIpAddress(dbInstancePrivateIpAddr);
 
 
             } catch (PluginException | AliCloudException ex) {
@@ -170,6 +176,7 @@ public class RDSServiceImpl implements RDSService {
         }
         return resultList;
     }
+
 
     @Override
     public List<CoreDeleteDBInstanceResponseDto> deleteDB(List<CoreDeleteDBInstanceRequestDto> requestDtoList) {
@@ -362,6 +369,91 @@ public class RDSServiceImpl implements RDSService {
     }
 
     @Override
+    public List<CoreModifyDBSecurityGroupResponseDto> appendSecurityGroup(List<CoreModifyDBSecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifyDBSecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifyDBSecurityGroupRequestDto requestDto : requestDtoList) {
+
+            CoreModifyDBSecurityGroupResponseDto result = new CoreModifyDBSecurityGroupResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // append target security group list to current's
+                List<String> currentSGList = queryDBSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.addAll(targetSGList);
+                targetSGList = currentSGList.stream().distinct().collect(Collectors.toList());
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(targetSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifyDBSecurityGroupResponseDto> removeSecurityGroup(List<CoreModifyDBSecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifyDBSecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifyDBSecurityGroupRequestDto requestDto : requestDtoList) {
+
+            CoreModifyDBSecurityGroupResponseDto result = new CoreModifyDBSecurityGroupResponseDto();
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // remove target security group list from current's (with non-exist id removal)
+                List<String> currentSGList = queryDBSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.removeAll(targetSGList);
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(currentSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+        }
+        return resultList;
+    }
+
+    @Override
     public List<CoreCreateBackupResponseDto> createBackup(List<CoreCreateBackupRequestDto> requestDtoList) {
         List<CoreCreateBackupResponseDto> resultList = new ArrayList<>();
         for (CoreCreateBackupRequestDto requestDto : requestDtoList) {
@@ -400,7 +492,7 @@ public class RDSServiceImpl implements RDSService {
                 final String backupJobId = response.getBackupJobId();
 
                 // wait for the backup job to be finished
-                Function<?, Boolean> func = o -> this.ifBackupTaskInStatus(client, regionId, dbInstanceId, backupJobId, BackupStatus.FINISHED);
+                Function<?, Boolean> func = o -> ifBackupTaskInStatus(client, regionId, dbInstanceId, backupJobId, BackupStatus.FINISHED, BackupStatus.FAILED);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
                 // retrieve backup info according to the backup job id from the AliCloud
@@ -410,6 +502,10 @@ public class RDSServiceImpl implements RDSService {
                 result = result.fromSdkCrossLineage(backupJob);
                 result.setRequestId(response.getRequestId());
                 result.setBackupJobId(backupJobId);
+
+                if (StringUtils.equals(BackupStatus.FAILED.getStatus(), result.getBackupStatus())) {
+                    throw new PluginException("Backup job failed");
+                }
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -510,8 +606,7 @@ public class RDSServiceImpl implements RDSService {
         return StringUtils.equals(status.getStatus(), dbInstance.getDBInstanceStatus());
     }
 
-    @Override
-    public Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus status) throws PluginException, AliCloudException {
+    public Boolean ifBackupTaskInStatus(IAcsClient client, String regionId, String dbInstanceId, String backupJobId, BackupStatus... statusArray) throws PluginException, AliCloudException {
         if (StringUtils.isAnyEmpty(regionId, backupJobId)) {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
@@ -529,7 +624,9 @@ public class RDSServiceImpl implements RDSService {
 
         final DescribeBackupTasksResponse.BackupJob backupJob = foundBackupJobOpt.get();
 
-        return StringUtils.equals(status.getStatus(), backupJob.getBackupStatus());
+        final List<String> statusList = Arrays.stream(statusArray).map(BackupStatus::getStatus).collect(Collectors.toList());
+
+        return statusList.contains(backupJob.getBackupStatus());
     }
 
     public void createRDSAccount(IAcsClient client, String regionId, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
@@ -747,7 +844,16 @@ public class RDSServiceImpl implements RDSService {
         return response;
     }
 
-    private DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray queryDBInstance(String dBInstanceId, IAcsClient client, String regionId) {
+    private List<String> queryDBSecurityGroup(String dBInstanceId, IAcsClient client, String regionId) throws AliCloudException {
+        DescribeSecurityGroupConfigurationRequest request = new DescribeSecurityGroupConfigurationRequest();
+        request.setDBInstanceId(dBInstanceId);
+
+        final DescribeSecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+        return response.getItems().stream().map(DescribeSecurityGroupConfigurationResponse.EcsSecurityGroupRelation::getSecurityGroupId).collect(Collectors.toList());
+
+    }
+
+    private DescribeDBInstanceIPArrayListResponse.DBInstanceIPArray queryDBInstance(String dBInstanceId, IAcsClient client, String regionId) throws PluginException, AliCloudException {
         DescribeDBInstanceIPArrayListRequest queryRequest = new DescribeDBInstanceIPArrayListRequest();
         queryRequest.setDBInstanceId(dBInstanceId);
         final DescribeDBInstanceIPArrayListResponse queryResponse = acsClientStub.request(client, queryRequest, regionId);
@@ -777,5 +883,80 @@ public class RDSServiceImpl implements RDSService {
         final String currentStatus = response.getAccounts().get(0).getAccountStatus();
 
         return StringUtils.equalsIgnoreCase(AccountStatus.Available.toString(), currentStatus);
+    }
+
+    private String getDBInstancePrivateIpAddr(IAcsClient client, String regionId, String dBInstanceId) throws PluginException, AliCloudException {
+
+        logger.info("Retrieving instance: [{}]'s private ip address.", dBInstanceId);
+
+        DescribeDBInstanceNetInfoRequest request = new DescribeDBInstanceNetInfoRequest();
+        request.setDBInstanceId(dBInstanceId);
+
+        final DescribeDBInstanceNetInfoResponse response = acsClientStub.request(client, request, regionId);
+
+        final List<String> privateIpAddrList = response.getDBInstanceNetInfos().stream()
+                .filter(dbInstanceNetInfo -> StringUtils.equals(DBInstanceIPType.Private.toString(), dbInstanceNetInfo.getIPType()))
+                .map(DescribeDBInstanceNetInfoResponse.DBInstanceNetInfo::getIPAddress)
+                .collect(Collectors.toList());
+
+        if (privateIpAddrList.isEmpty()) {
+            throw new PluginException("The resource doesn't have private ip");
+        }
+
+        return privateIpAddrList.get(0);
+
+    }
+
+    private void zoneIdAdaption(IAcsClient client, DBCloudParamDto dbCloudParamDto, CoreCreateDBInstanceRequestDto requestDto) throws PluginException, AliCloudException {
+
+        final String availableZoneId;
+        if (StringUtils.equalsIgnoreCase(RDSCategory.HighAvailability.toString(), requestDto.getCategory())) {
+            // high availability category
+            availableZoneId = queryAvailableZoneId(client, dbCloudParamDto);
+
+            ZoneIdHelper.ifZoneInAvailableZoneId(requestDto.getZoneId(), availableZoneId);
+
+        } else {
+            // basic category
+            final List<String> zoneIdList = PluginStringUtils.splitStringList(requestDto.getZoneId());
+            if (zoneIdList.isEmpty()) {
+                throw new PluginException("Invalid zoneId.");
+            }
+
+            availableZoneId = zoneIdList.get(0).trim();
+
+            if (ZoneIdHelper.ifZoneIdContainsMAZ(availableZoneId)) {
+                throw new PluginException("The given zoneId contains MAZ which is invalid.");
+            }
+
+        }
+
+        requestDto.setZoneId(availableZoneId);
+
+    }
+
+    private String queryAvailableZoneId(IAcsClient client, DBCloudParamDto dbCloudParamDto) {
+        DescribeRegionsRequest request = new DescribeRegionsRequest();
+        final DescribeRegionsResponse response = acsClientStub.request(client, request, dbCloudParamDto.getRegionId());
+
+        final Optional<String> zoneOpt = response.getRegions()
+                .stream()
+                .filter(rdsRegion -> StringUtils.containsIgnoreCase(rdsRegion.getZoneId(), dbCloudParamDto.getRegionGroup()))
+                .map(DescribeRegionsResponse.RDSRegion::getZoneId)
+                .filter(s -> StringUtils.containsIgnoreCase(s, dbCloudParamDto.getRegionGroup()))
+                .findFirst();
+
+        zoneOpt.orElseThrow(() -> new PluginException(String.format("Cannot find available zone by given region group: [%s]", dbCloudParamDto.getRegionGroup())));
+
+        return zoneOpt.get();
+    }
+
+    private enum DBInstanceIPType {
+        // inner
+        Inner,
+        // public
+        Public,
+        // private
+        Private
     }
 }

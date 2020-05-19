@@ -3,21 +3,17 @@ package com.webank.wecube.plugins.alicloud.service.redis;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.r_kvstore.model.v20150101.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreCreateInstanceResponseDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceRequestDto;
-import com.webank.wecube.plugins.alicloud.dto.redis.CoreDeleteInstanceResponseDto;
-import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
-import com.webank.wecube.plugins.alicloud.support.AliCloudException;
-import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.DBCloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.redis.*;
+import com.webank.wecube.plugins.alicloud.support.*;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RedisResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
+import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -61,10 +59,13 @@ public class RedisServiceImpl implements RedisService {
                 dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
+                final DBCloudParamDto dbCloudParamDto = DBCloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, dbCloudParamDto);
+                final String regionId = dbCloudParamDto.getRegionId();
                 final String instanceId = requestDto.getInstanceId();
+
+                // zoneId adaption
+                zoneIdAdaption(client, dbCloudParamDto, requestDto);
 
                 if (StringUtils.isNotEmpty(instanceId)) {
                     // retrieve InstanceInfo as result;
@@ -125,7 +126,10 @@ public class RedisServiceImpl implements RedisService {
                 }
 
 
-                result = result.fromSdk(response, encryptedPassword);
+                final DescribeInstancesResponse.KVStoreInstance foundInstance = retrieveRedis(client, regionId, response.getInstanceId());
+
+                result = result.fromSdk(response, encryptedPassword, foundInstance.getPrivateIp());
+
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -142,6 +146,52 @@ public class RedisServiceImpl implements RedisService {
 
         }
         return resultList;
+    }
+
+    private void zoneIdAdaption(IAcsClient client, DBCloudParamDto dbCloudParamDto, CoreCreateInstanceRequestDto requestDto) throws PluginException, AliCloudException {
+
+        final String availableZoneId;
+        final List<String> zoneIdList = PluginStringUtils.splitStringList(requestDto.getZoneId());
+
+        if (zoneIdList.isEmpty()) {
+            throw new PluginException("Invalid zoneId.");
+        }
+
+        if (zoneIdList.size() == 1) {
+            // basic category
+            availableZoneId = zoneIdList.get(0).trim();
+
+            if (ZoneIdHelper.ifZoneIdContainsMAZ(availableZoneId)) {
+                throw new PluginException("The given zoneId contains MAZ which is invalid.");
+            }
+        } else {
+            // high availability category
+            availableZoneId = queryAvailableZoneId(client, dbCloudParamDto);
+
+            ZoneIdHelper.ifZoneInAvailableZoneId(requestDto.getZoneId(), availableZoneId);
+        }
+
+        requestDto.setZoneId(availableZoneId);
+    }
+
+
+    private String queryAvailableZoneId(IAcsClient client, DBCloudParamDto dbCloudParamDto) throws AliCloudException {
+        DescribeRegionsRequest request = new DescribeRegionsRequest();
+        final DescribeRegionsResponse response = acsClientStub.request(client, request, dbCloudParamDto.getRegionId());
+
+
+        final Optional<String> zoneOpt = response.getRegionIds()
+                .stream()
+                .filter(kvStoreRegion -> kvStoreRegion.getRegionId().equalsIgnoreCase(dbCloudParamDto.getRegionId()))
+                .map(DescribeRegionsResponse.KVStoreRegion::getZoneIdList)
+                .flatMap(Collection::stream)
+                .filter(zoneId -> StringUtils.containsIgnoreCase(zoneId, dbCloudParamDto.getRegionGroup()))
+                .findFirst();
+
+
+        zoneOpt.orElseThrow(() -> new PluginException(String.format("Cannot find available zone by given region group: [%s]", dbCloudParamDto.getRegionGroup())));
+
+        return zoneOpt.get();
     }
 
     @Override
@@ -214,6 +264,109 @@ public class RedisServiceImpl implements RedisService {
             throw new PluginException("Either regionId or instanceId cannot be null or empty.");
         }
 
+        final DescribeInstancesResponse.KVStoreInstance foundInstance = retrieveRedis(client, regionId, instanceId);
+
+        return StringUtils.equals(status.getStatus(), foundInstance.getInstanceStatus());
+    }
+
+    @Override
+    public List<CoreModifySecurityGroupResponseDto> appendSecurityGroup(List<CoreModifySecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifySecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityGroupRequestDto requestDto : requestDtoList) {
+            CoreModifySecurityGroupResponseDto result = new CoreModifySecurityGroupResponseDto();
+
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // append target security group list to current's
+                List<String> currentSGList = queryRedisSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.addAll(targetSGList);
+                targetSGList = currentSGList.stream().distinct().collect(Collectors.toList());
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(targetSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CoreModifySecurityGroupResponseDto> removeSecurityGroup(List<CoreModifySecurityGroupRequestDto> requestDtoList) {
+        List<CoreModifySecurityGroupResponseDto> resultList = new ArrayList<>();
+        for (CoreModifySecurityGroupRequestDto requestDto : requestDtoList) {
+            CoreModifySecurityGroupResponseDto result = new CoreModifySecurityGroupResponseDto();
+
+            try {
+
+                dtoValidator.validate(requestDto);
+
+                final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
+                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
+                final String regionId = cloudParamDto.getRegionId();
+
+                // remove target security group list from current's (with non-exist id removal)
+                List<String> currentSGList = queryRedisSecurityGroup(requestDto.getdBInstanceId(), client, regionId);
+                List<String> targetSGList = PluginStringUtils.splitStringList(requestDto.getSecurityGroupId());
+                currentSGList.removeAll(targetSGList);
+                requestDto.setSecurityGroupId(PluginStringUtils.stringifyListWithoutBracket(currentSGList));
+
+                final ModifySecurityGroupConfigurationRequest request = requestDto.toSdk();
+                final ModifySecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+
+                result = result.fromSdk(response);
+
+
+            } catch (PluginException | AliCloudException ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setErrorMessage(ex.getMessage());
+            } catch (Exception ex) {
+                result.setErrorCode(CoreResponseDto.STATUS_ERROR);
+                result.setUnhandledErrorMessage(ex.getMessage());
+            } finally {
+                result.setGuid(requestDto.getGuid());
+                result.setCallbackParameter(requestDto.getCallbackParameter());
+                logger.info("Result: {}", result.toString());
+                resultList.add(result);
+            }
+
+        }
+        return resultList;
+    }
+
+    private List<String> queryRedisSecurityGroup(String instanceId, IAcsClient client, String regionId) throws AliCloudException {
+        DescribeSecurityGroupConfigurationRequest request = new DescribeSecurityGroupConfigurationRequest();
+        request.setInstanceId(instanceId);
+
+        final DescribeSecurityGroupConfigurationResponse response = acsClientStub.request(client, request, regionId);
+        return response.getItems().stream().map(DescribeSecurityGroupConfigurationResponse.EcsSecurityGroupRelation::getSecurityGroupId).collect(Collectors.toList());
+    }
+
+    private DescribeInstancesResponse.KVStoreInstance retrieveRedis(IAcsClient client, String regionId, String instanceId) {
         DescribeInstancesRequest request = new DescribeInstancesRequest();
         request.setInstanceIds(instanceId);
 
@@ -224,9 +377,7 @@ public class RedisServiceImpl implements RedisService {
 
         foundRedisOpt.orElseThrow(() -> new PluginException(String.format("Cannot found instance by instanceId: [%s]", instanceId)));
 
-        final DescribeInstancesResponse.KVStoreInstance foundInstance = foundRedisOpt.get();
-
-        return StringUtils.equals(status.getStatus(), foundInstance.getInstanceStatus());
+        return foundRedisOpt.get();
     }
 
     public Boolean ifRedisIsDeleted(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
