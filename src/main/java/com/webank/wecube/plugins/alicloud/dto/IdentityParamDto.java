@@ -21,7 +21,13 @@ public class IdentityParamDto {
     }
 
     public static IdentityParamDto convertFromString(String paramStr) throws PluginException {
-        final Map<String, String> map = PluginMapUtils.fromCoreParamString(paramStr);
+        final Map<String, String> map;
+        try {
+            map = PluginMapUtils.fromCoreParamString(paramStr);
+        } catch (PluginException ex) {
+            throw new PluginException("Error when handling identityParam, please check your request.");
+        }
+
         return new IdentityParamDto(map.get("accessKeyId"), map.get("secret"));
     }
 

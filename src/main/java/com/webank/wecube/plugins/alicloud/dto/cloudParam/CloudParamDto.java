@@ -26,7 +26,13 @@ public class CloudParamDto {
     }
 
     public static CloudParamDto convertFromString(String paramStr) throws PluginException {
-        final Map<String, String> map = PluginMapUtils.fromCoreParamString(paramStr);
+        final Map<String, String> map;
+        try {
+            map = PluginMapUtils.fromCoreParamString(paramStr);
+        } catch (PluginException ex) {
+            throw new PluginException("Error when handling cloudParam, please check your request.");
+        }
+
         final String regionId = map.get("regionId");
         if (StringUtils.isEmpty(regionId)) {
             throw new PluginException("Cannot get field: [regionId] through the given cloudParams string");
