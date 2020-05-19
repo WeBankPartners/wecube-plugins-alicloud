@@ -2,8 +2,11 @@ package com.webank.wecube.plugins.alicloud.dto.loadBalancer;
 
 import com.aliyuncs.slb.model.v20140515.CreateLoadBalancerRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.loadBalancer.LoadBalancerPayType;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -14,14 +17,6 @@ import javax.validation.constraints.NotEmpty;
  * @author howechen
  */
 public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implements PluginSdkInputBridge<CreateLoadBalancerRequest> {
-
-    @Override
-    public void adaptToAliCloud() {
-        if (!StringUtils.isEmpty(this.getAddressType()) && StringUtils.equalsIgnoreCase(AddressType.internet.toString(), this.getAddressType())) {
-            this.setAddress(null);
-            this.setVSwitchId(null);
-        }
-    }
 
     private String loadBalancerId;
     private String loadBalancerProtocol;
@@ -276,6 +271,28 @@ public class CoreCreateLoadBalancerRequestDto extends CoreRequestInputDto implem
                 .append("payType", payType)
                 .append("pricingCycle", pricingCycle)
                 .toString();
+    }
+
+    @Override
+    public void adaptToAliCloud() throws PluginException {
+        if (!StringUtils.isEmpty(this.getAddressType()) && StringUtils.equalsIgnoreCase(AddressType.internet.toString(), this.getAddressType())) {
+            this.setAddress(null);
+            this.setVSwitchId(null);
+        }
+
+        if (StringUtils.isNotEmpty(payType)) {
+            if (EnumUtils.isValidEnumIgnoreCase(LoadBalancerPayType.class, payType)) {
+                payType = EnumUtils.getEnumIgnoreCase(LoadBalancerPayType.class, payType).toString();
+            } else {
+                if (StringUtils.equalsIgnoreCase("postpaid", payType)) {
+                    payType = LoadBalancerPayType.PayOnDemand.toString();
+                } else if (StringUtils.equalsIgnoreCase("prepaid", payType)) {
+                    payType = LoadBalancerPayType.PrePay.toString();
+                } else {
+                    throw new PluginException(String.format("Invalid given payType: [%s]", payType));
+                }
+            }
+        }
     }
 
     private enum AddressType {

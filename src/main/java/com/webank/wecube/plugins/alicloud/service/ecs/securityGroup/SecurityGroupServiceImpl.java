@@ -3,10 +3,10 @@ package com.webank.wecube.plugins.alicloud.service.ecs.securityGroup;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.ForkableDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
@@ -247,14 +247,14 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
     private CoreAuthorizeSecurityGroupResponseDto authorizeSecurityGroup(String regionId, IAcsClient client, CoreAuthorizeSecurityGroupRequestDto singleRequestDto) throws PluginException, AliCloudException {
-        final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, singleRequestDto.getActionType());
+        final PolicyType policyType = EnumUtils.getEnumIgnoreCase(PolicyType.class, singleRequestDto.getPolicyType());
 
-        if (null == actionType) {
-            throw new PluginException(String.format("Invalid action type: [%s]", actionType));
+        if (null == policyType) {
+            throw new PluginException(String.format("Invalid policy type: [%s]", policyType));
         }
 
         CoreAuthorizeSecurityGroupResponseDto result = new CoreAuthorizeSecurityGroupResponseDto();
-        switch (actionType) {
+        switch (policyType) {
             case EGRESS:
                 // egress authorization
                 AuthorizeSecurityGroupEgressRequest egressRequest = singleRequestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
@@ -276,14 +276,14 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
     private void authorizeSecurityGroup(String regionId, IAcsClient client, CoreRevokeSecurityGroupRequestDto singleRequestDto) throws PluginException, AliCloudException {
-        final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, singleRequestDto.getActionType());
+        final PolicyType policyType = EnumUtils.getEnumIgnoreCase(PolicyType.class, singleRequestDto.getPolicyType());
 
-        if (null == actionType) {
-            throw new PluginException(String.format("Invalid action type: [%s]", actionType));
+        if (null == policyType) {
+            throw new PluginException(String.format("Invalid policy type: [%s]", policyType));
         }
 
         CoreAuthorizeSecurityGroupResponseDto result = new CoreAuthorizeSecurityGroupResponseDto();
-        switch (actionType) {
+        switch (policyType) {
             case EGRESS:
                 // egress authorization
                 AuthorizeSecurityGroupEgressRequest egressRequest = singleRequestDto.toSdkCrossLineage(AuthorizeSecurityGroupEgressRequest.class);
@@ -317,13 +317,13 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
     private void revokeSecurityGroup(String regionId, IAcsClient client, CoreAuthorizeSecurityGroupRequestDto rollBackDto) throws AliCloudException {
-        final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, rollBackDto.getActionType());
+        final PolicyType policyType = EnumUtils.getEnumIgnoreCase(PolicyType.class, rollBackDto.getPolicyType());
 
-        if (null == actionType) {
-            throw new PluginException(String.format("Invalid action type: [%s]", actionType));
+        if (null == policyType) {
+            throw new PluginException(String.format("Invalid policy type: [%s]", policyType));
         }
 
-        switch (actionType) {
+        switch (policyType) {
             case EGRESS:
                 // egress authorization
                 RevokeSecurityGroupEgressRequest egressRequest = rollBackDto.toSdkCrossLineage(RevokeSecurityGroupEgressRequest.class);
@@ -340,13 +340,13 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
     private void revokeSecurityGroup(String regionId, IAcsClient client, CoreRevokeSecurityGroupRequestDto requestDto) throws AliCloudException {
-        final ActionType actionType = EnumUtils.getEnumIgnoreCase(ActionType.class, requestDto.getActionType());
+        final PolicyType policyType = EnumUtils.getEnumIgnoreCase(PolicyType.class, requestDto.getPolicyType());
 
-        if (null == actionType) {
-            throw new PluginException(String.format("Invalid action type: [%s]", actionType));
+        if (null == policyType) {
+            throw new PluginException(String.format("Invalid policy type: [%s]", policyType));
         }
 
-        switch (actionType) {
+        switch (policyType) {
             case EGRESS:
                 // egress authorization
                 RevokeSecurityGroupEgressRequest egressRequest = requestDto.toSdkCrossLineage(RevokeSecurityGroupEgressRequest.class);
@@ -362,6 +362,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private <T extends ForkableDto<?>> List<T> mapToMultipleRequest(T requestDto) throws PluginException {
         List<T> result = new ArrayList<>();
 
@@ -436,7 +437,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
 
-    public enum ActionType {
+    public enum PolicyType {
         // ingress
         INGRESS,
         // egress

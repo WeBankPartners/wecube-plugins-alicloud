@@ -219,6 +219,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">seed</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceSpec</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceFamily</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">imageId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">securityGroupId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">instanceName</parameter>
@@ -226,7 +227,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">autoRenewPeriod</parameter>
                     <!--<parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">hostName</parameter>-->
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">password</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">zoneId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">zoneId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskSize</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">systemDiskCategory</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">vSwitchId</parameter>
@@ -240,6 +241,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">password</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">instanceType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">cpu</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">memory</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIp</parameter>
@@ -360,6 +362,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">dBInstanceId</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">connectionString</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">port</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIpAddress</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -387,6 +390,34 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">dBInstanceIPArrayName</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="N">whitelistNetworkType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">modifyMode</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="append_security_group" path="/alicloud/v1/rds/security_group/append">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="remove_security_group" path="/alicloud/v1/rds/security_group/remove">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -496,6 +527,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">password</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">port</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">privateIpAddr</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">connectionDomain</parameter>
                     <parameter datatype="string" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -506,6 +538,34 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">instanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="append_security_group" path="/alicloud/v1/redis/security_group/append">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="remove_security_group" path="/alicloud/v1/redis/security_group/remove">
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">dBInstanceId</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">securityGroupId</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -756,7 +816,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">actionType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policyType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
@@ -775,7 +835,7 @@
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cloudParams</parameter>
-                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">actionType</parameter>
+                    <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">policyType</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">cidrIp</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">ipProtocol</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">portRange</parameter>
@@ -879,7 +939,7 @@
                     <parameter datatype="string" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="modify_remove" path="/alicloud/v1/vpc/nat/snat_entry/modify/prune">
+            <interface action="modify_remove" path="/alicloud/v1/vpc/nat/snat_entry/modify/remove">
                 <inputParameters>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">guid</parameter>
                     <parameter datatype="string" mappingType="entity" mappingEntityExpression="" required="Y">identityParams</parameter>

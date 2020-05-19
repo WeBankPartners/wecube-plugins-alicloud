@@ -3,9 +3,9 @@ package com.webank.wecube.plugins.alicloud.service.vpc.routeTable;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.vpc.model.v20160428.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.*;
 import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreCreateRouteEntryRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.vpc.routeTable.routeEntry.CoreCreateRouteEntryResponseDto;
@@ -15,6 +15,8 @@ import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudConstant;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
 import com.webank.wecube.plugins.alicloud.support.DtoValidator;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
+import com.webank.wecube.plugins.alicloud.support.timer.PluginTimerTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author howechen
@@ -79,8 +84,10 @@ public class RouteTableServiceImpl implements RouteTableService {
 
                 CreateRouteTableResponse response;
                 response = this.acsClientStub.request(client, request, regionId);
-
                 result = result.fromSdk(response);
+
+                Function<?, Boolean> func = o -> ifRouteTableInStatus(client, regionId, response.getRouteTableId(), RouteTableStatus.Available);
+                PluginTimer.runTask(new PluginTimerTask(func));
 
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
@@ -393,6 +400,21 @@ public class RouteTableServiceImpl implements RouteTableService {
             }
         }
         return resultList;
+    }
+
+    private boolean ifRouteTableInStatus(IAcsClient client, String regionId, String routeTableId, RouteTableStatus... statusArray) throws PluginException, AliCloudException {
+
+        DescribeRouteTablesRequest request = new DescribeRouteTablesRequest();
+        request.setRouteTableId(routeTableId);
+
+        final DescribeRouteTablesResponse response = acsClientStub.request(client, request, regionId);
+        if (response.getRouteTables().isEmpty()) {
+            throw new PluginException(String.format("Cannot find routeTable according to the given vpcId: [%s]", routeTableId));
+        }
+
+        final List<String> statusList = Arrays.stream(statusArray).map(Enum::toString).collect(Collectors.toList());
+
+        return statusList.contains(response.getRouteTables().get(0).getStatus());
     }
 
 

@@ -4,9 +4,9 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
 import com.google.common.collect.Lists;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.disk.*;
 import com.webank.wecube.plugins.alicloud.service.ecs.vm.VMService;
 import com.webank.wecube.plugins.alicloud.support.*;
@@ -199,7 +199,7 @@ public class DiskServiceImpl implements DiskService {
         final String password = passwordManager.decryptPassword(requestDto.getInstanceGuid(), requestDto.getSeed(), requestDto.getHostPassword());
 
         // scp diskScripts
-        @SuppressWarnings("unchecked") final ArrayList<Pair<String, byte[]>> nameToDataPairList = Lists.newArrayList(
+        final ArrayList<Pair<String, byte[]>> nameToDataPairList = Lists.newArrayList(
                 diskScriptHelper.getUnFormattedDiskScriptPair(),
                 diskScriptHelper.getMountDiskScriptPair()
         );
