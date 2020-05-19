@@ -112,10 +112,18 @@ public class VMServiceImpl implements VMService {
                 final String seed = requestDto.getSeed();
                 final String encryptedPassword = passwordManager.encryptPassword(guid, seed, password);
 
-                // query created instance and get the private ip
-                final String instancePrivateIp = getInstancePrivateIp(client, regionId, response.getInstanceId());
+                // query created instance
+                final DescribeInstancesResponse.Instance instance = queryVM(client, regionId, response.getInstanceId());
 
-                result = result.fromSdk(response, encryptedPassword, instancePrivateIp, fitSpec);
+                // get the private ip
+                final String instancePrivateIp = getInstancePrivateIp(instance);
+
+                // get hostName
+                final String hostName = instance.getHostName();
+
+
+                result = result.fromSdk(response, encryptedPassword, instancePrivateIp, fitSpec, hostName);
+
             } catch (PluginException | AliCloudException ex) {
                 result.setErrorCode(CoreResponseDto.STATUS_ERROR);
                 result.setErrorMessage(ex.getMessage());
@@ -479,17 +487,9 @@ public class VMServiceImpl implements VMService {
         return describeInstancesResponse.getTotalCount() == 0;
     }
 
-    private String getInstancePrivateIp(IAcsClient client, String regionId, String instanceId) throws AliCloudException {
+    private String getInstancePrivateIp(DescribeInstancesResponse.Instance instance) {
 
-        logger.info("Query instance private ip...");
-
-        final DescribeInstancesResponse foundInstance = retrieveVM(client, regionId, instanceId);
-
-        if (foundInstance.getInstances().isEmpty()) {
-            throw new PluginException(String.format("Cannot find instance by given instanceId: [%s]", instanceId));
-        }
-
-        final DescribeInstancesResponse.Instance instance = foundInstance.getInstances().get(0);
+        logger.info("Get instance private ip...");
         final List<DescribeInstancesResponse.Instance.NetworkInterface> networkInterfaceList = instance.getNetworkInterfaces();
 
         if (networkInterfaceList.isEmpty()) {
@@ -504,5 +504,15 @@ public class VMServiceImpl implements VMService {
                     .collect(Collectors.toList());
             return PluginStringUtils.stringifyListWithoutBracket(ipAddressList);
         }
+    }
+
+    private DescribeInstancesResponse.Instance queryVM(IAcsClient client, String regionId, String instanceId) throws PluginException, AliCloudException {
+        final DescribeInstancesResponse foundInstance = retrieveVM(client, regionId, instanceId);
+
+        if (foundInstance.getInstances().isEmpty()) {
+            throw new PluginException(String.format("Cannot find instance by given instanceId: [%s]", instanceId));
+        }
+
+        return foundInstance.getInstances().get(0);
     }
 }
