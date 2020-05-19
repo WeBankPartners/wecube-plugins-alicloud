@@ -430,21 +430,33 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
     @Override
     public void adaptToAliCloud() throws PluginException {
-        if (!StringUtils.isEmpty(chargeType)) {
+        if (StringUtils.isNotEmpty(chargeType)) {
             final ChargeType type = EnumUtils.getEnumIgnoreCase(ChargeType.class, chargeType);
             if (type == null) {
                 throw new PluginException("Invalid charge type");
             }
             chargeType = type.toString();
+
+            switch (type) {
+                case PostPaid:
+                    period = null;
+                    break;
+                case PrePaid:
+                    break;
+                default:
+                    break;
+            }
         }
 
-        if (!StringUtils.isEmpty(securityIps)) {
+        if (StringUtils.isNotEmpty(securityIps)) {
             securityIps = PluginStringUtils.removeSquareBracket(securityIps);
         }
 
-        if (!StringUtils.isEmpty(securityGroupId)) {
+        if (StringUtils.isNotEmpty(securityGroupId)) {
             securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
         }
+
+
     }
 
 
