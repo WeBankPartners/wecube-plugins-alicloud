@@ -24,6 +24,8 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
     @JsonProperty(value = "password")
     private String encryptedPassword;
 
+    private String hostName;
+
     public CoreCreateVMResponseDto() {
     }
 
@@ -91,14 +93,23 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
         this.privateIpAddress = privateIpAddress;
     }
 
+    public String getHostName() {
+        return hostName;
+    }
 
-    public CoreCreateVMResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String privateIpAddress, SpecInfo specInfo) {
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+
+    public CoreCreateVMResponseDto fromSdk(CreateInstanceResponse response, String encryptedPassword, String privateIpAddress, SpecInfo specInfo, String hostName) {
         final CoreCreateVMResponseDto result = this.fromSdk(response);
         result.setEncryptedPassword(encryptedPassword);
         result.setInstanceType(specInfo.getResourceClass());
         result.setCpu(String.valueOf(specInfo.getCoreMemorySpec().getCore()));
         result.setMemory(String.valueOf(specInfo.getCoreMemorySpec().getMemory()));
         result.setPrivateIpAddress(privateIpAddress);
+        result.setHostName(hostName);
         return result;
     }
 
@@ -114,9 +125,9 @@ public class CoreCreateVMResponseDto extends CoreResponseOutputDto implements Pl
                 .append("memory", memory)
                 .append("privateIpAddress", privateIpAddress)
                 .append("encryptedPassword", encryptedPassword)
+                .append("hostName", hostName)
                 .toString();
     }
-
 
 
 }
