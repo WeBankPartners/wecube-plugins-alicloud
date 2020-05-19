@@ -245,7 +245,6 @@ description|string|否|交换机的描述
 :--|:--|:--    
 guid|string|CI类型全局唯一ID
 vSwitchId|string|交换机实例ID
-routeTableId|string|交换机默认路由表ID
 
 ##### 示例：
 
@@ -2890,7 +2889,7 @@ curl -X POST http://127.0.0.1:8080/alicloud/v1/redis/create \
                 "guid": "0033_0000000001",
                 "instanceId": "r-t4nd94f0f7cf4bb4",
                 "port": "6379",
-                "privateIpAddr": "1024",
+                "privateIpAddr": "xx.xx.xx.xx",
                 "password": "{cipher_a}9b28cb58bd8aca2a1f0cef1ea58f6756"
             }
         ]
