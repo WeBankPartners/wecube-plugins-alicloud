@@ -899,7 +899,7 @@ public class RDSServiceImpl implements RDSService {
             }
 
         }
-
+        logger.info(String.format("Get available zone ID: [%s]", availableZoneId));
         requestDto.setZoneId(availableZoneId);
 
     }

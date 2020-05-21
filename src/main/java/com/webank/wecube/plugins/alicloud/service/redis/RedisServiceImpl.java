@@ -171,6 +171,7 @@ public class RedisServiceImpl implements RedisService {
             ZoneIdHelper.ifZoneInAvailableZoneId(requestDto.getZoneId(), availableZoneId);
         }
 
+        logger.info(String.format("Get available zone ID: [%s]", availableZoneId));
         requestDto.setZoneId(availableZoneId);
     }
 
