@@ -682,6 +682,11 @@ public class CoreCreateVMRequestDto extends CoreRequestInputDto implements Plugi
                 throw new PluginException("Invalid instance charge type");
             }
             instanceChargeType = type.toString();
+
+            if (instanceChargeType.equalsIgnoreCase(InstanceChargeType.PostPaid.toString())) {
+                period = null;
+                autoRenew = null;
+            }
         }
 
         if (StringUtils.isNotEmpty(periodUnit)) {
