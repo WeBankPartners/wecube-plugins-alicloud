@@ -4,9 +4,10 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.rds.model.v20140815.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.DBCloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreCreateBackupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.backup.CoreDeleteBackupRequestDto;
@@ -19,10 +20,7 @@ import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecu
 import com.webank.wecube.plugins.alicloud.dto.rds.securityGroup.CoreModifyDBSecurityGroupResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsRequestDto;
 import com.webank.wecube.plugins.alicloud.dto.rds.securityIP.CoreModifySecurityIPsResponseDto;
-import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
-import com.webank.wecube.plugins.alicloud.support.AliCloudException;
-import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.*;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.specs.SpecInfo;
@@ -77,10 +75,12 @@ public class RDSServiceImpl implements RDSService {
                 dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final String regionId = cloudParamDto.getRegionId();
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                requestDto.adaptToAliCloud();
+                final DBCloudParamDto dbCloudParamDto = DBCloudParamDto.convertFromString(requestDto.getCloudParams());
+                final String regionId = dbCloudParamDto.getRegionId();
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, dbCloudParamDto);
+
+                // zoneId adaption
+                zoneIdAdaption(client, dbCloudParamDto, requestDto);
 
                 if (StringUtils.isNotEmpty(requestDto.getDBInstanceId())) {
                     final String instanceId = requestDto.getDBInstanceId();
@@ -131,22 +131,15 @@ public class RDSServiceImpl implements RDSService {
                 Function<?, Boolean> func = o -> !ifDBInstanceInStatus(client, regionId, createdDBInstanceId, RDSStatus.CREATING);
                 PluginTimer.runTask(new PluginTimerTask(func));
 
-                // create an RDS account with just created DB instance bound onto
-                logger.info("Creating RDS account and bind it to the just created DB instance");
 
-                final CreateAccountRequest createAccountRequest = PluginSdkBridge.toSdk(requestDto, CreateAccountRequest.class, true);
-
-                String password = createAccountRequest.getAccountPassword();
-                if (StringUtils.isEmpty(password)) {
-                    password = passwordManager.generateRDSPassword();
-                    createAccountRequest.setAccountPassword(password);
+                // generate and encrypt password
+                if (StringUtils.isEmpty(requestDto.getAccountPassword())) {
+                    requestDto.setAccountPassword(passwordManager.generateRDSPassword());
                 }
-                final String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), password);
+                final String encryptedPassword = passwordManager.encryptPassword(requestDto.getGuid(), requestDto.getSeed(), requestDto.getAccountPassword());
 
-                createAccountRequest.setDBInstanceId(createdDBInstanceId);
-                createRDSAccount(client, regionId, createAccountRequest);
-                func = o -> ifAccountIsAvailable(client, regionId, response.getDBInstanceId(), requestDto.getAccountName());
-                PluginTimer.runTask(new PluginTimerTask(func));
+                // create an RDS account with just created DB instance bound onto
+                createRDSAccount(requestDto, regionId, client, createdDBInstanceId);
 
                 // bind security group to the created RDS instance
                 if (StringUtils.isNotEmpty(requestDto.getSecurityGroupId())) {
@@ -176,6 +169,21 @@ public class RDSServiceImpl implements RDSService {
         }
         return resultList;
     }
+
+    private void createRDSAccount(CoreCreateDBInstanceRequestDto requestDto, String regionId, IAcsClient client, String createdDBInstanceId) throws PluginException, AliCloudException {
+
+        Function<?, Boolean> func;
+        final CreateAccountRequest createAccountRequest = PluginSdkBridge.toSdk(requestDto, CreateAccountRequest.class, true);
+
+        createAccountRequest.setDBInstanceId(createdDBInstanceId);
+
+        logger.info("Creating RDS account...");
+
+        this.acsClientStub.request(client, createAccountRequest, regionId);
+        func = o -> ifAccountIsAvailable(client, regionId, createdDBInstanceId, createAccountRequest.getAccountName());
+        PluginTimer.runTask(new PluginTimerTask(func));
+    }
+
 
     @Override
     public List<CoreDeleteDBInstanceResponseDto> deleteDB(List<CoreDeleteDBInstanceRequestDto> requestDtoList) {
@@ -628,44 +636,6 @@ public class RDSServiceImpl implements RDSService {
         return statusList.contains(backupJob.getBackupStatus());
     }
 
-    public void createRDSAccount(IAcsClient client, String regionId, CreateAccountRequest createAccountRequest) throws PluginException, AliCloudException {
-
-        logger.info("Creating RDS account...");
-
-        this.acsClientStub.request(client, createAccountRequest, regionId);
-
-        // check if the account has been created
-        Function<?, Boolean> func = o -> ifRDSAccountCreated(client, createAccountRequest.getSysRegionId(), createAccountRequest.getAccountName(), createAccountRequest.getDBInstanceId());
-        PluginTimer.runTask(new PluginTimerTask(func));
-    }
-
-    @Override
-    public Boolean ifRDSAccountCreated(IAcsClient client, String regionId, String accountName, String dBInstanceId) throws PluginException, AliCloudException {
-
-        boolean ifAccountCreated = false;
-
-        logger.info("Retrieving RDS account info...");
-
-        if (StringUtils.isAnyEmpty(regionId, accountName)) {
-            throw new PluginException("Either regionId or accountName cannot be null or empty.");
-        }
-
-        DescribeAccountsRequest request = new DescribeAccountsRequest();
-        request.setAccountName(accountName);
-        request.setDBInstanceId(dBInstanceId);
-
-        final DescribeAccountsResponse response = this.acsClientStub.request(client, request, regionId);
-
-        final long count = response.getAccounts().stream().filter(dbInstanceAccount -> StringUtils.equals(accountName, dbInstanceAccount.getAccountName())).count();
-
-        if (count == 1) {
-            ifAccountCreated = true;
-        }
-
-        return ifAccountCreated;
-
-    }
-
     private Boolean ifDBInstanceIsDeleted(IAcsClient client, String regionId, String dBInstanceId) throws PluginException, AliCloudException {
         if (StringUtils.isAnyEmpty(regionId, dBInstanceId)) {
             throw new PluginException("Either regionId or dBInstanceId cannot be null or empty.");
@@ -904,6 +874,50 @@ public class RDSServiceImpl implements RDSService {
 
         return privateIpAddrList.get(0);
 
+    }
+
+    private void zoneIdAdaption(IAcsClient client, DBCloudParamDto dbCloudParamDto, CoreCreateDBInstanceRequestDto requestDto) throws PluginException, AliCloudException {
+
+        final String availableZoneId;
+        if (StringUtils.equalsIgnoreCase(RDSCategory.HighAvailability.toString(), requestDto.getCategory())) {
+            // high availability category
+            availableZoneId = queryAvailableZoneId(client, dbCloudParamDto);
+
+            ZoneIdHelper.ifZoneInAvailableZoneId(requestDto.getZoneId(), availableZoneId);
+
+        } else {
+            // basic category
+            final List<String> zoneIdList = PluginStringUtils.splitStringList(requestDto.getZoneId());
+            if (zoneIdList.isEmpty()) {
+                throw new PluginException("Invalid zoneId.");
+            }
+
+            availableZoneId = zoneIdList.get(0).trim();
+
+            if (ZoneIdHelper.ifZoneIdContainsMAZ(availableZoneId)) {
+                throw new PluginException("The given zoneId contains MAZ which is invalid.");
+            }
+
+        }
+        logger.info(String.format("Get available zone ID: [%s]", availableZoneId));
+        requestDto.setZoneId(availableZoneId);
+
+    }
+
+    private String queryAvailableZoneId(IAcsClient client, DBCloudParamDto dbCloudParamDto) {
+        DescribeRegionsRequest request = new DescribeRegionsRequest();
+        final DescribeRegionsResponse response = acsClientStub.request(client, request, dbCloudParamDto.getRegionId());
+
+        final Optional<String> zoneOpt = response.getRegions()
+                .stream()
+                .filter(rdsRegion -> StringUtils.containsIgnoreCase(rdsRegion.getZoneId(), dbCloudParamDto.getRegionGroup()))
+                .map(DescribeRegionsResponse.RDSRegion::getZoneId)
+                .filter(s -> StringUtils.containsIgnoreCase(s, dbCloudParamDto.getRegionGroup()))
+                .findFirst();
+
+        zoneOpt.orElseThrow(() -> new PluginException(String.format("Cannot find available zone by given region group: [%s]", dbCloudParamDto.getRegionGroup())));
+
+        return zoneOpt.get();
     }
 
     private enum DBInstanceIPType {

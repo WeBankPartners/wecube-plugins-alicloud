@@ -3,14 +3,12 @@ package com.webank.wecube.plugins.alicloud.service.redis;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.r_kvstore.model.v20150101.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.DBCloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.redis.*;
-import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
-import com.webank.wecube.plugins.alicloud.support.AliCloudException;
-import com.webank.wecube.plugins.alicloud.support.DtoValidator;
-import com.webank.wecube.plugins.alicloud.support.PluginSdkBridge;
+import com.webank.wecube.plugins.alicloud.support.*;
 import com.webank.wecube.plugins.alicloud.support.password.PasswordManager;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RedisResourceSeeker;
 import com.webank.wecube.plugins.alicloud.support.timer.PluginTimer;
@@ -23,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -60,10 +59,13 @@ public class RedisServiceImpl implements RedisService {
                 dtoValidator.validate(requestDto);
 
                 final IdentityParamDto identityParamDto = IdentityParamDto.convertFromString(requestDto.getIdentityParams());
-                final CloudParamDto cloudParamDto = CloudParamDto.convertFromString(requestDto.getCloudParams());
-                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, cloudParamDto);
-                final String regionId = cloudParamDto.getRegionId();
+                final DBCloudParamDto dbCloudParamDto = DBCloudParamDto.convertFromString(requestDto.getCloudParams());
+                final IAcsClient client = this.acsClientStub.generateAcsClient(identityParamDto, dbCloudParamDto);
+                final String regionId = dbCloudParamDto.getRegionId();
                 final String instanceId = requestDto.getInstanceId();
+
+                // zoneId adaption
+                zoneIdAdaption(client, dbCloudParamDto, requestDto);
 
                 if (StringUtils.isNotEmpty(instanceId)) {
                     // retrieve InstanceInfo as result;
@@ -144,6 +146,53 @@ public class RedisServiceImpl implements RedisService {
 
         }
         return resultList;
+    }
+
+    private void zoneIdAdaption(IAcsClient client, DBCloudParamDto dbCloudParamDto, CoreCreateInstanceRequestDto requestDto) throws PluginException, AliCloudException {
+
+        final String availableZoneId;
+        final List<String> zoneIdList = PluginStringUtils.splitStringList(requestDto.getZoneId());
+
+        if (zoneIdList.isEmpty()) {
+            throw new PluginException("Invalid zoneId.");
+        }
+
+        if (zoneIdList.size() == 1) {
+            // basic category
+            availableZoneId = zoneIdList.get(0).trim();
+
+            if (ZoneIdHelper.ifZoneIdContainsMAZ(availableZoneId)) {
+                throw new PluginException("The given zoneId contains MAZ which is invalid.");
+            }
+        } else {
+            // high availability category
+            availableZoneId = queryAvailableZoneId(client, dbCloudParamDto);
+
+            ZoneIdHelper.ifZoneInAvailableZoneId(requestDto.getZoneId(), availableZoneId);
+        }
+
+        logger.info(String.format("Get available zone ID: [%s]", availableZoneId));
+        requestDto.setZoneId(availableZoneId);
+    }
+
+
+    private String queryAvailableZoneId(IAcsClient client, DBCloudParamDto dbCloudParamDto) throws AliCloudException {
+        DescribeRegionsRequest request = new DescribeRegionsRequest();
+        final DescribeRegionsResponse response = acsClientStub.request(client, request, dbCloudParamDto.getRegionId());
+
+
+        final Optional<String> zoneOpt = response.getRegionIds()
+                .stream()
+                .filter(kvStoreRegion -> kvStoreRegion.getRegionId().equalsIgnoreCase(dbCloudParamDto.getRegionId()))
+                .map(DescribeRegionsResponse.KVStoreRegion::getZoneIdList)
+                .flatMap(Collection::stream)
+                .filter(zoneId -> StringUtils.containsIgnoreCase(zoneId, dbCloudParamDto.getRegionGroup()))
+                .findFirst();
+
+
+        zoneOpt.orElseThrow(() -> new PluginException(String.format("Cannot find available zone by given region group: [%s]", dbCloudParamDto.getRegionGroup())));
+
+        return zoneOpt.get();
     }
 
     @Override

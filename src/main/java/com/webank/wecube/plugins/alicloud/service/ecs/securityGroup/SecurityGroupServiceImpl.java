@@ -3,10 +3,10 @@ package com.webank.wecube.plugins.alicloud.service.ecs.securityGroup;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.ecs.model.v20140526.*;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
-import com.webank.wecube.plugins.alicloud.dto.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.CoreResponseDto;
 import com.webank.wecube.plugins.alicloud.dto.ForkableDto;
 import com.webank.wecube.plugins.alicloud.dto.IdentityParamDto;
+import com.webank.wecube.plugins.alicloud.dto.cloudParam.CloudParamDto;
 import com.webank.wecube.plugins.alicloud.dto.ecs.securityGroup.*;
 import com.webank.wecube.plugins.alicloud.support.AcsClientStub;
 import com.webank.wecube.plugins.alicloud.support.AliCloudException;
@@ -362,6 +362,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private <T extends ForkableDto<?>> List<T> mapToMultipleRequest(T requestDto) throws PluginException {
         List<T> result = new ArrayList<>();
 

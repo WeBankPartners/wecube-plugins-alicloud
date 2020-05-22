@@ -13,9 +13,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
-
-import static com.webank.wecube.plugins.alicloud.support.ZoneIdHelper.*;
 
 /**
  * @author howechen
@@ -433,39 +430,33 @@ public class CoreCreateInstanceRequestDto extends CoreRequestInputDto implements
 
     @Override
     public void adaptToAliCloud() throws PluginException {
-        if (!StringUtils.isEmpty(chargeType)) {
+        if (StringUtils.isNotEmpty(chargeType)) {
             final ChargeType type = EnumUtils.getEnumIgnoreCase(ChargeType.class, chargeType);
             if (type == null) {
                 throw new PluginException("Invalid charge type");
             }
             chargeType = type.toString();
+
+            switch (type) {
+                case PostPaid:
+                    period = null;
+                    break;
+                case PrePaid:
+                    break;
+                default:
+                    break;
+            }
         }
 
-        if (!StringUtils.isEmpty(securityIps)) {
+        if (StringUtils.isNotEmpty(securityIps)) {
             securityIps = PluginStringUtils.removeSquareBracket(securityIps);
         }
 
-        if (!StringUtils.isEmpty(securityGroupId)) {
+        if (StringUtils.isNotEmpty(securityGroupId)) {
             securityGroupId = PluginStringUtils.removeSquareBracket(securityGroupId);
         }
 
-        if (!StringUtils.isEmpty(zoneId)) {
-            String resultZoneId = zoneId;
-            final List<String> zoneIdList = PluginStringUtils.splitStringList(zoneId);
-            if (zoneIdList.size() == 1) {
-                // basic RDS category
-                if (!isValidBasicZoneId(zoneId)) {
-                    final String rawStr = zoneIdList.get(0);
-                    resultZoneId = removeMAZField(rawStr);
-                }
-            } else {
-                // other RDS categories
-                if (!isValidMAZZoneId(zoneId)) {
-                    resultZoneId = concatHighAvailableZoneId(zoneIdList);
-                }
-            }
-            zoneId = resultZoneId;
-        }
+
     }
 
 
