@@ -2090,7 +2090,7 @@
             </interface>
             <interface action="delete-deploy-backup" path="/alicloud/v1/rds/backup/delete" filterRule="{state_code eq 'changed'}{fixed_date isnot NULL}">
                 <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_instance.guid">guid</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_instance.rdb_resource_instance>wecmdb:rdb_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_instance.deploy_backup_asset_id">backupId</parameter>
