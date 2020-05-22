@@ -1,14 +1,17 @@
 package com.webank.wecube.plugins.alicloud.dto;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import static com.webank.wecube.plugins.alicloud.dto.CoreResponseDto.STATUS_OK;
 
 /**
  * @author howechen
  */
 public class CoreResponseOutputDto {
-    private String errorCode;
-    private String errorMessage;
+    private String errorCode = STATUS_OK;
+    private String errorMessage = StringUtils.EMPTY;
     private String guid;
     private String callbackParameter;
 
