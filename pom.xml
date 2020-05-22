@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.webank.wecube.plugins</groupId>
     <artifactId>wecube-plugins-alicloud</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0-RELEASE</version>
     <name>wecube-plugins-alicloud</name>
     <description>WeCube Plugins AliCloud</description>
 
