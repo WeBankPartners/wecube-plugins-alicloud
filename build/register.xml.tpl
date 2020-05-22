@@ -41,7 +41,7 @@
 
     <!-- 6.运行资源 - 描述部署运行本插件包需要的基础资源(如主机、虚拟机、容器、数据库等) -->
     <resourceDependencies>
-        <docker imageName="wecube-plugins-alicloud:v0.9.10" containerName="wecube-plugins-alicloud-v0.9.10" portBindings="{{ALLOCATE_PORT}}:8080" volumeBindings="/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/alicloud/logs:/logs" envVariables="http_proxy={{HTTP_PROXY}},https_proxy={{HTTPS_PROXY}},HTTP_PROXY={{HTTP_PROXY}},HTTPS_PROXY={{HTTPS_PROXY}}"/>
+        <docker imageName="{{IMAGENAME}}" containerName="{{CONTAINERNAME}}" portBindings="{{PORTBINDINGS}}" volumeBindings="/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/alicloud/logs:/logs" envVariables="http_proxy={{HTTP_PROXY}},https_proxy={{HTTPS_PROXY}},HTTP_PROXY={{HTTP_PROXY}},HTTPS_PROXY={{HTTPS_PROXY}}"/>
     </resourceDependencies>
 
     <!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
