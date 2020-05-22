@@ -21,11 +21,18 @@
         <systemParameter name="ALICLOUD_MYSQL_LOWER_CASE_TABLE_NAMES" scopeType="global" defaultValue="1"/>
         <systemParameter name="ALICLOUD_DEFAULT_TIME_ZONE" scopeType="global" defaultValue="UTC+08:00"/>
         <systemParameter name="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION" scopeType="global" defaultValue="accept"/>
-        <systemParameter name="ALICLOUD_DEFAULT_SECURITY_POLICY_TYPE" scopeType="global" defaultValue="egress"/>
+        <systemParameter name="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS" scopeType="global" defaultValue="egress"/>
+        <systemParameter name="ALICLOUD_SECURITY_POLICY_ACTION_INGRESS" scopeType="global" defaultValue="ingress"/>
         <systemParameter name="ALICLOUD_RDS_INSTANCE_BACKUP_STRATEGY" scopeType="global" defaultValue="instance"/>
         <systemParameter name="ALICLOUD_RDS_DATABASE_BACKUP_STRATEGY" scopeType="global" defaultValue="db"/>
         <systemParameter name="ALICLOUD_DEFAULT_RDS_BACKUP_METHOD" scopeType="global" defaultValue="logic"/>
         <systemParameter name="ALICLOUD_API_SECRET" scopeType="global" defaultValue="accessKeyId=;secret="/>
+        <systemParameter name="ALICLOUD_DELETE_LB_LISTENER" scopeType="global" defaultValue="Y"/>
+        <systemParameter name="ALICLOUD_NOT_DELETE_LB_LISTENER" scopeType="global" defaultValue="N"/>
+        <systemParameter name="ALICLOUD_DEFAULT_REDIS_NETWORK_TYPE" scopeType="global" defaultValue="VPC"/>
+        <systemParameter name="ALICLOUD_DEFAULT_INTERNET_LB_CHARGE_TYPE" scopeType="global" defaultValue="paybytraffic"/>
+        <systemParameter name="ALICLOUD_DEFAULT_LB_BANDWIDTH" scopeType="global" defaultValue="-1"/>
+        <systemParameter name="ALICLOUD_DEFAULT_VM_FORCE_STOP" scopeType="global" defaultValue="false"/>
     </systemParameters>
 
     <!-- 5.权限设定 -->
@@ -34,12 +41,12 @@
 
     <!-- 6.运行资源 - 描述部署运行本插件包需要的基础资源(如主机、虚拟机、容器、数据库等) -->
     <resourceDependencies>
-        <docker imageName="{{IMAGENAME}}" containerName="{{CONTAINERNAME}}" portBindings="{{PORTBINDINGS}}" volumeBindings="/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/alicloud/logs:/logs" envVariables=""/>
+        <docker imageName="wecube-plugins-alicloud:v0.9.10" containerName="wecube-plugins-alicloud-v0.9.10" portBindings="{{ALLOCATE_PORT}}:8080" volumeBindings="/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/alicloud/logs:/logs" envVariables="http_proxy={{HTTP_PROXY}},https_proxy={{HTTPS_PROXY}},HTTP_PROXY={{HTTP_PROXY}},HTTPS_PROXY={{HTTPS_PROXY}}"/>
     </resourceDependencies>
 
     <!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
     <plugins>
-<plugin name="vpc" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+        <plugin name="vpc" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
             <interface action="create" path="/alicloud/v1/vpc/create" filterRule="">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -64,6 +71,178 @@
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="cloud-enterprise-network" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+            <interface action="create" path="/alicloud/v1/cen/create" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">name</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/cen/delete" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="attach" path="/alicloud/v1/cen/attach" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceRegionId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceOwnerId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="detach" path="/alicloud/v1/cen/detach" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceRegionId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceOwnerId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenOwnerId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="nat-gateway" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+            <interface action="create" path="/alicloud/v1/vpc/nat/create" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">name</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">spec</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">pricingCycle</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">duration</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vSwitchId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/vpc/nat/delete" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="nat-snat" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+            <interface action="create" path="/alicloud/v1/vpc/nat/snat_entry/create" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">sourceVSwitchId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">sourceCIDR</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/vpc/nat/snat_entry/delete" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="append-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/append" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="remove-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/remove" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -139,6 +318,79 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="security-group" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupName</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-policy" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
         <plugin name="route-table" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
             <interface action="create" path="/alicloud/v1/route_table/create" filterRule="">
                 <inputParameters>
@@ -185,7 +437,7 @@
                 </outputParameters>
             </interface>
         </plugin>
-<plugin name="route-entry" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+        <plugin name="route-entry" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
             <interface action="create" path="/alicloud/v1/route_table/route_entry/create" filterRule="">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -219,7 +471,76 @@
                 </outputParameters>
             </interface>
         </plugin>
-<plugin name="vm" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+        <plugin name="eip" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+            <interface action="create" path="/alicloud/v1/vpc/eip/allocate" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">bandwidth</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">internetChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">period</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">pricingCycle</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">eipAddress</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/vpc/eip/release" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="associate" path="/alicloud/v1/vpc/eip/associate" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceRegionId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="unassociate" path="/alicloud/v1/vpc/eip/un-associate" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="vm" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
             <interface action="create" path="/alicloud/v1/vm/create" filterRule="">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -245,7 +566,6 @@
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">period</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">periodUnit</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">resourceTag</parameter>
-
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -292,7 +612,7 @@
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">forceStop</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_VM_FORCE_STOP">forceStop</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
@@ -329,7 +649,57 @@
                 </outputParameters>
             </interface>
         </plugin>
-<plugin name="rds" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+        <plugin name="disk" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+            <interface action="create-attach" path="/alicloud/v1/disk/create_attach" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <!-- instance password -->
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">seed</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceGuid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">password</parameter>
+                    <!-- attach disk to instance -->
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">fileSystemType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">mountDir</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
+                    <!-- create disk -->
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">zoneId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskName</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">size</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskCategory</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">volumeName</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="detach-delete" path="/alicloud/v1/disk/detach_delete" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">seed</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceGuid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">unmountDir</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">password</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">volumeName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="rds" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
             <interface action="create" path="/alicloud/v1/rds/db/create" filterRule="">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -517,7 +887,7 @@
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">engineVersion</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityIps</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">networkType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_REDIS_NETWORK_TYPE">networkType</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vSwitchId</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">period</parameter>
@@ -586,8 +956,8 @@
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">loadBalancerId</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">addressType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">internetChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">bandWidth</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_INTERNET_LB_CHARGE_TYPE">internetChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_LB_BANDWIDTH">bandWidth</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">loadBalancerName</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vSwitchId</parameter>
@@ -621,7 +991,7 @@
                 </outputParameters>
             </interface>
         </plugin>
-<plugin name="load-balancer-target" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
+        <plugin name="load-balancer-target" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
             <interface action="add" path="/alicloud/v1/load_balancer/backend_server/add" filterRule="">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -663,373 +1033,7 @@
                 </outputParameters>
             </interface>
         </plugin>
-        <plugin name="disk" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
-            <interface action="create-attach" path="/alicloud/v1/disk/create_attach" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <!-- instance password -->
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">seed</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceGuid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">password</parameter>
-                    <!-- attach disk to instance -->
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">fileSystemType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">mountDir</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
-                    <!-- create disk -->
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">zoneId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskName</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">size</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskCategory</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">volumeName</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="detach-delete" path="/alicloud/v1/disk/detach_delete" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">diskId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">seed</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceGuid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">unmountDir</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">password</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">volumeName</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-                <plugin name="cloud-enterprise-network" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
-            <interface action="create" path="/alicloud/v1/cen/create" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">name</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/cen/delete" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="attach" path="/alicloud/v1/cen/attach" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceRegionId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceOwnerId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="detach" path="/alicloud/v1/cen/detach" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceRegionId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">childInstanceOwnerId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cenOwnerId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="security-group" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
-            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupName</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupType</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-<plugin name="security-policy" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
-            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">actionType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cidrIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">ipProtocol</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">portRange</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">policy</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">actionType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cidrIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">ipProtocol</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">portRange</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">securityGroupId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">policy</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-         <plugin name="nat-gateway" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
-            <interface action="create" path="/alicloud/v1/vpc/nat/create" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vpcId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">name</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">description</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">spec</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">pricingCycle</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">duration</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">vSwitchId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/vpc/nat/delete" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natGatewayId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-                <plugin name="nat-snat" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
-            <interface action="create" path="/alicloud/v1/vpc/nat/snat_entry/create" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">sourceVSwitchId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">sourceCIDR</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryName</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/vpc/nat/snat_entry/delete" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="append-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/append" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="remove-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/remove" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="eip" targetPackage="" targetEntity="" registerName="" targetEntityFilterRule="">
-            <interface action="create" path="/alicloud/v1/vpc/eip/allocate" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">bandwidth</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">internetChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">period</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">pricingCycle</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">eipAddress</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/vpc/eip/release" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cbpName</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="associate" path="/alicloud/v1/vpc/eip/associate" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceRegionId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="unassociate" path="/alicloud/v1/vpc/eip/un-associate" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">allocationId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">instanceId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        
-        
-        
+
         <!--最佳实践-->
         <plugin name="vpc" targetPackage="wecmdb" targetEntity="network_segment" registerName="network_segment" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
             <interface action="create" path="/alicloud/v1/vpc/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
@@ -1064,7 +1068,180 @@
                 </outputParameters>
             </interface>
         </plugin>
-
+        <plugin name="cloud-enterprise-network" targetPackage="wecmdb" targetEntity="data_center" registerName="region" targetEntityFilterRule="{data_center_type eq 'REGION'}">
+            <interface action="create" path="/alicloud/v1/cen/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.cen_asset_id">cenId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.name">name</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.cen_asset_id">cenId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/cen/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.cen_asset_id">cenId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="cloud-enterprise-network" targetPackage="wecmdb" targetEntity="network_segment" registerName="vpc" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
+            <interface action="attach" path="/alicloud/v1/cen/attach" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.cen_asset_id">cenId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.vpc_asset_id">childInstanceId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.region">childInstanceRegionId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.network_segment_type">childInstanceType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.cloud_uid">childInstanceOwnerId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="detach" path="/alicloud/v1/cen/detach" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.cen_asset_id">cenId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.vpc_asset_id">childInstanceId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.region">childInstanceRegionId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.network_segment_type">childInstanceType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.cloud_uid">childInstanceOwnerId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.NONE">cenOwnerId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="nat-gateway" targetPackage="wecmdb" targetEntity="network_link" registerName="network_link" targetEntityFilterRule="{code eq 'nat'}">
+            <interface action="create" path="/alicloud/v1/vpc/nat/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.network_segment_2>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.asset_id">natGatewayId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.network_segment_2>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.key_name">name</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.description">description</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.NONE">spec</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.NONE">instanceChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_PERIOD_UNIT">pricingCycle</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.NONE">duration</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.subnet_network_segment>wecmdb:network_segment.subnet_asset_id">vSwitchId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.asset_id">natGatewayId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.nat_table_asset_id">snatTableId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/vpc/nat/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.network_segment_2>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.asset_id">natGatewayId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="nat-snat" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
+            <interface action="create" path="/alicloud/v1/vpc/nat/snat_entry/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_nat eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.nat_ip_address>wecmdb:ip_address.code">snatIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.nat_table_asset_id">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.asset_id">natId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.subnet_asset_id">sourceVSwitchId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.code">sourceCIDR</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.name">snatEntryName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.nat_rule_asset_id">snatEntryId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/vpc/nat/snat_entry/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}{private_nat eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.nat_rule_asset_id">snatEntryId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.nat_table_asset_id">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.asset_id">natId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="append-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/append" filterRule="{state_code eq 'changed'}{fixed_date is NULL}{private_nat eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.nat_rule_asset_id">snatEntryId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.nat_table_asset_id">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.asset_id">natId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.nat_ip_address>wecmdb:ip_address{state_code eq 'created'}{fixed_date is NULL}.code">snatIp</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="remove-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/remove" filterRule="">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.nat_rule_asset_id">snatEntryId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.nat_table_asset_id">snatTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.asset_id">natId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.nat_ip_address>wecmdb:ip_address{state_code eq 'destroyed'}{fixed_date is NULL}.code">snatIp</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
         <plugin name="vswitch" targetPackage="wecmdb" targetEntity="network_segment" registerName="network_segment" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
             <interface action="create" path="/alicloud/v1/vswitch/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_route_table eq 'N'}">
                 <inputParameters>
@@ -1132,6 +1309,52 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="route-table" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
+            <interface action="create" path="/alicloud/v1/route_table/create" filterRule="{fixed_date is NULL}{private_route_table eq 'Y'}{route_table_asset_id eq ''}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.name">routeTableName</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.route_table_asset_id">routeTableId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.route_table_asset_id">routeTableId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/route_table/delete" filterRule="{fixed_date is NULL}{private_route_table eq 'N'}{route_table_asset_id neq ''}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.route_table_asset_id">routeTableId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="associate-vswitch" path="/alicloud/v1/route_table/vswitch/associate" filterRule="{fixed_date is NULL}{private_route_table eq 'Y'}{route_table_asset_id eq ''}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.route_table_asset_id">routeTableId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.subnet_asset_id">vSwitchId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
         <plugin name="route-entry" targetPackage="wecmdb" targetEntity="route" registerName="route" targetEntityFilterRule="">
             <interface action="create" path="/alicloud/v1/route_table/route_entry/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
@@ -1150,7 +1373,7 @@
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="delete" path="/alicloud/v1/route_table/route_entry/delete" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+            <interface action="delete" path="/alicloud/v1/route_table/route_entry/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:route.guid">guid</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1161,6 +1384,374 @@
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:route.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-group" targetPackage="wecmdb" targetEntity="network_segment" registerName="vpc" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
+            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_security_group eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.description">description</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.name">securityGroupName</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.NONE">securityGroupType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}{private_security_group eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-group" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
+            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_security_group eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.description">description</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.name">securityGroupName</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.NONE">securityGroupType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}{private_security_group eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-group" targetPackage="wecmdb" targetEntity="unit" registerName="unit" targetEntityFilterRule="">
+            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{fixed_date is NULL}{white_list_type neq 'N'}{security_group_asset_id eq ''}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.resource_set>wecmdb:resource_set.network_zone>wecmdb:network_zone.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.resource_set>wecmdb:resource_set.network_zone>wecmdb:network_zone.network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.description">description</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.key_name">securityGroupName</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.NONE">securityGroupType</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.resource_set>wecmdb:resource_set.network_zone>wecmdb:network_zone.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-policy" targetPackage="wecmdb" targetEntity="default_security_policy" registerName="default" targetEntityFilterRule="">
+            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_type">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.policy_network_segment>wecmdb:network_segment.code">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_action">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_type">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.policy_network_segment>wecmdb:network_segment.code">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_action">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_cache" targetEntityFilterRule="{invoked_resource_type eq 'CACHE'}">
+            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:cache_instance.cache_resource_instance>wecmdb:cache_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:cache_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:cache_instance.cache_resource_instance>wecmdb:cache_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:cache_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_rdb" targetEntityFilterRule="{invoked_resource_type eq 'RDB'}">
+            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:rdb_instance.rdb_resource_instance>wecmdb:rdb_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:rdb_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:rdb_instance.rdb_resource_instance>wecmdb:rdb_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:rdb_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_lb" targetEntityFilterRule="{invoked_resource_type eq 'LB'}">
+            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:lb_instance.lb_resource_instance>wecmdb:lb_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:lb_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:lb_instance.lb_resource_instance>wecmdb:lb_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:lb_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_app" targetEntityFilterRule="{invoked_resource_type eq 'HOST'}">
+            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance.app_resource_instance>wecmdb:app_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.subsys>wecmdb:subsys.app_system>wecmdb:app_system.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_SECURITY_POLICY_ACTION_EGRESS">policyType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance.app_resource_instance>wecmdb:app_resource_instance.ip_address">cidrIp</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance.port">portRange</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="eip" targetPackage="wecmdb" targetEntity="ip_address" registerName="nat_ip" targetEntityFilterRule="">
+            <interface action="create" path="/alicloud/v1/vpc/eip/allocate" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(nat_ip_address)wecmdb:network_link.key_name">cbpName</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(nat_ip_address)wecmdb:network_link.netband_width">bandwidth</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">instanceChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">internetChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">period</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">pricingCycle</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.code">eipAddress</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(nat_ip_address)wecmdb:network_link.cbp_asset_id">cbpId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">cbpName</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/alicloud/v1/vpc/eip/release" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(nat_ip_address)wecmdb:network_link.key_name">cbpName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="associate" path="/alicloud/v1/vpc/eip/associate" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(nat_ip_address)wecmdb:network_link.asset_id">instanceId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(nat_ip_address)wecmdb:network_link.code">instanceType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.region">instanceRegionId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="unassociate" path="/alicloud/v1/vpc/eip/un-associate" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(nat_ip_address)wecmdb:network_link.asset_id">instanceId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -1238,10 +1829,38 @@
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.asset_id">instanceId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">forceStop</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_VM_FORCE_STOP">forceStop</parameter>
                 </inputParameters>
                 <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="bind-subnet-security-group" path="/alicloud/v1/vm/security-group/bind" filterRule="{state_code eq 'created'}{fixed_date is NULL}{subnet_security_group eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.asset_id">instanceId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="unbind-sunbet-security-group" path="/alicloud/v1/vm/security-group/unbind" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}{subnet_security_group eq 'Y'}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.asset_id">instanceId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:host_resource_instance.guid">guid</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -1254,7 +1873,7 @@
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.host_resource_instance>wecmdb:host_resource_instance.asset_id">instanceId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.unit>wecmdb:unit.security_group_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.guid">guid</parameter>
@@ -1268,10 +1887,60 @@
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.host_resource_instance>wecmdb:host_resource_instance.asset_id">instanceId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.unit>wecmdb:unit.security_group_id">securityGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="disk" targetPackage="wecmdb" targetEntity="block_storage" registerName="block_storage" targetEntityFilterRule="">
+            <interface action="create_attach" path="/alicloud/v1/disk/create_attach" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
+                    <!-- instance password -->
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ENCRYPT_SEED">seed</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.guid">instanceGuid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.user_password">password</parameter>
+                    <!-- attach disk to instance -->
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.file_system">fileSystemType</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.mount_point">mountDir</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.asset_id">instanceId</parameter>
+                    <!-- create disk -->
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.asset_id">diskId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.available_zone">zoneId</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.name">diskName</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.disk_size">size</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.storage_type>wecmdb:storage_type.code">diskCategory</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.description">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.asset_id">diskId</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.code">volumeName</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="detach_delete" path="/alicloud/v1/disk/detach_delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+                <inputParameters>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.asset_id">diskId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.asset_id">instanceId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ENCRYPT_SEED">seed</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.guid">instanceGuid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.mount_point">unmountDir</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.user_password">password</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.code">volumeName</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
                 </outputParameters>
@@ -1297,7 +1966,7 @@
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.resource_set>wecmdb:resource_set.unit_type>wecmdb:unit_type.code">engine</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.resource_instance_system>wecmdb:resource_instance_system.code">engineVersion</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.charge_type>wecmdb:charge_type.code">payType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.network_segment>wecmdb:network_segment.code">securityIPList</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.network_segment>wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(policy_network_segment)wecmdb:default_security_policy{security_policy_type eq 'egress'}.owner_network_segment>wecmdb:network_segment.code">securityIPList</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.description">dBInstanceDescription</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.resource_set>wecmdb:resource_set.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.available_zone">zoneId</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_resource_instance.network_segment>wecmdb:network_segment.f_network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
@@ -1466,7 +2135,6 @@
                 </outputParameters>
             </interface>
         </plugin>
-        
         <plugin name="redis" targetPackage="wecmdb" targetEntity="cache_resource_instance" registerName="resource" targetEntityFilterRule="">
             <interface action="create" path="/alicloud/v1/redis/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
@@ -1481,9 +2149,9 @@
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.resource_set>wecmdb:resource_set.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.available_zone">zoneId</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.charge_type>wecmdb:charge_type.code">chargeType</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.resource_instance_system>wecmdb:resource_instance_system.code">engineVersion</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.network_segment>wecmdb:network_segment.code">securityIps</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.network_segment>wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(policy_network_segment)wecmdb:default_security_policy{security_policy_type eq 'egress'}.owner_network_segment>wecmdb:network_segment.code">securityIps</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.network_segment>wecmdb:network_segment.f_network_segment>wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.NONE">networkType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_REDIS_NETWORK_TYPE">networkType</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.network_segment>wecmdb:network_segment.f_network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.network_segment>wecmdb:network_segment.subnet_asset_id">vSwitchId</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:cache_resource_instance.billing_cycle">period</parameter>
@@ -1552,8 +2220,8 @@
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_resource_instance.guid">guid</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_resource_instance.asset_id">loadBalancerId</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_resource_instance.resource_instance_type>wecmdb:resource_instance_type.code">addressType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">internetChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="">bandWidth</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_INTERNET_LB_CHARGE_TYPE">internetChargeType</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_LB_BANDWIDTH">bandWidth</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_resource_instance.key_name">loadBalancerName</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_resource_instance.network_segment>wecmdb:network_segment.f_network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_resource_instance.network_segment>wecmdb:network_segment.subnet_asset_id">vSwitchId</parameter>
@@ -1587,7 +2255,7 @@
                 </outputParameters>
             </interface>
         </plugin>
-        <plugin name="load-balancer-target" targetPackage="wecmdb" targetEntity="lb_instance" registerName="app" targetEntityFilterRule="">
+        <plugin name="load-balancer-target" targetPackage="wecmdb" targetEntity="lb_instance" registerName="whole" targetEntityFilterRule="">
             <interface action="add" path="/alicloud/v1/load_balancer/backend_server/add" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1598,9 +2266,9 @@
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit~(invoke_unit)wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance.port">hostPorts</parameter>
                     <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.name">vServerGroupName</parameter>
                     <!-- listener configurations -->
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">bandwidth</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_LB_BANDWIDTH">bandwidth</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.port">listenerPort</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit.unit_design>wecmdb:unit_design.protocol">listenerProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit.protocol">listenerProtocol</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.guid">guid</parameter>
@@ -1619,8 +2287,8 @@
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit~(invoke_unit)wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance.host_resource_instance>wecmdb:host_resource_instance.asset_id">hostIds</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit~(invoke_unit)wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance.port">hostPorts</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.port">listenerPort</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit.unit_design>wecmdb:unit_design.protocol">listenerProtocol</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">deleteListener</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit.protocol">listenerProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DELETE_LB_LISTENER">deleteListener</parameter>
                 </inputParameters>
                 <outputParameters>
                     <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.guid">guid</parameter>
@@ -1629,481 +2297,43 @@
                 </outputParameters>
             </interface>
         </plugin>
-        <plugin name="disk" targetPackage="wecmdb" targetEntity="block_storage" registerName="block_storage" targetEntityFilterRule="">
-            <interface action="create_attach" path="/alicloud/v1/disk/create_attach" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
+        <plugin name="load-balancer-target" targetPackage="wecmdb" targetEntity="lb_instance" registerName="target" targetEntityFilterRule="">
+            <interface action="add" path="/alicloud/v1/load_balancer/backend_server/add" filterRule="{state_code neq 'destroyed'}{fixed_date isnot  NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
-                    <!-- instance password -->
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ENCRYPT_SEED">seed</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.guid">instanceGuid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.user_password">password</parameter>
-                    <!-- attach disk to instance -->
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.file_system">fileSystemType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.mount_point">mountDir</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.asset_id">instanceId</parameter>
-                    <!-- create disk -->
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.asset_id">diskId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.available_zone">zoneId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.name">diskName</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.disk_size">size</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.storage_type>wecmdb:storage_type.code">diskCategory</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.description">description</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.lb_resource_instance>wecmdb:lb_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.lb_resource_instance>wecmdb:lb_resource_instance.asset_id">loadBalancerId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit~(invoke_unit)wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance{state_code eq 'created'}{fixed_date is NULL}.host_resource_instance>wecmdb:host_resource_instance.asset_id">hostIds</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit~(invoke_unit)wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance{state_code eq 'created'}{fixed_date is NULL}.port">hostPorts</parameter>
+                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.name">vServerGroupName</parameter>
+                    <!-- listener configurations -->
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_LB_BANDWIDTH">bandwidth</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.port">listenerPort</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit.protocol">listenerProtocol</parameter>
                 </inputParameters>
                 <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.asset_id">diskId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.code">volumeName</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.lb_listener_asset_id">vServerGroupId</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
                 </outputParameters>
             </interface>
-            <interface action="detach_delete" path="/alicloud/v1/disk/detach_delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
+            <interface action="remove" path="/alicloud/v1/load_balancer/backend_server/remove" filterRule="{state_code neq 'destroyed'}{fixed_date isnot  NULL}">
                 <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.guid">guid</parameter>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.asset_id">diskId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.asset_id">instanceId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ENCRYPT_SEED">seed</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.guid">instanceGuid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.mount_point">unmountDir</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.host_resource_instance>wecmdb:host_resource_instance.user_password">password</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.code">volumeName</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.lb_resource_instance>wecmdb:lb_resource_instance.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.lb_resource_instance>wecmdb:lb_resource_instance.asset_id">loadBalancerId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.lb_listener_asset_id">vServerGroupId</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit~(invoke_unit)wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance{state_code eq 'destroyed'}{fixed_date is NULL}.host_resource_instance>wecmdb:host_resource_instance.asset_id">hostIds</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit~(invoke_unit)wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)wecmdb:app_instance{state_code eq 'destroyed'}{fixed_date is NULL}.port">hostPorts</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.port">listenerPort</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.unit>wecmdb:unit.protocol">listenerProtocol</parameter>
+                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_NOT_DELETE_LB_LISTENER">deleteListener</parameter>
                 </inputParameters>
                 <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:block_storage.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="cloud-enterprise-network" targetPackage="wecmdb" targetEntity="data_center" registerName="enterprise" targetEntityFilterRule="{data_center_type eq 'ENTERPRISE'}">
-            <interface action="create" path="/alicloud/v1/cen/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.cen_asset_id">cenId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.name">name</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.description">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.cen_asset_id">cenId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/cen/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.cen_asset_id">cenId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:data_center.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="cloud-enterprise-network" targetPackage="wecmdb" targetEntity="network_segment" registerName="vpc" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
-            <interface action="attach" path="/alicloud/v1/cen/attach" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.region_data_center>wecmdb:data_center.cen_asset_id">cenId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.vpc_asset_id">childInstanceId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.region">childInstanceRegionId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.network_segment_type">childInstanceType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.cloud_uid">childInstanceOwnerId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="detach" path="/alicloud/v1/cen/detach" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.region_data_center>wecmdb:data_center.cen_asset_id">cenId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.vpc_asset_id">childInstanceId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.region">childInstanceRegionId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.network_segment_type">childInstanceType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.cloud_uid">childInstanceOwnerId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.NONE">cenOwnerId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-
-        <plugin name="security-group" targetPackage="wecmdb" targetEntity="network_segment" registerName="vpc" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
-            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_security_group eq 'Y'}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.description">description</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.name">securityGroupName</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.NONE">securityGroupType</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}{private_security_group eq 'Y'}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="security-group" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
-            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_security_group eq 'Y'}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.description">description</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.name">securityGroupName</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.NONE">securityGroupType</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}{private_security_group eq 'Y'}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="security-group" targetPackage="wecmdb" targetEntity="unit" registerName="unit" targetEntityFilterRule="">
-            <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.resource_set>wecmdb:resource_set.business_zone>wecmdb:business_zone.network_zone>wecmdb:network_zone.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.resource_set>wecmdb:resource_set.business_zone>wecmdb:business_zone.network_zone>wecmdb:network_zone.network_segment>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.description">description</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.key_name">securityGroupName</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.NONE">securityGroupType</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/security_group/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.resource_set>wecmdb:resource_set.business_zone>wecmdb:business_zone.network_zone>wecmdb:network_zone.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:unit.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="security-policy" targetPackage="wecmdb" targetEntity="default_security_policy" registerName="default" targetEntityFilterRule="">
-            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_type">actionType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.policy_network_segment>wecmdb:network_segment.code">cidrIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.protocol">ipProtocol</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.port">portRange</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_action">policy</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.description">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_type">actionType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.policy_network_segment>wecmdb:network_segment.code">cidrIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.protocol">ipProtocol</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.port">portRange</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.owner_network_segment>wecmdb:network_segment.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.security_policy_action">policy</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.description">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:default_security_policy.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-
-        <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="app" targetEntityFilterRule="">
-            <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_TYPE">actionType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)cmdb:app_instance.host_resource_instance>wecmdb:host_resource_instance.ip_address">cidrIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)cmdb:app_instance.port">portRange</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_id">securityGroupId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="revoke" path="/alicloud/v1/security_group/revoke" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_TYPE">actionType</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)cmdb:app_instance.host_resource_instance>wecmdb:host_resource_instance.ip_address">cidrIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit.protocol">ipProtocol</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoked_unit>wecmdb:unit~(unit)cmdb:app_instance.port">portRange</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.invoke_unit>wecmdb:unit.security_group_asset_i">securityGroupId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_SECURITY_POLICY_ACTION">policy</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.description">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:invoke.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-
-        <plugin name="nat-gateway" targetPackage="wecmdb" targetEntity="network_link" registerName="network_link" targetEntityFilterRule="{code eq 'nat'}">
-            <interface action="create" path="/alicloud/v1/vpc/nat/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.network_segment_2>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.asset_id">natGatewayId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.network_segment_2>wecmdb:network_segment.vpc_asset_id">vpcId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.key_name">name</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.description">description</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.NONE">spec</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.NONE">instanceChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_DEFAULT_PERIOD_UNIT">pricingCycle</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.NONE">duration</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.subnet_network_segment>wecmdb:network_segment.subnet_asset_id">vSwitchId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.asset_id">natGatewayId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.snat_table_asset_id">snatTableId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/vpc/nat/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.network_segment_2>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.asset_id">natGatewayId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-
-
-
-
-        <plugin name="nat-snat" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
-            <interface action="create" path="/alicloud/v1/vpc/nat/snat_entry/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_nat eq 'Y'}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.internet_ip>wecmdb:ip_address.code">snatIp</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.snat_table_asset_id">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.asset_id">natId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.subnet_asset_id">sourceVSwitchId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.code">sourceCIDR</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.name">snatEntryName</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.nat_rule_asset_id">snatEntryId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/vpc/nat/snat_entry/delete" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}{private_nat eq 'Y'}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.nat_rule_asset_id">snatEntryId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.snat_table_asset_id">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.f_network_segment>wecmdb:network_segment~(network_segment_2)wecmdb:network_link{code eq 'nat'}.asset_id">natId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="append-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/append" filterRule="{state_code eq 'changed'}{fixed_date is NULL}{private_nat eq 'Y'}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="remove-eip" path="/alicloud/v1/vpc/nat/snat_entry/modify/remove" filterRule="">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatEntryId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatTableId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">natId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="">snatIp</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-
-        <plugin name="eip" targetPackage="wecmdb" targetEntity="ip_address" registerName="nat_ip" targetEntityFilterRule="">
-            <interface action="create" path="/alicloud/v1/vpc/eip/allocate" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(internet_ip)wecmdb:network_link.key_name">cbpName</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(internet_ip)wecmdb:network_link.netband_width">bandwidth</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">instanceChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">internetChargeType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">period</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.NONE">pricingCycle</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.code">eipAddress</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(internet_ip)wecmdb:network_link.cbp_asset_id">cbpId</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">cbpName</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/alicloud/v1/vpc/eip/release" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(internet_ip)wecmdb:network_link.key_name">cbpName</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="associate" path="/alicloud/v1/vpc/eip/associate" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(internet_ip)wecmdb:network_link.asset_id">instanceId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(internet_ip)wecmdb:network_link.code">instanceType</parameter>
-                    <parameter datatype="string" required="N" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.region">instanceRegionId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
-                    <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="unassociate" path="/alicloud/v1/vpc/eip/un-associate" filterRule="{state_code eq 'destroyed'}{fixed_date is NULL}">
-                <inputParameters>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.network_segment>wecmdb:network_segment.data_center>wecmdb:data_center.location">cloudParams</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.asset_id">allocationId</parameter>
-                    <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address~(internet_ip)wecmdb:network_link.asset_id">instanceId</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
+                    <parameter datatype="string" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:lb_instance.guid">guid</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorCode</parameter>
                     <parameter datatype="string" sensitiveData="N" mappingType="context">errorMessage</parameter>
                 </outputParameters>
