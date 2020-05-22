@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecube.plugins.alicloud.common.PluginException;
 import com.webank.wecube.plugins.alicloud.dto.CoreRequestInputDto;
 import com.webank.wecube.plugins.alicloud.dto.PluginSdkInputBridge;
+import com.webank.wecube.plugins.alicloud.service.rds.PayType;
 import com.webank.wecube.plugins.alicloud.support.resourceSeeker.RDSResourceSeeker;
 import com.webank.wecube.plugins.alicloud.utils.PluginStringUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -492,6 +493,12 @@ public class CoreCreateDBInstanceRequestDto extends CoreRequestInputDto implemen
 
         if (StringUtils.isNotEmpty(payType)) {
             payType = StringUtils.capitalize(payType.toLowerCase());
+
+            if (StringUtils.equals(payType, PayType.Postpaid.toString())) {
+                usedTime = null;
+                period = null;
+            }
+
         }
 
         if (StringUtils.isNotEmpty(period)) {
