@@ -32,7 +32,6 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
             throw new PluginException(exception.getMessage());
         }
 
-        adaptToCore(response, result);
         return result;
     }
 
@@ -57,17 +56,7 @@ public interface PluginSdkOutputBridge<T extends CoreResponseOutputDto, K extend
             throw new PluginException(exception.getMessage());
         }
 
-        adaptToCore(response, result);
 
         return result;
-    }
-
-    /**
-     * Adapt to core required field
-     *
-     * @param response AliCloud's response
-     * @param <J>      AliCloud response type
-     */
-    default <J> void adaptToCore(J response, T result) throws PluginException {
     }
 }

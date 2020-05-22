@@ -86,11 +86,10 @@ public class RedisResourceSeeker {
         }
 
         DescribeAvailableResourceRequest request = new DescribeAvailableResourceRequest();
-        request.setRegionId(regionId);
         request.setZoneId(zoneId);
         request.setInstanceChargeType(instanceChargeType);
         request.setEngine(engine);
-        final DescribeAvailableResourceResponse response = this.acsClientStub.request(client, request);
+        final DescribeAvailableResourceResponse response = this.acsClientStub.request(client, request, regionId);
 
         return filterResponse(response, editionType, seriesType, version, architecture, shardNumber, nodeType, capacity);
 
