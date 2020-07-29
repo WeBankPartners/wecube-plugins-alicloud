@@ -1036,6 +1036,10 @@
 
         <!--最佳实践-->
         <plugin name="vpc" targetPackage="wecmdb" targetEntity="network_segment" registerName="network_segment" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/vpc/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1069,6 +1073,10 @@
             </interface>
         </plugin>
         <plugin name="cloud-enterprise-network" targetPackage="wecmdb" targetEntity="data_center" registerName="region" targetEntityFilterRule="{data_center_type eq 'REGION'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/cen/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1100,6 +1108,10 @@
             </interface>
         </plugin>
         <plugin name="cloud-enterprise-network" targetPackage="wecmdb" targetEntity="network_segment" registerName="vpc" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="attach" path="/alicloud/v1/cen/attach" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
@@ -1137,6 +1149,10 @@
             </interface>
         </plugin>
         <plugin name="nat-gateway" targetPackage="wecmdb" targetEntity="network_link" registerName="network_link" targetEntityFilterRule="{code eq 'nat'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/vpc/nat/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_link.guid">guid</parameter>
@@ -1175,6 +1191,10 @@
             </interface>
         </plugin>
         <plugin name="nat-snat" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/vpc/nat/snat_entry/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_nat eq 'Y'}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:network_segment.guid">guid</parameter>
@@ -1243,6 +1263,10 @@
             </interface>
         </plugin>
         <plugin name="vswitch" targetPackage="wecmdb" targetEntity="network_segment" registerName="network_segment" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/vswitch/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_route_table eq 'N'}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1310,6 +1334,10 @@
             </interface>
         </plugin>
         <plugin name="route-table" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/route_table/create" filterRule="{fixed_date is NULL}{private_route_table eq 'Y'}{route_table_asset_id eq ''}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1356,6 +1384,10 @@
             </interface>
         </plugin>
         <plugin name="route-entry" targetPackage="wecmdb" targetEntity="route" registerName="route" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/route_table/route_entry/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1390,6 +1422,10 @@
             </interface>
         </plugin>
         <plugin name="security-group" targetPackage="wecmdb" targetEntity="network_segment" registerName="vpc" targetEntityFilterRule="{network_segment_usage eq 'VPC'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_security_group eq 'Y'}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1423,6 +1459,10 @@
             </interface>
         </plugin>
         <plugin name="security-group" targetPackage="wecmdb" targetEntity="network_segment" registerName="subnet" targetEntityFilterRule="{network_segment_usage eq 'SUBNET'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}{private_security_group eq 'Y'}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1456,6 +1496,10 @@
             </interface>
         </plugin>
         <plugin name="security-group" targetPackage="wecmdb" targetEntity="unit" registerName="unit" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/security_group/create" filterRule="{fixed_date is NULL}{white_list_type neq 'N'}{security_group_asset_id eq ''}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1489,6 +1533,10 @@
             </interface>
         </plugin>
         <plugin name="security-policy" targetPackage="wecmdb" targetEntity="default_security_policy" registerName="default" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1529,6 +1577,10 @@
             </interface>
         </plugin>
         <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_cache" targetEntityFilterRule="{invoked_resource_type eq 'CACHE'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1569,6 +1621,10 @@
             </interface>
         </plugin>
         <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_rdb" targetEntityFilterRule="{invoked_resource_type eq 'RDB'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1609,6 +1665,10 @@
             </interface>
         </plugin>
         <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_lb" targetEntityFilterRule="{invoked_resource_type eq 'LB'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1649,6 +1709,10 @@
             </interface>
         </plugin>
         <plugin name="security-policy" targetPackage="wecmdb" targetEntity="invoke" registerName="egress_app" targetEntityFilterRule="{invoked_resource_type eq 'HOST'}">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="authorize" path="/alicloud/v1/security_group/authorize" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1689,6 +1753,10 @@
             </interface>
         </plugin>
         <plugin name="eip" targetPackage="wecmdb" targetEntity="ip_address" registerName="nat_ip" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/vpc/eip/allocate" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:ip_address.guid">guid</parameter>
@@ -1758,6 +1826,10 @@
             </interface>
         </plugin>
         <plugin name="vm" targetPackage="wecmdb" targetEntity="host_resource_instance" registerName="resource" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/vm/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1867,6 +1939,10 @@
             </interface>
         </plugin>
         <plugin name="vm" targetPackage="wecmdb" targetEntity="app_instance" registerName="app_deploy" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="bind_sg_app_created" path="/alicloud/v1/vm/security-group/bind" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:app_instance.guid">guid</parameter>
@@ -1897,6 +1973,10 @@
             </interface>
         </plugin>
         <plugin name="disk" targetPackage="wecmdb" targetEntity="block_storage" registerName="block_storage" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create_attach" path="/alicloud/v1/disk/create_attach" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -1947,6 +2027,10 @@
             </interface>
         </plugin>
         <plugin name="rds" targetPackage="wecmdb" targetEntity="rdb_resource_instance" registerName="resource" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/rds/db/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -2070,6 +2154,10 @@
             </interface>
         </plugin>
         <plugin name="rds" targetPackage="wecmdb" targetEntity="rdb_instance" registerName="database" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create-deploy-backup" path="/alicloud/v1/rds/backup/create" filterRule="{state_code eq 'changed'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="N" mappingType="entity" mappingEntityExpression="wecmdb:rdb_instance.guid">guid</parameter>
@@ -2136,6 +2224,10 @@
             </interface>
         </plugin>
         <plugin name="redis" targetPackage="wecmdb" targetEntity="cache_resource_instance" registerName="resource" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/redis/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -2213,6 +2305,10 @@
             </interface>
         </plugin>
         <plugin name="load-balancer" targetPackage="wecmdb" targetEntity="lb_resource_instance" registerName="resource" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="create" path="/alicloud/v1/load_balancer/create" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -2256,6 +2352,10 @@
             </interface>
         </plugin>
         <plugin name="load-balancer-target" targetPackage="wecmdb" targetEntity="lb_instance" registerName="whole" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="add" path="/alicloud/v1/load_balancer/backend_server/add" filterRule="{state_code eq 'created'}{fixed_date is NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
@@ -2298,6 +2398,10 @@
             </interface>
         </plugin>
         <plugin name="load-balancer-target" targetPackage="wecmdb" targetEntity="lb_instance" registerName="target" targetEntityFilterRule="">
+            <roleBinds>
+                <roleBind permission="MGMT" roleName="SUPER_ADMIN"/>
+                <roleBind permission="USE" roleName="SUPER_ADMIN"/>
+            </roleBinds>
             <interface action="add" path="/alicloud/v1/load_balancer/backend_server/add" filterRule="{state_code neq 'destroyed'}{fixed_date isnot  NULL}">
                 <inputParameters>
                     <parameter datatype="string" required="Y" sensitiveData="Y" mappingType="system_variable" mappingSystemVariableName="ALICLOUD_API_SECRET">identityParams</parameter>
